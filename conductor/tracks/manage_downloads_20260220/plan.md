@@ -9,9 +9,10 @@
 - [x] Task: Implement `force_remove` and `force_pause` methods. (971f1a0)
 
 
-### [ ] Task: Define MCP Tool Schema
+### [x] Task: Define MCP Tool Schema (ceac512)
 - **Objective**: Create the request/response schema for the `manage_downloads` tool.
-- [ ] Task: Define the tool input arguments structure (action, gid, uris, etc.).
+- [x] Task: Define the tool input arguments structure (action, gid, uris, etc.). (ceac512)
+
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Client Enhancements & Foundation' (Protocol in workflow.md)
 

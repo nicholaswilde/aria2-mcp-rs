@@ -1,5 +1,21 @@
 use crate::Config;
 use anyhow::Result;
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ManageDownloadsArgs {
+    /// Action to perform: add, pause, resume, remove, forcePause, forceRemove, move
+    pub action: String,
+    /// GID of the download (required for all actions except 'add')
+    pub gid: Option<String>,
+    /// URIs to add (required for 'add')
+    pub uris: Option<Vec<String>>,
+    /// New position (required for 'move')
+    pub pos: Option<i32>,
+    /// How to move: POS_SET, POS_CUR, POS_END (required for 'move')
+    pub how: Option<String>,
+}
 
 pub struct McpServer {
     config: Config,
