@@ -41,9 +41,34 @@ tasks:
     silent: true
 
   build:
-    desc: Build the project
+    desc: Build the project for the host architecture
     cmds:
       - cargo build
+
+  build:local:
+    desc: Build the project natively (alias for build)
+    cmds:
+      - task: build
+
+  build:amd64:
+    desc: Cross-compile the project for AMD64 (x86_64-unknown-linux-gnu)
+    cmds:
+      - cross build --target x86_64-unknown-linux-gnu --release
+
+  build:arm64:
+    desc: Cross-compile the project for ARM64 (aarch64-unknown-linux-gnu)
+    cmds:
+      - cross build --target aarch64-unknown-linux-gnu --release
+
+  build:armv7:
+    desc: Cross-compile the project for ARMv7 (armv7-unknown-linux-gnueabihf)
+    cmds:
+      - cross build --target armv7-unknown-linux-gnueabihf --release
+
+  build:armv6:
+    desc: Cross-compile the project for ARMv6 (arm-unknown-linux-gnueabihf)
+    cmds:
+      - cross build --target arm-unknown-linux-gnueabihf --release
 
   test:
     desc: Run all tests (fmt, lint, and unit tests)
