@@ -36,9 +36,9 @@
 - [x] Task: Create `Cross.toml` or relevant configuration for multi-architecture builds. [c30b9ca]
 - [x] Task: Verify the build process for at least one non-native architecture. [c30b9ca]
 
-### [ ] Task: Initialize CI/CD with GitHub Actions
+### [x] Task: Initialize CI/CD with GitHub Actions [9396dae]
 - **Objective**: Set up automated checks for the project.
-- [ ] Task: Create `.github/workflows/ci.yml` for automated testing and linting.
-- [ ] Task: Verify the CI workflow passes on the initial project structure.
+- [x] Task: Create `.github/workflows/ci.yml` for automated testing and linting. [9396dae]
+- [x] Task: Verify the CI workflow passes on the initial project structure. [9396dae]
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Automation & Cross-Compilation' (Protocol in workflow.md)
