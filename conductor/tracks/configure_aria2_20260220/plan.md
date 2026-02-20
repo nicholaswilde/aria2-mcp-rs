@@ -1,13 +1,13 @@
 # Implementation Plan - configure_aria2_20260220
 
-## Phase 1: Client Configuration Methods
+## Phase 1: Client Configuration Methods [checkpoint: 4c05a84]
 
 ### [ ] Task: Complete Client Configuration Support
 - **Objective**: Ensure all configuration RPCs are available.
-- [ ] Task: Implement `get_option` in `Aria2Client`.
-- [ ] Task: Implement `change_option` in `Aria2Client`.
+- [x] Task: Implement `get_option` in `Aria2Client`. [4c05a84]
+- [x] Task: Implement `change_option` in `Aria2Client`. [4c05a84]
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Client Configuration Methods' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Client Configuration Methods' (Protocol in workflow.md)
 
 ## Phase 2: MCP Tool Implementation
 
