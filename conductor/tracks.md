@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Implement inspect_download MCP tool**
+- [x] **Track: Implement inspect_download MCP tool**
   *Link: [./tracks/inspect_download_20260220/](./tracks/inspect_download_20260220/)*
 
 ---
