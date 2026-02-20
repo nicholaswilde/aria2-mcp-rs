@@ -16,7 +16,7 @@ async fn test_configure_aria2_tool_get_global() -> Result<()> {
     });
 
     let result = tool.run(&client, args).await?;
-    
+
     // Check if result contains global options (e.g., max-overall-download-limit)
     assert!(result.is_object());
     assert!(result.get("max-overall-download-limit").is_some());
@@ -38,7 +38,7 @@ async fn test_configure_aria2_tool_change_global() -> Result<()> {
     });
 
     tool.run(&client, args).await?;
-    
+
     // Verify change
     let global_stat = client.get_global_option().await?;
     assert_eq!(global_stat["max-overall-download-limit"], "10240");
@@ -53,7 +53,9 @@ async fn test_configure_aria2_tool_local_options() -> Result<()> {
     let tool = ConfigureAria2Tool;
 
     // Add download
-    let gid = client.add_uri(vec!["https://www.google.com".to_string()], None).await?;
+    let gid = client
+        .add_uri(vec!["https://www.google.com".to_string()], None)
+        .await?;
 
     // Change local option
     let args_change = json!({

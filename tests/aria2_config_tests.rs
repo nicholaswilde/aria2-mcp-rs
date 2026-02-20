@@ -15,10 +15,10 @@ async fn test_aria2_client_get_option() -> Result<()> {
 
     // Get options for the download
     let options = client.get_option(&gid).await?;
-    
+
     // Check if we got some options back (e.g., dir or max-connection-per-server)
     assert!(options.is_object());
-    
+
     Ok(())
 }
 
@@ -36,15 +36,15 @@ async fn test_aria2_client_change_option() -> Result<()> {
     let options = json!({
         "max-download-limit": new_limit
     });
-    
+
     client.change_option(&gid, options).await?;
 
     // Verify the change
     let current_options = client.get_option(&gid).await?;
     let limit = current_options["max-download-limit"].as_str().unwrap();
-    
+
     // Aria2 converts 10K to bytes
     assert_eq!(limit, "10240");
-    
+
     Ok(())
 }

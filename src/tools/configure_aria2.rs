@@ -74,7 +74,9 @@ impl McpeTool for ConfigureAria2Tool {
                     .context("Missing 'options' for change_local")?
                     .clone();
                 client.change_option(gid, options).await?;
-                Ok(json!({"status": "success", "message": format!("Options updated for GID {}", gid)}))
+                Ok(
+                    json!({"status": "success", "message": format!("Options updated for GID {}", gid)}),
+                )
             }
             _ => Err(anyhow::anyhow!("Unknown action: {}", action)),
         }
