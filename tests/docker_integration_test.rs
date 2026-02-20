@@ -4,6 +4,29 @@ use common::Aria2Container;
 use anyhow::Result;
 
 #[tokio::test]
+async fn test_status_reporting() -> Result<()> {
+    let container = Aria2Container::new().await?;
+    let client = container.client();
+    
+    let uris = vec!["https://p3terx.com".to_string()];
+    let gid = client.add_uri(uris, None).await?;
+    
+    // Check progress fields
+    let status = client.tell_status(&gid).await?;
+    assert!(status.get("completedLength").is_some());
+    assert!(status.get("totalLength").is_some());
+    assert!(status.get("downloadSpeed").is_some());
+    
+    let completed = status["completedLength"].as_str().unwrap().parse::<u64>().unwrap();
+    let total = status["totalLength"].as_str().unwrap().parse::<u64>().unwrap();
+    let speed = status["downloadSpeed"].as_str().unwrap().parse::<u64>().unwrap();
+    
+    println!("progress: {}/{} (speed: {} bytes/s)", completed, total, speed);
+    
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_add_download() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
