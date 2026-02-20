@@ -33,11 +33,11 @@
 
 ## Phase 3: Advanced Control & Configuration Tests
 
-### [ ] Task: Implement Pause/Resume Integration Test
+### [x] Task: Implement Pause/Resume Integration Test (4955c84)
 - **Objective**: Verify state management of downloads via the RPC bridge.
-- [ ] Task: Write failing integration tests for pausing and resuming active downloads.
-- [ ] Task: Implement/Refine the pause/resume logic in the client/server to pass the tests.
-- [ ] Task: Verify the tests pass against the live `aria2` instance.
+- [x] Task: Write failing integration tests for pausing and resuming active downloads. (4955c84)
+- [x] Task: Implement/Refine the pause/resume logic in the client/server to pass the tests. (4955c84)
+- [x] Task: Verify the tests pass against the live `aria2` instance. (4955c84)
 
 ### [ ] Task: Implement Configuration Update Integration Test
 - **Objective**: Verify dynamic adjustment of `aria2` settings.
