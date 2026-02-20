@@ -16,6 +16,68 @@ impl Aria2Client {
         }
     }
 
+    pub async fn tell_status(&self, gid: &str) -> Result<serde_json::Value> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.tellStatus",
+            "params": params,
+        });
+
+        let resp = self.client.post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+        
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(res["result"].clone())
+    }
+
+    pub async fn add_uri(&self, uris: Vec<String>, options: Option<serde_json::Value>) -> Result<String> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(uris));
+        if let Some(opts) = options {
+            params.push(opts);
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.addUri",
+            "params": params,
+        });
+
+        let resp = self.client.post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+        
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        let gid = res["result"].as_str()
+            .ok_or_else(|| anyhow::anyhow!("Failed to get GID from response"))?;
+
+        Ok(gid.to_string())
+    }
+
     pub async fn get_version(&self) -> Result<String> {
         let mut params = Vec::new();
         if let Some(secret) = &self.config.rpc_secret {
