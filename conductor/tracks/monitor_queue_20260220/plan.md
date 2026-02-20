@@ -1,6 +1,6 @@
 # Implementation Plan - monitor_queue_20260220
 
-## Phase 1: Client Monitoring Capabilities
+## Phase 1: Client Monitoring Capabilities [checkpoint: f75f3bb]
 
 ### [x] Task: Implement tell* Methods in Aria2Client (45fea20)
 - **Objective**: Expand the client to support queue listing.
@@ -9,7 +9,7 @@
 - [x] Task: Implement `tell_stopped` in `Aria2Client`. (45fea20)
 - [x] Task: Implement `get_global_stat` in `Aria2Client`. (45fea20)
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Client Monitoring Capabilities' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Client Monitoring Capabilities' (f75f3bb)
 
 ## Phase 2: MCP Tool Implementation
 
