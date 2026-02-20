@@ -16,10 +16,10 @@
 - [x] Task: Write unit tests for the MCP server's initialization and lifecycle. [1265897]
 - [x] Task: Implement the MCP server's identification and basic handlers. [b3005c8]
 
-### [ ] Task: Define aria2 Client Module Structure
+### [x] Task: Define aria2 Client Module Structure
 - **Objective**: Create the placeholder structure for interacting with `aria2`.
-- [ ] Task: Create `src/aria2/mod.rs` and initial client structure.
-- [ ] Task: Write tests for the `aria2` client's core structure.
+- [x] Task: Create `src/aria2/mod.rs` and initial client structure. [67603bb]
+- [x] Task: Write tests for the `aria2` client's core structure. [f02ad10]
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Project Scaffolding & Configuration' (Protocol in workflow.md)
 
