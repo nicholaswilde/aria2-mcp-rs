@@ -29,13 +29,15 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
@@ -57,13 +59,15 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
@@ -85,13 +89,45 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
+
+    pub async fn force_pause(&self, gid: &str) -> Result<()> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.forcePause",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
@@ -113,18 +149,116 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
 
         Ok(())
+    }
+
+    pub async fn remove(&self, gid: &str) -> Result<()> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.remove",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
+
+    pub async fn force_remove(&self, gid: &str) -> Result<()> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.forceRemove",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
+
+    pub async fn move_position(&self, gid: &str, pos: i32, how: &str) -> Result<i32> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+        params.push(serde_json::json!(pos));
+        params.push(serde_json::json!(how));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.changePosition",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        let new_pos = res["result"]
+            .as_i64()
+            .ok_or_else(|| anyhow::anyhow!("Failed to get new position from response"))?;
+
+        Ok(new_pos as i32)
     }
 
     pub async fn tell_status(&self, gid: &str) -> Result<serde_json::Value> {
@@ -141,13 +275,15 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
@@ -155,7 +291,11 @@ impl Aria2Client {
         Ok(res["result"].clone())
     }
 
-    pub async fn add_uri(&self, uris: Vec<String>, options: Option<serde_json::Value>) -> Result<String> {
+    pub async fn add_uri(
+        &self,
+        uris: Vec<String>,
+        options: Option<serde_json::Value>,
+    ) -> Result<String> {
         let mut params = Vec::new();
         if let Some(secret) = &self.config.rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
@@ -172,18 +312,21 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
 
-        let gid = res["result"].as_str()
+        let gid = res["result"]
+            .as_str()
             .ok_or_else(|| anyhow::anyhow!("Failed to get GID from response"))?;
 
         Ok(gid.to_string())
@@ -202,18 +345,21 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self.client.post(&self.config.rpc_url)
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
             .json(&body)
             .send()
             .await?;
 
         let res: serde_json::Value = resp.json().await?;
-        
+
         if let Some(err) = res.get("error") {
             return Err(anyhow::anyhow!("aria2 error: {}", err));
         }
 
-        let version = res["result"]["version"].as_str()
+        let version = res["result"]["version"]
+            .as_str()
             .ok_or_else(|| anyhow::anyhow!("Failed to get version from response"))?;
 
         Ok(version.to_string())
