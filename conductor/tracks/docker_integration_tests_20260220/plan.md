@@ -4,7 +4,7 @@
 
 ### [ ] Task: Configure Integration Test Dependencies
 - **Objective**: Add necessary crates for containerized testing.
-- [ ] Task: Add `testcontainers` and `testcontainers-modules` (if applicable) to `Cargo.toml` dev-dependencies.
+- [x] Task: Add `testcontainers` and `testcontainers-modules` (if applicable) to `Cargo.toml` dev-dependencies. (527cab4)
 - [ ] Task: Update `Cargo.toml` and verify compilation.
 
 ### [ ] Task: Implement Aria2 Container Wrapper
