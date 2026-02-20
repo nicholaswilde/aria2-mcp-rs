@@ -2,6 +2,7 @@ use crate::Config;
 use anyhow::Result;
 use reqwest::Client;
 
+#[allow(dead_code)]
 pub struct Aria2Client {
     config: Config,
     client: Client,
