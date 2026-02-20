@@ -29,7 +29,7 @@
 - [x] Task: Implement/Refine the status retrieval logic to pass the test. (91637d4)
 - [x] Task: Verify the test passes with live data from the container. (91637d4)
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Functional Integration Tests' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Functional Integration Tests' (Protocol in workflow.md) (b6371af)
 
 ## Phase 3: Advanced Control & Configuration Tests
 
