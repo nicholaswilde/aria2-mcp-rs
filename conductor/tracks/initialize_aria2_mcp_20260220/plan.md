@@ -2,9 +2,9 @@
 
 ## Phase 1: Project Scaffolding & Configuration
 
-### [ ] Task: Initialize Rust Project & Core Structure
+### [~] Task: Initialize Rust Project & Core Structure
 - **Objective**: Create the initial directory structure and basic Rust source files based on `adguardhome-mcp-rs`.
-- [ ] Task: Create `Cargo.toml` with initial dependencies (`mcp-sdk-rs`, `reqwest`, `serde`, `tokio`).
+- [x] Task: Create `Cargo.toml` with initial dependencies (`mcp-sdk-rs`, `reqwest`, `serde`, `tokio`). [b9265e2]
 - [ ] Task: Create the initial source structure (`src/main.rs`, `src/lib.rs`, `src/error.rs`, `src/config.rs`).
 - [ ] Task: Define the core `Error` type in `src/error.rs`.
 - [ ] Task: Write initial tests for project structure and error types.
