@@ -7,7 +7,7 @@ use mcp_sdk_rs::{
 use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
-use crate::tools::ToolRegistry;
+use crate::tools::registry::ToolRegistry;
 
 pub struct McpHandler {
     registry: Arc<ToolRegistry>,
@@ -45,16 +45,17 @@ impl ServerHandler for McpHandler {
         match method {
             "tools/list" => {
                 let tools = self.registry.list_tools();
-                let tool_infos: Vec<serde_json::Value> = tools
-                    .iter()
-                    .map(|t| {
-                        serde_json::json!({
-                            "name": t.name(),
-                            "description": t.description(),
-                            "inputSchema": t.input_schema(),
-                        })
-                    })
-                    .collect();
+                let mut tool_infos = Vec::new();
+                for t in tools {
+                    let schema = t.schema().map_err(|e| {
+                        Error::protocol(ErrorCode::InternalError, format!("Schema error: {}", e))
+                    })?;
+                    tool_infos.push(serde_json::json!({
+                        "name": t.name(),
+                        "description": t.description(),
+                        "inputSchema": schema,
+                    }));
+                }
 
                 Ok(serde_json::json!({ "tools": tool_infos }))
             }
@@ -83,7 +84,7 @@ impl ServerHandler for McpHandler {
                 })?;
 
                 let result = tool
-                    .execute(&self.client, arguments)
+                    .run(&self.client, arguments)
                     .await
                     .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
 

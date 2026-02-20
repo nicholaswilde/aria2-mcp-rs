@@ -1,7 +1,8 @@
 use anyhow::Result;
 use axum::{
+    extract::Json,
     routing::{get, post},
-    Extension, Json, Router,
+    Extension, Router,
 };
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -22,7 +23,7 @@ pub async fn run_server(
         .layer(Extension(client));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    let listener = TcpListener::bind(&addr).await?;
+    let listener = TcpListener::bind(addr).await?;
 
     println!("SSE Server starting on {}", addr);
 
@@ -39,7 +40,7 @@ async fn list_tools(Extension(registry): Extension<Arc<ToolRegistry>>) -> Json<s
             serde_json::json!({
                 "name": t.name(),
                 "description": t.description(),
-                "inputSchema": t.input_schema(),
+                "inputSchema": t.schema().unwrap_or(serde_json::json!({})),
             })
         })
         .collect();
@@ -56,7 +57,7 @@ async fn execute_tool(
     let args = req["arguments"].clone();
 
     if let Some(tool) = registry.get_tool(name) {
-        match tool.execute(&client, args).await {
+        match tool.run(&client, args).await {
             Ok(result) => Json(
                 serde_json::json!({ "content": [{ "type": "text", "text": result.to_string() }] }),
             ),

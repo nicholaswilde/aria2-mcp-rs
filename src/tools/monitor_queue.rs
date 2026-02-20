@@ -4,7 +4,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::aria2::Aria2Client;
-use crate::tools::registry::Tool;
+use crate::tools::registry::McpeTool;
 
 pub struct MonitorQueueTool;
 
@@ -22,17 +22,18 @@ pub struct MonitorQueueArgs {
 }
 
 #[async_trait]
-impl Tool for MonitorQueueTool {
-    fn name(&self) -> &str {
-        "monitor_queue"
+impl McpeTool for MonitorQueueTool {
+    fn name(&self) -> String {
+        "monitor_queue".to_string()
     }
 
-    fn description(&self) -> &str {
+    fn description(&self) -> String {
         "Monitor the aria2 download queue: active, waiting, stopped downloads and global stats"
+            .to_string()
     }
 
-    fn input_schema(&self) -> Value {
-        json!({
+    fn schema(&self) -> Result<Value> {
+        Ok(json!({
             "type": "object",
             "properties": {
                 "action": {
@@ -55,10 +56,10 @@ impl Tool for MonitorQueueTool {
                 }
             },
             "required": ["action"]
-        })
+        }))
     }
 
-    async fn execute(&self, client: &Aria2Client, args: Value) -> Result<Value> {
+    async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
         let args: MonitorQueueArgs = serde_json::from_value(args)?;
 
         match args.action.as_str() {

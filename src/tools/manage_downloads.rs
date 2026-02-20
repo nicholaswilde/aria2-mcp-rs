@@ -4,7 +4,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::aria2::Aria2Client;
-use crate::tools::registry::Tool;
+use crate::tools::registry::McpeTool;
 
 pub struct ManageDownloadsTool;
 
@@ -26,17 +26,17 @@ pub struct ManageDownloadsArgs {
 }
 
 #[async_trait]
-impl Tool for ManageDownloadsTool {
-    fn name(&self) -> &str {
-        "manage_downloads"
+impl McpeTool for ManageDownloadsTool {
+    fn name(&self) -> String {
+        "manage_downloads".to_string()
     }
 
-    fn description(&self) -> &str {
-        "Monitor and manage aria2 downloads: add, pause, resume, remove, force-pause, force-remove, move"
+    fn description(&self) -> String {
+        "Monitor and manage aria2 downloads: add, pause, resume, remove, force-pause, force-remove, move".to_string()
     }
 
-    fn input_schema(&self) -> Value {
-        json!({
+    fn schema(&self) -> Result<Value> {
+        Ok(json!({
             "type": "object",
             "properties": {
                 "action": {
@@ -68,10 +68,10 @@ impl Tool for ManageDownloadsTool {
                 }
             },
             "required": ["action"]
-        })
+        }))
     }
 
-    async fn execute(&self, client: &Aria2Client, args: Value) -> Result<Value> {
+    async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
         let args: ManageDownloadsArgs = serde_json::from_value(args)?;
 
         match args.action.as_str() {

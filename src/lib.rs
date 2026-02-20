@@ -9,5 +9,5 @@ pub use config::{Config, TransportType};
 pub use error::{Error, Result};
 pub use server::McpServer;
 pub use tools::{
-    manage_downloads::ManageDownloadsTool, monitor_queue::MonitorQueueTool, Tool, ToolRegistry,
+    InspectDownloadTool, ManageDownloadsTool, McpeTool, MonitorQueueTool, ToolRegistry,
 };

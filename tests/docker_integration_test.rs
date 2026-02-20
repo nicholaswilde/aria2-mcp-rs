@@ -119,6 +119,38 @@ async fn test_add_download() -> Result<()> {
 }
 
 #[tokio::test]
+async fn test_inspect_download_files_and_uris() -> Result<()> {
+    let container = Aria2Container::new().await?;
+    let client = container.client();
+
+    let uris = vec!["https://p3terx.com".to_string()];
+    let gid = client.add_uri(uris, None).await?;
+
+    // Verify files
+    let files = client.get_files(&gid).await?;
+    assert!(files.is_array());
+    let files_array = files.as_array().unwrap();
+    assert!(!files_array.is_empty());
+    // Check if path or length exists
+    assert!(files_array[0].get("path").is_some());
+    assert!(files_array[0].get("length").is_some());
+
+    // Verify URIs
+    let uris_resp = client.get_uris(&gid).await?;
+    assert!(uris_resp.is_array());
+    let uris_array = uris_resp.as_array().unwrap();
+    assert!(!uris_array.is_empty());
+    // Check if uri matches one we added (or at least check structure)
+    // Note: aria2 might add default trackers, so we check if our URI is present
+    let found = uris_array
+        .iter()
+        .any(|u| u["uri"].as_str().unwrap() == "https://p3terx.com");
+    assert!(found, "Original URI not found in get_uris response");
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_container_starts_and_is_reachable() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();

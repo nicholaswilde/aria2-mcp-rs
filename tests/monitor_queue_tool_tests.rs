@@ -1,7 +1,7 @@
 mod common;
 
 use anyhow::Result;
-use aria2_mcp_rs::{MonitorQueueTool, Tool};
+use aria2_mcp_rs::{McpeTool, MonitorQueueTool};
 use common::Aria2Container;
 use serde_json::json;
 
@@ -15,7 +15,7 @@ async fn test_mcp_monitor_queue_stats() -> Result<()> {
         "action": "stats"
     });
 
-    let result = tool.execute(&client, args).await?;
+    let result = tool.run(&client, args).await?;
     assert!(result.get("numActive").is_some());
 
     Ok(())
@@ -35,7 +35,7 @@ async fn test_mcp_monitor_queue_active() -> Result<()> {
         "action": "active"
     });
 
-    let result = tool.execute(&client, args).await?;
+    let result = tool.run(&client, args).await?;
     assert!(result.is_array());
     assert!(!result.as_array().unwrap().is_empty());
 
@@ -60,7 +60,7 @@ async fn test_mcp_monitor_queue_waiting() -> Result<()> {
         "action": "waiting"
     });
 
-    let result = tool.execute(&client, args).await?;
+    let result = tool.run(&client, args).await?;
     assert!(result.is_array());
     assert!(!result.as_array().unwrap().is_empty());
 
@@ -82,7 +82,7 @@ async fn test_mcp_monitor_queue_stopped() -> Result<()> {
         "action": "stopped"
     });
 
-    let result = tool.execute(&client, args).await?;
+    let result = tool.run(&client, args).await?;
     assert!(result.is_array());
     assert!(!result.as_array().unwrap().is_empty());
 

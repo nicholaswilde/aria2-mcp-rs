@@ -1,9 +1,6 @@
 use anyhow::Result;
-use aria2_mcp_rs::{
-    Aria2Client, Config, ManageDownloadsTool, McpServer, MonitorQueueTool, ToolRegistry,
-};
+use aria2_mcp_rs::{Aria2Client, Config, McpServer, ToolRegistry};
 use clap::Parser;
-use std::sync::Arc;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -50,11 +47,7 @@ async fn main() -> Result<()> {
     log::info!("Starting aria2-mcp-rs with RPC URL: {}...", config.rpc_url);
 
     let client = Aria2Client::new(config.clone());
-    let mut registry = ToolRegistry::new();
-
-    // Register tools
-    registry.register(Arc::new(ManageDownloadsTool));
-    registry.register(Arc::new(MonitorQueueTool));
+    let registry = ToolRegistry::new();
 
     let server = McpServer::new(config, registry, client);
     server.run().await?;

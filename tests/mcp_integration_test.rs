@@ -1,7 +1,7 @@
 mod common;
 
 use anyhow::Result;
-use aria2_mcp_rs::{ManageDownloadsTool, Tool};
+use aria2_mcp_rs::{ManageDownloadsTool, McpeTool};
 use common::Aria2Container;
 use serde_json::json;
 
@@ -16,7 +16,7 @@ async fn test_mcp_manage_downloads_add() -> Result<()> {
         "uris": ["https://p3terx.com"]
     });
 
-    let result = tool.execute(&client, args).await?;
+    let result = tool.run(&client, args).await?;
     let gid = result["gid"].as_str().expect("GID should be in result");
 
     // Verify status
@@ -37,7 +37,7 @@ async fn test_mcp_manage_downloads_pause_resume() -> Result<()> {
         "action": "add",
         "uris": ["https://p3terx.com"]
     });
-    let result_add = tool.execute(&client, args_add).await?;
+    let result_add = tool.run(&client, args_add).await?;
     let gid = result_add["gid"].as_str().expect("GID should be in result");
 
     // Pause
@@ -45,7 +45,7 @@ async fn test_mcp_manage_downloads_pause_resume() -> Result<()> {
         "action": "pause",
         "gid": gid
     });
-    tool.execute(&client, args_pause).await?;
+    tool.run(&client, args_pause).await?;
     let status = client.tell_status(gid).await?;
     assert_eq!(status["status"], "paused");
 
@@ -54,7 +54,7 @@ async fn test_mcp_manage_downloads_pause_resume() -> Result<()> {
         "action": "resume",
         "gid": gid
     });
-    tool.execute(&client, args_resume).await?;
+    tool.run(&client, args_resume).await?;
     let status = client.tell_status(gid).await?;
     assert!(status["status"] == "active" || status["status"] == "waiting");
 
@@ -71,7 +71,7 @@ async fn test_mcp_manage_downloads_remove() -> Result<()> {
         "action": "add",
         "uris": ["https://p3terx.com"]
     });
-    let result_add = tool.execute(&client, args_add).await?;
+    let result_add = tool.run(&client, args_add).await?;
     let gid = result_add["gid"].as_str().expect("GID should be in result");
 
     // Remove
@@ -79,7 +79,7 @@ async fn test_mcp_manage_downloads_remove() -> Result<()> {
         "action": "remove",
         "gid": gid
     });
-    tool.execute(&client, args_remove).await?;
+    tool.run(&client, args_remove).await?;
     let status = client.tell_status(gid).await?;
     assert_eq!(status["status"], "removed");
 

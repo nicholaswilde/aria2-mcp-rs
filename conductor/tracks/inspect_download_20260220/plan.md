@@ -11,13 +11,13 @@
 
 ## Phase 2: MCP Tool Implementation
 
-### [ ] Task: Implement inspect_download Tool
+### [x] Task: Implement inspect_download Tool
 - **Objective**: Create the detailed inspection tool.
-- [ ] Task: Define tool schema and action logic.
-- [ ] Task: Register tool in the MCP server.
+- [x] Task: Define tool schema and action logic.
+- [x] Task: Register tool in the MCP server.
 
-### [ ] Task: Add Integration Tests for inspect_download
+### [x] Task: Add Integration Tests for inspect_download
 - **Objective**: Verify inspection depth.
-- [ ] Task: Add tests to `tests/docker_integration_test.rs` to verify file and URI listing.
+- [x] Task: Add tests to `tests/docker_integration_test.rs` to verify file and URI listing.
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)

@@ -7,6 +7,10 @@ use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
 
+use super::inspect_download::InspectDownloadTool;
+use super::manage_downloads::ManageDownloadsTool;
+use super::monitor_queue::MonitorQueueTool;
+
 #[async_trait]
 pub trait Tool: Send + Sync {
     fn name(&self) -> &str;
@@ -15,8 +19,17 @@ pub trait Tool: Send + Sync {
     async fn execute(&self, client: &Aria2Client, args: Value) -> Result<Value>;
 }
 
+// Rename to McpeTool to match usage in other files
+#[async_trait]
+pub trait McpeTool: Send + Sync {
+    fn name(&self) -> String;
+    fn description(&self) -> String;
+    fn schema(&self) -> Result<Value>;
+    async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value>;
+}
+
 pub struct ToolRegistry {
-    tools: HashMap<String, Arc<dyn Tool>>,
+    tools: HashMap<String, Arc<dyn McpeTool>>,
 }
 
 impl Default for ToolRegistry {
@@ -27,20 +40,26 @@ impl Default for ToolRegistry {
 
 impl ToolRegistry {
     pub fn new() -> Self {
-        Self {
+        let mut registry = Self {
             tools: HashMap::new(),
-        }
+        };
+
+        registry.register(Arc::new(ManageDownloadsTool));
+        registry.register(Arc::new(MonitorQueueTool));
+        registry.register(Arc::new(InspectDownloadTool));
+
+        registry
     }
 
-    pub fn register(&mut self, tool: Arc<dyn Tool>) {
-        self.tools.insert(tool.name().to_string(), tool);
+    pub fn register(&mut self, tool: Arc<dyn McpeTool>) {
+        self.tools.insert(tool.name(), tool);
     }
 
-    pub fn get_tool(&self, name: &str) -> Option<Arc<dyn Tool>> {
+    pub fn get_tool(&self, name: &str) -> Option<Arc<dyn McpeTool>> {
         self.tools.get(name).cloned()
     }
 
-    pub fn list_tools(&self) -> Vec<Arc<dyn Tool>> {
+    pub fn list_tools(&self) -> Vec<Arc<dyn McpeTool>> {
         self.tools.values().cloned().collect()
     }
 }
