@@ -1,5 +1,5 @@
 use anyhow::Result;
-use aria2_mcp_rs::{Aria2Client, Config, ManageDownloadsTool, McpServer, ToolRegistry};
+use aria2_mcp_rs::{Aria2Client, Config, ManageDownloadsTool, McpServer, MonitorQueueTool, ToolRegistry};
 use clap::Parser;
 use std::sync::Arc;
 
@@ -52,6 +52,7 @@ async fn main() -> Result<()> {
     
     // Register tools
     registry.register(Arc::new(ManageDownloadsTool));
+    registry.register(Arc::new(MonitorQueueTool));
 
     let server = McpServer::new(config, registry, client);
     server.run().await?;
