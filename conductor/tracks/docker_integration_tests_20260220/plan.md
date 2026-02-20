@@ -13,7 +13,7 @@
 - [x] Task: Implement `testcontainers::Image` for `Aria2Container` using `aria2/aria2`. (ded899e)
 - [x] Task: Write a basic test to verify the container starts and is reachable. (ded899e)
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Test Environment Setup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Test Environment Setup' (Protocol in workflow.md) (ddf56d8)
 
 ## Phase 2: Core Functional Integration Tests
 
