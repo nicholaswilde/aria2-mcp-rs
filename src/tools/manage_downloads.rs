@@ -76,42 +76,60 @@ impl Tool for ManageDownloadsTool {
 
         match args.action.as_str() {
             "add" => {
-                let uris = args.uris.ok_or_else(|| anyhow::anyhow!("'uris' is required for action 'add'"))?;
+                let uris = args
+                    .uris
+                    .ok_or_else(|| anyhow::anyhow!("'uris' is required for action 'add'"))?;
                 let gid = client.add_uri(uris, args.options).await?;
                 Ok(json!({ "gid": gid }))
-            },
+            }
             "pause" => {
-                let gid = args.gid.ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'pause'"))?;
+                let gid = args
+                    .gid
+                    .ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'pause'"))?;
                 client.pause(&gid).await?;
                 Ok(json!({ "status": "paused", "gid": gid }))
-            },
+            }
             "resume" => {
-                let gid = args.gid.ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'resume'"))?;
+                let gid = args
+                    .gid
+                    .ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'resume'"))?;
                 client.unpause(&gid).await?;
                 Ok(json!({ "status": "resumed", "gid": gid }))
-            },
+            }
             "remove" => {
-                let gid = args.gid.ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'remove'"))?;
+                let gid = args
+                    .gid
+                    .ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'remove'"))?;
                 client.remove(&gid).await?;
                 Ok(json!({ "status": "removed", "gid": gid }))
-            },
+            }
             "forcePause" => {
-                let gid = args.gid.ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'forcePause'"))?;
+                let gid = args
+                    .gid
+                    .ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'forcePause'"))?;
                 client.force_pause(&gid).await?;
                 Ok(json!({ "status": "force-paused", "gid": gid }))
-            },
+            }
             "forceRemove" => {
-                let gid = args.gid.ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'forceRemove'"))?;
+                let gid = args
+                    .gid
+                    .ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'forceRemove'"))?;
                 client.force_remove(&gid).await?;
                 Ok(json!({ "status": "force-removed", "gid": gid }))
-            },
+            }
             "move" => {
-                let gid = args.gid.ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'move'"))?;
-                let pos = args.pos.ok_or_else(|| anyhow::anyhow!("'pos' is required for action 'move'"))?;
-                let how = args.how.ok_or_else(|| anyhow::anyhow!("'how' is required for action 'move'"))?;
+                let gid = args
+                    .gid
+                    .ok_or_else(|| anyhow::anyhow!("'gid' is required for action 'move'"))?;
+                let pos = args
+                    .pos
+                    .ok_or_else(|| anyhow::anyhow!("'pos' is required for action 'move'"))?;
+                let how = args
+                    .how
+                    .ok_or_else(|| anyhow::anyhow!("'how' is required for action 'move'"))?;
                 let new_pos = client.move_position(&gid, pos, &how).await?;
                 Ok(json!({ "newPosition": new_pos, "gid": gid }))
-            },
+            }
             _ => Err(anyhow::anyhow!("Unknown action: {}", args.action)),
         }
     }

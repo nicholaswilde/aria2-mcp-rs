@@ -62,22 +62,18 @@ impl Tool for MonitorQueueTool {
         let args: MonitorQueueArgs = serde_json::from_value(args)?;
 
         match args.action.as_str() {
-            "active" => {
-                client.tell_active(args.keys).await
-            },
+            "active" => client.tell_active(args.keys).await,
             "waiting" => {
                 let offset = args.offset.unwrap_or(0);
                 let num = args.num.unwrap_or(100);
                 client.tell_waiting(offset, num, args.keys).await
-            },
+            }
             "stopped" => {
                 let offset = args.offset.unwrap_or(0);
                 let num = args.num.unwrap_or(100);
                 client.tell_stopped(offset, num, args.keys).await
-            },
-            "stats" => {
-                client.get_global_stat().await
-            },
+            }
+            "stats" => client.get_global_stat().await,
             _ => Err(anyhow::anyhow!("Unknown action: {}", args.action)),
         }
     }

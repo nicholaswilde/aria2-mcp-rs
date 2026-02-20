@@ -30,7 +30,12 @@ impl McpServer {
                 stdio::run_server(Arc::clone(&self.registry), Arc::clone(&self.client)).await
             }
             TransportType::Sse => {
-                sse::run_server(self.config.port, Arc::clone(&self.registry), Arc::clone(&self.client)).await
+                sse::run_server(
+                    self.config.port,
+                    Arc::clone(&self.registry),
+                    Arc::clone(&self.client),
+                )
+                .await
             }
         }
     }

@@ -1,5 +1,7 @@
 use anyhow::Result;
-use aria2_mcp_rs::{Aria2Client, Config, ManageDownloadsTool, McpServer, MonitorQueueTool, ToolRegistry};
+use aria2_mcp_rs::{
+    Aria2Client, Config, ManageDownloadsTool, McpServer, MonitorQueueTool, ToolRegistry,
+};
 use clap::Parser;
 use std::sync::Arc;
 
@@ -27,7 +29,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     let mut config = Config::load()?;
-    
+
     // Override config with CLI arguments if provided
     if let Some(url) = args.rpc_url {
         config.rpc_url = url;
@@ -49,7 +51,7 @@ async fn main() -> Result<()> {
 
     let client = Aria2Client::new(config.clone());
     let mut registry = ToolRegistry::new();
-    
+
     // Register tools
     registry.register(Arc::new(ManageDownloadsTool));
     registry.register(Arc::new(MonitorQueueTool));

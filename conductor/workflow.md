@@ -33,37 +33,40 @@ All tasks follow a strict lifecycle:
    - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
    - Rerun tests to ensure they still pass after refactoring.
 
-6. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
+6. **Final Verification:**
+   - Run the Gemini `test-fix` command (`/test-fix`) to ensure all project-wide checks (formatting, linting, and tests) pass after your changes.
+
+7. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
    ```bash
    pytest --cov=app --cov-report=html
    ```
    Target: >80% coverage for new code. The specific tools and commands will vary by language and framework.
 
-7. **Document Deviations:** If implementation differs from tech stack:
+8. **Document Deviations:** If implementation differs from tech stack:
    - **STOP** implementation
    - Update `tech-stack.md` with new design
    - Add dated note explaining the change
    - Resume implementation
 
-8. **Commit Code Changes:**
+9. **Commit Code Changes:**
    - Stage all code changes related to the task.
    - Propose a clear, concise commit message e.g, `feat(ui): Create basic HTML structure for calculator`.
    - Perform the commit.
 
-9. **Attach Task Summary with Git Notes:**
-   - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
-   - **Step 9.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
-   - **Step 9.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
-     ```bash
-     # The note content from the previous step is passed via the -m flag.
-     git notes add -m "<note content>" <commit_hash>
-     ```
+10. **Attach Task Summary with Git Notes:**
+    - **Step 10.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
+    - **Step 10.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
+    - **Step 10.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
+      ```bash
+      # The note content from the previous step is passed via the -m flag.
+      git notes add -m "<note content>" <commit_hash>
+      ```
 
-10. **Get and Record Task Commit SHA:**
-    - **Step 10.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the *just-completed commit's* commit hash.
-    - **Step 10.2: Write Plan:** Write the updated content back to `plan.md`.
+11. **Get and Record Task Commit SHA:**
+    - **Step 11.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the *just-completed commit's* commit hash.
+    - **Step 11.2: Write Plan:** Write the updated content back to `plan.md`.
 
-11. **Commit Plan Update:**
+12. **Commit Plan Update:**
     - **Action:** Stage the modified `plan.md` file.
     - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
 
@@ -169,9 +172,11 @@ Before marking any task complete, verify:
 
 ### Before Committing
 ```bash
-# Example: Commands to run all pre-commit checks (e.g., format, lint, type check, run tests)
-# e.g., for a Node.js project: npm run check
-# e.g., for a Go project: make check (if a Makefile exists)
+# Run all pre-commit checks using Gemini test-fix command
+# /test-fix
+
+# Project-specific checks:
+task test:ci
 ```
 
 ## Testing Requirements

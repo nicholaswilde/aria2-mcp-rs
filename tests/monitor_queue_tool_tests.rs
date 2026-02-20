@@ -52,7 +52,9 @@ async fn test_mcp_monitor_queue_waiting() -> Result<()> {
     let uris = vec!["https://p3terx.com/waiting".to_string()];
     let mut options = serde_json::Map::new();
     options.insert("pause".to_string(), serde_json::json!("true"));
-    let _gid = client.add_uri(uris, Some(serde_json::Value::Object(options))).await?;
+    let _gid = client
+        .add_uri(uris, Some(serde_json::Value::Object(options)))
+        .await?;
 
     let args = json!({
         "action": "waiting"
