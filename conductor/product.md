@@ -21,3 +21,4 @@ The project provides a dual interface approach:
 
 ## Success Criteria
 - **Robustness & Flexibility**: A robust and highly configurable server for complex use cases.
+- **Token Efficiency**: Optimized to save on LLM tokens using MCP server best practices (e.g., concise tool outputs, structured data, and context-aware responses).

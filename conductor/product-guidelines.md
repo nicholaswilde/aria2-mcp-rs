@@ -20,6 +20,7 @@
     - Focus on low-latency interactions for both the MCP server and CLI.
     - Streamline common tasks to require minimal user input or configuration.
     - Optimize resource usage to ensure the server remains lightweight and responsive.
+    - **Token Efficiency**: Design MCP tool outputs to be concise and high-signal to minimize LLM token usage. Avoid conversational filler or redundant metadata in automated responses.
 
 ## Error Handling: Detailed & Technical
 - **Objective**: Facilitate quick diagnosis and resolution of issues.
