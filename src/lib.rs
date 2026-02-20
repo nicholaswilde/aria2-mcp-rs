@@ -7,5 +7,5 @@ pub mod tools;
 pub use config::{Config, TransportType};
 pub use error::{Error, Result};
 pub use server::McpServer;
-pub use tools::{ToolRegistry, manage_downloads::ManageDownloadsTool};
+pub use tools::{Tool, ToolRegistry, manage_downloads::ManageDownloadsTool};
 pub use aria2::Aria2Client;
