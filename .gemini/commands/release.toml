@@ -9,7 +9,7 @@ Follow these steps exactly:
 2.  **Calculate New Version**: Increment the patch version (e.g., `0.1.15` -> `0.1.16`).
 3.  **Update Cargo.toml**: Update the `version` field in `Cargo.toml` with the new version.
 4.  **Update Cargo.lock**: Run `cargo check` to update `Cargo.lock`.
-5.  **Update README.md**: Update the version string in the title (e.g., `(v0.1.15)` -> `(v0.1.16)`).
+5.  **Update README.md**: Update the version string in the `[!WARNING]` section (e.g., `(v0.1.15)` -> `(v0.1.16)`).
 6.  **Git Operations**:
     -   Perform `git pull --rebase` to ensure the local branch is up-to-date.
     -   Stage `Cargo.toml`, `Cargo.lock`, and `README.md`.
