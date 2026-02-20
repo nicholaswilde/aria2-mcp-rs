@@ -20,4 +20,4 @@
 - **Objective**: Verify inspection depth.
 - [x] Task: Add tests to `tests/docker_integration_test.rs` to verify file and URI listing.
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
