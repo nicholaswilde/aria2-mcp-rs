@@ -7,24 +7,43 @@ tasks:
       - cargo build
 
   test:
-    desc: Run tests
+    desc: Run all tests (fmt, lint, and unit tests)
     cmds:
-      - CI=true cargo test
+      - task: fmt:check
+      - task: lint
+      - CI=true cargo test --lib --tests
+
+  test:ci:
+    desc: Run tests using the CI profile
+    cmds:
+      - task: fmt:check
+      - task: lint
+      - CI=true cargo test --lib --tests --profile ci
 
   lint:
     desc: Run clippy for linting
     cmds:
       - cargo clippy -- -D warnings
 
+  clippy:
+    desc: Run cargo clippy (alias for lint)
+    cmds:
+      - task: lint
+
   format:
     desc: Format code with rustfmt
     cmds:
       - cargo fmt --all
 
+  fmt:check:
+    desc: Check code formatting with rustfmt
+    cmds:
+      - cargo fmt -- --check
+
   check:
     desc: Run all checks (format, lint, test)
     cmds:
-      - task: format
+      - task: fmt:check
       - task: lint
       - task: test
 
