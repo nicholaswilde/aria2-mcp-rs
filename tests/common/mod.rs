@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 use anyhow::Result;
+use aria2_mcp_rs::aria2::Aria2Client;
+use aria2_mcp_rs::config::Config;
 use testcontainers::core::{ContainerPort, WaitFor};
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{GenericImage, ImageExt};
 use tokio::io::AsyncBufReadExt;
-use aria2_mcp_rs::aria2::Aria2Client;
-use aria2_mcp_rs::config::Config;
 
 pub struct Aria2Container {
     _container: testcontainers::ContainerAsync<GenericImage>,
@@ -18,7 +18,9 @@ impl Aria2Container {
         println!("🐳 Starting aria2 container...");
 
         let image = GenericImage::new("p3terx/aria2-pro", "latest")
-            .with_wait_for(WaitFor::message_on_stdout("IPv4 RPC: listening on TCP port 6800"))
+            .with_wait_for(WaitFor::message_on_stdout(
+                "IPv4 RPC: listening on TCP port 6800",
+            ))
             .with_exposed_port(ContainerPort::Tcp(6800))
             .with_env_var("RPC_SECRET", "test-secret");
 

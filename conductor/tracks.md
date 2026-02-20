@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement manage_downloads MCP tool**
+- [~] **Track: Implement manage_downloads MCP tool**
   *Link: [./tracks/manage_downloads_20260220/](./tracks/manage_downloads_20260220/)*
 
 ---

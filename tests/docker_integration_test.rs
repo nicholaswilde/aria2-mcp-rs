@@ -1,29 +1,40 @@
 mod common;
 
-use common::Aria2Container;
 use anyhow::Result;
+use common::Aria2Container;
 
 #[tokio::test]
 async fn test_config_update() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
-    
+
     // Get current max-overall-download-limit
     let options = client.get_global_option().await?;
-    let original_limit = options["max-overall-download-limit"].as_str().unwrap().to_string();
+    let original_limit = options["max-overall-download-limit"]
+        .as_str()
+        .unwrap()
+        .to_string();
     println!("original limit: {}", original_limit);
-    
+
     // Change limit
     let new_limit = "1M";
     let mut new_opts = serde_json::Map::new();
-    new_opts.insert("max-overall-download-limit".to_string(), serde_json::json!(new_limit));
-    client.change_global_option(serde_json::Value::Object(new_opts)).await?;
-    
+    new_opts.insert(
+        "max-overall-download-limit".to_string(),
+        serde_json::json!(new_limit),
+    );
+    client
+        .change_global_option(serde_json::Value::Object(new_opts))
+        .await?;
+
     // Verify change
     let updated_options = client.get_global_option().await?;
     assert_eq!(updated_options["max-overall-download-limit"], "1048576");
-    println!("updated limit: {}", updated_options["max-overall-download-limit"]);
-    
+    println!(
+        "updated limit: {}",
+        updated_options["max-overall-download-limit"]
+    );
+
     Ok(())
 }
 
@@ -31,20 +42,20 @@ async fn test_config_update() -> Result<()> {
 async fn test_pause_resume() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
-    
+
     let uris = vec!["https://p3terx.com".to_string()];
     let gid = client.add_uri(uris, None).await?;
-    
+
     // Pause
     client.pause(&gid).await?;
     let status = client.tell_status(&gid).await?;
     assert_eq!(status["status"], "paused");
-    
+
     // Resume
     client.unpause(&gid).await?;
     let status = client.tell_status(&gid).await?;
     assert!(status["status"] == "active" || status["status"] == "waiting");
-    
+
     Ok(())
 }
 
@@ -52,22 +63,37 @@ async fn test_pause_resume() -> Result<()> {
 async fn test_status_reporting() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
-    
+
     let uris = vec!["https://p3terx.com".to_string()];
     let gid = client.add_uri(uris, None).await?;
-    
+
     // Check progress fields
     let status = client.tell_status(&gid).await?;
     assert!(status.get("completedLength").is_some());
     assert!(status.get("totalLength").is_some());
     assert!(status.get("downloadSpeed").is_some());
-    
-    let completed = status["completedLength"].as_str().unwrap().parse::<u64>().unwrap();
-    let total = status["totalLength"].as_str().unwrap().parse::<u64>().unwrap();
-    let speed = status["downloadSpeed"].as_str().unwrap().parse::<u64>().unwrap();
-    
-    println!("progress: {}/{} (speed: {} bytes/s)", completed, total, speed);
-    
+
+    let completed = status["completedLength"]
+        .as_str()
+        .unwrap()
+        .parse::<u64>()
+        .unwrap();
+    let total = status["totalLength"]
+        .as_str()
+        .unwrap()
+        .parse::<u64>()
+        .unwrap();
+    let speed = status["downloadSpeed"]
+        .as_str()
+        .unwrap()
+        .parse::<u64>()
+        .unwrap();
+
+    println!(
+        "progress: {}/{} (speed: {} bytes/s)",
+        completed, total, speed
+    );
+
     Ok(())
 }
 
@@ -75,20 +101,20 @@ async fn test_status_reporting() -> Result<()> {
 async fn test_add_download() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
-    
+
     let uris = vec!["https://p3terx.com".to_string()];
     let gid = client.add_uri(uris, None).await?;
-    
+
     assert!(!gid.is_empty());
     println!("added download with GID: {}", gid);
-    
+
     // Verify status
     let status = client.tell_status(&gid).await?;
     assert_eq!(status["gid"], gid);
     let status_str = status["status"].as_str().unwrap();
     println!("download status: {}", status_str);
     assert!(status_str == "active" || status_str == "waiting" || status_str == "complete");
-    
+
     Ok(())
 }
 
