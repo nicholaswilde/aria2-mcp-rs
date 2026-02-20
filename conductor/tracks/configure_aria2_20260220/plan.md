@@ -9,15 +9,15 @@
 
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Client Configuration Methods' (Protocol in workflow.md)
 
-## Phase 2: MCP Tool Implementation
+## Phase 2: MCP Tool Implementation [checkpoint: 5a9a6e4]
 
-### [ ] Task: Implement configure_aria2 Tool
+### [x] Task: Implement configure_aria2 Tool
 - **Objective**: Create the dynamic configuration tool.
-- [ ] Task: Define tool schema and action logic.
-- [ ] Task: Register tool in the MCP server.
+- [x] Task: Define tool schema and action logic. [5a9a6e4]
+- [x] Task: Register tool in the MCP server. [5a9a6e4]
 
-### [ ] Task: Add Integration Tests for configure_aria2
+### [x] Task: Add Integration Tests for configure_aria2
 - **Objective**: Verify configuration persistence.
-- [ ] Task: Add tests to `tests/docker_integration_test.rs` to verify that both global and local option changes are reflected.
+- [x] Task: Add tests to `tests/docker_integration_test.rs` to verify that both global and local option changes are reflected. [5a9a6e4]
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
