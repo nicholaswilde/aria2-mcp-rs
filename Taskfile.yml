@@ -1,0 +1,34 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the project
+    cmds:
+      - cargo build
+
+  test:
+    desc: Run tests
+    cmds:
+      - CI=true cargo test
+
+  lint:
+    desc: Run clippy for linting
+    cmds:
+      - cargo clippy -- -D warnings
+
+  format:
+    desc: Format code with rustfmt
+    cmds:
+      - cargo fmt --all
+
+  check:
+    desc: Run all checks (format, lint, test)
+    cmds:
+      - task: format
+      - task: lint
+      - task: test
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - cargo clean
