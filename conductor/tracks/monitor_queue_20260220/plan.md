@@ -2,12 +2,12 @@
 
 ## Phase 1: Client Monitoring Capabilities
 
-### [ ] Task: Implement tell* Methods in Aria2Client
+### [x] Task: Implement tell* Methods in Aria2Client (45fea20)
 - **Objective**: Expand the client to support queue listing.
-- [ ] Task: Implement `tell_active` in `Aria2Client`.
-- [ ] Task: Implement `tell_waiting` in `Aria2Client`.
-- [ ] Task: Implement `tell_stopped` in `Aria2Client`.
-- [ ] Task: Implement `get_global_stat` in `Aria2Client`.
+- [x] Task: Implement `tell_active` in `Aria2Client`. (45fea20)
+- [x] Task: Implement `tell_waiting` in `Aria2Client`. (45fea20)
+- [x] Task: Implement `tell_stopped` in `Aria2Client`. (45fea20)
+- [x] Task: Implement `get_global_stat` in `Aria2Client`. (45fea20)
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Client Monitoring Capabilities' (Protocol in workflow.md)
 
