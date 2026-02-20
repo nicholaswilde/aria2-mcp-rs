@@ -31,10 +31,10 @@
 - [x] Task: Write unit tests to verify `task` commands are reachable (e.g., in a test script). [32d6208]
 - [x] Task: Verify all `task` commands are functional in the local environment. [f525981]
 
-### [ ] Task: Configure Cross-Compilation
+### [x] Task: Configure Cross-Compilation [c30b9ca]
 - **Objective**: Enable building for multiple architectures using `cross`.
-- [ ] Task: Create `Cross.toml` or relevant configuration for multi-architecture builds.
-- [ ] Task: Verify the build process for at least one non-native architecture.
+- [x] Task: Create `Cross.toml` or relevant configuration for multi-architecture builds. [c30b9ca]
+- [x] Task: Verify the build process for at least one non-native architecture. [c30b9ca]
 
 ### [ ] Task: Initialize CI/CD with GitHub Actions
 - **Objective**: Set up automated checks for the project.
