@@ -39,10 +39,10 @@
 - [x] Task: Implement/Refine the pause/resume logic in the client/server to pass the tests. (4955c84)
 - [x] Task: Verify the tests pass against the live `aria2` instance. (4955c84)
 
-### [ ] Task: Implement Configuration Update Integration Test
+### [x] Task: Implement Configuration Update Integration Test (d88a2ad)
 - **Objective**: Verify dynamic adjustment of `aria2` settings.
-- [ ] Task: Write a failing integration test for updating a global configuration option.
-- [ ] Task: Implement/Refine the configuration update logic to pass the test.
-- [ ] Task: Verify the setting change is reflected in the containerized instance.
+- [x] Task: Write a failing integration test for updating a global configuration option. (d88a2ad)
+- [x] Task: Implement/Refine the configuration update logic to pass the test. (d88a2ad)
+- [x] Task: Verify the setting change is reflected in the containerized instance. (d88a2ad)
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Advanced Control & Configuration Tests' (Protocol in workflow.md)
