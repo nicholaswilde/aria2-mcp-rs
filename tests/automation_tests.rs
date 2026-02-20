@@ -6,7 +6,7 @@ fn test_taskfile_exists() {
         .arg("Taskfile.yml")
         .output()
         .expect("failed to execute process");
-    
+
     assert!(output.status.success());
 }
 
@@ -16,7 +16,7 @@ fn test_task_list() {
         .arg("--list")
         .output()
         .expect("failed to execute process");
-    
+
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("build"));
