@@ -1,0 +1,7 @@
+{
+  "id": "inspect_download_20260220",
+  "name": "Implement inspect_download MCP tool",
+  "description": "Provide detailed status, file listing, and URI information for specific downloads.",
+  "status": "pending",
+  "created_at": "2026-02-20T16:55:00Z"
+}

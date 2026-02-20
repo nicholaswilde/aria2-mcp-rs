@@ -1,0 +1,7 @@
+{
+  "id": "configure_aria2_20260220",
+  "name": "Implement configure_aria2 MCP tool",
+  "description": "Manage global and per-download configuration options dynamically.",
+  "status": "pending",
+  "created_at": "2026-02-20T16:55:00Z"
+}

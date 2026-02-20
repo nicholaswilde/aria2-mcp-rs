@@ -1,0 +1,7 @@
+{
+  "id": "monitor_queue_20260220",
+  "name": "Implement monitor_queue MCP tool",
+  "description": "Provide visibility into active, waiting, and stopped downloads and global stats.",
+  "status": "pending",
+  "created_at": "2026-02-20T16:55:00Z"
+}

@@ -1,4 +1,4 @@
-# Track docker_integration_tests_20260220 Context
+# Track: Implement configure_aria2 MCP tool
 
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)

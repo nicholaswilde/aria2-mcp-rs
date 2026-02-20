@@ -1,0 +1,7 @@
+{
+  "id": "manage_downloads_20260220",
+  "name": "Implement manage_downloads MCP tool",
+  "description": "Consolidate add, remove, pause, resume, and move actions into a single MCP tool.",
+  "status": "pending",
+  "created_at": "2026-02-20T16:55:00Z"
+}
