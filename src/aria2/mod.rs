@@ -17,7 +17,32 @@ impl Aria2Client {
     }
 
     pub async fn get_version(&self) -> Result<String> {
-        // Placeholder for real JSON-RPC call
-        Ok("1.36.0".to_string())
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.getVersion",
+            "params": params,
+        });
+
+        let resp = self.client.post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+        
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        let version = res["result"]["version"].as_str()
+            .ok_or_else(|| anyhow::anyhow!("Failed to get version from response"))?;
+
+        Ok(version.to_string())
     }
 }
