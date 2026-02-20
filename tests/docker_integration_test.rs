@@ -1,7 +1,53 @@
 mod common;
 
 use anyhow::Result;
+use aria2_mcp_rs::{ConfigureAria2Tool, McpeTool};
 use common::Aria2Container;
+use serde_json::json;
+
+#[tokio::test]
+async fn test_configure_aria2_tool_integration() -> Result<()> {
+    let container = Aria2Container::new().await?;
+    let client = container.client();
+    let tool = ConfigureAria2Tool;
+
+    // 1. Test Global Config
+    let args_global = json!({
+        "action": "change_global",
+        "options": {
+            "max-overall-download-limit": "500K"
+        }
+    });
+    tool.run(&client, args_global).await?;
+
+    let args_get_global = json!({
+        "action": "get_global"
+    });
+    let result_global = tool.run(&client, args_get_global).await?;
+    assert_eq!(result_global["max-overall-download-limit"], "512000");
+
+    // 2. Test Local Config
+    let uris = vec!["https://p3terx.com".to_string()];
+    let gid = client.add_uri(uris, None).await?;
+
+    let args_local = json!({
+        "action": "change_local",
+        "gid": gid,
+        "options": {
+            "max-download-limit": "100K"
+        }
+    });
+    tool.run(&client, args_local).await?;
+
+    let args_get_local = json!({
+        "action": "get_local",
+        "gid": gid
+    });
+    let result_local = tool.run(&client, args_get_local).await?;
+    assert_eq!(result_local["max-download-limit"], "102400");
+
+    Ok(())
+}
 
 #[tokio::test]
 async fn test_config_update() -> Result<()> {

@@ -1,8 +1,10 @@
+pub mod configure_aria2;
 pub mod inspect_download;
 pub mod manage_downloads;
 pub mod monitor_queue;
 pub mod registry;
 
+pub use configure_aria2::ConfigureAria2Tool;
 pub use inspect_download::InspectDownloadTool;
 pub use manage_downloads::ManageDownloadsTool;
 pub use monitor_queue::MonitorQueueTool;

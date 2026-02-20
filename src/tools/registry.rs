@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
 
+use super::configure_aria2::ConfigureAria2Tool;
 use super::inspect_download::InspectDownloadTool;
 use super::manage_downloads::ManageDownloadsTool;
 use super::monitor_queue::MonitorQueueTool;
@@ -47,6 +48,7 @@ impl ToolRegistry {
         registry.register(Arc::new(ManageDownloadsTool));
         registry.register(Arc::new(MonitorQueueTool));
         registry.register(Arc::new(InspectDownloadTool));
+        registry.register(Arc::new(ConfigureAria2Tool));
 
         registry
     }
