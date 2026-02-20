@@ -4,6 +4,30 @@ use common::Aria2Container;
 use anyhow::Result;
 
 #[tokio::test]
+async fn test_config_update() -> Result<()> {
+    let container = Aria2Container::new().await?;
+    let client = container.client();
+    
+    // Get current max-overall-download-limit
+    let options = client.get_global_option().await?;
+    let original_limit = options["max-overall-download-limit"].as_str().unwrap().to_string();
+    println!("original limit: {}", original_limit);
+    
+    // Change limit
+    let new_limit = "1M";
+    let mut new_opts = serde_json::Map::new();
+    new_opts.insert("max-overall-download-limit".to_string(), serde_json::json!(new_limit));
+    client.change_global_option(serde_json::Value::Object(new_opts)).await?;
+    
+    // Verify change
+    let updated_options = client.get_global_option().await?;
+    assert_eq!(updated_options["max-overall-download-limit"], "1048576");
+    println!("updated limit: {}", updated_options["max-overall-download-limit"]);
+    
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_pause_resume() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
