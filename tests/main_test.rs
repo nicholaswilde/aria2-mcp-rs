@@ -22,7 +22,7 @@ fn test_error_display() {
 
 #[test]
 fn test_error_from_io() {
-    let io_err = std::io::Error::new(std::io::ErrorKind::Other, "io error");
+    let io_err = std::io::Error::other("io error");
     let err = Error::from(io_err);
     assert!(format!("{}", err).contains("io error"));
 }

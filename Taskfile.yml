@@ -85,14 +85,14 @@ tasks:
   test:ci:
     desc: Run tests using the CI profile
     cmds:
-      - task: fmt:check
+      - task: fmt
       - task: lint
       - CI=true cargo test --lib --tests --profile ci
 
   lint:
     desc: Run clippy for linting
     cmds:
-      - cargo clippy -- -D warnings
+      - cargo clippy --workspace --all-targets --all-features -- -D warnings
 
   clippy:
     desc: Run cargo clippy (alias for lint)
