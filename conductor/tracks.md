@@ -4,11 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Implement manage_downloads MCP tool**
-  *Link: [./tracks/manage_downloads_20260220/](./tracks/manage_downloads_20260220/)*
-
----
-
 - [ ] **Track: Implement monitor_queue MCP tool**
   *Link: [./tracks/monitor_queue_20260220/](./tracks/monitor_queue_20260220/)*
 
