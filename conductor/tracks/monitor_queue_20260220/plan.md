@@ -13,13 +13,13 @@
 
 ## Phase 2: MCP Tool Implementation
 
-### [ ] Task: Implement monitor_queue Tool
+### [x] Task: Implement monitor_queue Tool (b83fc21)
 - **Objective**: Create the consolidated monitoring tool.
-- [ ] Task: Define tool schema and action logic.
-- [ ] Task: Register tool in the MCP server.
+- [x] Task: Define tool schema and action logic. (b83fc21)
+- [x] Task: Register tool in the MCP server. (b83fc21)
 
-### [ ] Task: Add Integration Tests for monitor_queue
+### [x] Task: Add Integration Tests for monitor_queue (b83fc21)
 - **Objective**: Verify reporting accuracy.
-- [ ] Task: Add tests to `tests/docker_integration_test.rs` to verify queue lists and global stats.
+- [x] Task: Add tests to `tests/monitor_queue_tool_tests.rs` to verify queue lists and global stats. (b83fc21)
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
