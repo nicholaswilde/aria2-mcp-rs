@@ -16,6 +16,145 @@ impl Aria2Client {
         }
     }
 
+    pub async fn tell_active(&self, keys: Option<Vec<String>>) -> Result<serde_json::Value> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        if let Some(k) = keys {
+            params.push(serde_json::json!(k));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.tellActive",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(res["result"].clone())
+    }
+
+    pub async fn tell_waiting(
+        &self,
+        offset: i32,
+        num: i32,
+        keys: Option<Vec<String>>,
+    ) -> Result<serde_json::Value> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(offset));
+        params.push(serde_json::json!(num));
+        if let Some(k) = keys {
+            params.push(serde_json::json!(k));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.tellWaiting",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(res["result"].clone())
+    }
+
+    pub async fn tell_stopped(
+        &self,
+        offset: i32,
+        num: i32,
+        keys: Option<Vec<String>>,
+    ) -> Result<serde_json::Value> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(offset));
+        params.push(serde_json::json!(num));
+        if let Some(k) = keys {
+            params.push(serde_json::json!(k));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.tellStopped",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(res["result"].clone())
+    }
+
+    pub async fn get_global_stat(&self) -> Result<serde_json::Value> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.getGlobalStat",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(res["result"].clone())
+    }
+
     pub async fn get_global_option(&self) -> Result<serde_json::Value> {
         let mut params = Vec::new();
         if let Some(secret) = &self.config.rpc_secret {
