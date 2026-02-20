@@ -17,11 +17,11 @@
 
 ## Phase 2: Core Functional Integration Tests
 
-### [ ] Task: Implement Basic Download Integration Test
+### [x] Task: Implement Basic Download Integration Test (0cf31b9)
 - **Objective**: Verify the full path from MCP tool to `aria2` task creation.
-- [ ] Task: Write a failing integration test in `tests/docker_integration_test.rs` for adding a download.
-- [ ] Task: Implement/Refine the `Aria2Client` or MCP tool to pass the test.
-- [ ] Task: Verify the test passes and the download starts in the container.
+- [x] Task: Write a failing integration test in `tests/docker_integration_test.rs` for adding a download. (0cf31b9)
+- [x] Task: Implement/Refine the `Aria2Client` or MCP tool to pass the test. (0cf31b9)
+- [x] Task: Verify the test passes and the download starts in the container. (0cf31b9)
 
 ### [ ] Task: Implement Status Reporting Integration Test
 - **Objective**: Ensure the server correctly retrieves and formats task status.
