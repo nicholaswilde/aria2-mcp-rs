@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement configure_aria2 MCP tool**
+- [x] **Track: Implement configure_aria2 MCP tool**
   *Link: [./tracks/configure_aria2_20260220/](./tracks/configure_aria2_20260220/)*
 
 ---
