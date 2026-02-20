@@ -2,10 +2,10 @@
 
 ## Phase 1: Client Inspection Methods
 
-### [ ] Task: Expand Client with Inspection Methods
+### [~] Task: Expand Client with Inspection Methods
 - **Objective**: Ensure the client can retrieve task details.
-- [ ] Task: Implement `get_files` in `Aria2Client`.
-- [ ] Task: Implement `get_uris` in `Aria2Client`.
+- [~] Task: Implement `get_files` in `Aria2Client`.
+- [x] Task: Implement `get_uris` in `Aria2Client`.
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Client Inspection Methods' (Protocol in workflow.md)
 
