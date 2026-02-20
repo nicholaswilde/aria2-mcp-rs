@@ -3,69 +3,60 @@
 [![task](https://img.shields.io/badge/Task-Enabled-brightgreen?style=for-the-badge&logo=task&logoColor=white)](https://taskfile.dev/#/)
 [![ci](https://img.shields.io/github/actions/workflow/status/nicholaswilde/aria2-mcp-rs/ci.yml?label=ci&style=for-the-badge&branch=main&logo=github-actions)](https://github.com/nicholaswilde/aria2-mcp-rs/actions/workflows/ci.yml)
 
-> [!WARNING]
-> This project is currently in active development and is **not production-ready**. Features may change, and breaking changes may occur without notice. **Use this MCP server at your own risk.**
+This project is a high-performance Model Context Protocol (MCP) server for [aria2](https://aria2.github.io/), built with Rust. It provides a comprehensive interface for LLMs to monitor and manage downloads.
 
-A Rust implementation of an aria2 [MCP (Model Context Protocol) server](https://modelcontextprotocol.io/docs/getting-started/intro). This server connects to an `aria2` instance and exposes tools to monitor and manage downloads via the Model Context Protocol.
+## Core Architectural Features
 
-## :sparkles: Features
+- **Dual Transport Implementation:** Supports both **Stdio** for local integration (e.g., Claude Desktop) and **HTTP/SSE** for remote, network-accessible clients.
+- **Functional Tool Grouping:** Consolidates granular API actions into logical management tools (e.g., `manage_downloads`, `monitor_queue`) to minimize token usage and optimize the AI context window.
+- **Multi-Instance Support:** Enables a single MCP server to monitor and manage multiple aria2 instances simultaneously.
+- **Automated Schema Validation:** Tools use a robust registry system with automated JSON schema-based input validation.
 
-- **Download Control:** Support for adding, pausing, and resuming downloads via MCP.
-- **Status Monitoring:** Ability to query current download status, progress, and speeds.
-- **Configuration Management:** Tools to manage `aria2` global settings and configuration on the fly.
-- **Robust Configuration:** Supports configuration via CLI arguments and environment variables.
+## Technical Stack & Components
 
-## :hammer_and_wrench: Build
+- **Tool Registry:** A modular system for registering and executing tools with strictly typed inputs.
+- **Dynamic Configuration:** Uses the `config` crate to merge settings from CLI arguments, environment variables, and configuration files (TOML, YAML, JSON).
+- **Async Runtime:** Built on `tokio`, utilizing background tasks for efficient I/O and instance management.
+- **API & Serialization:** Leverages `axum` for web transport and `serde`/`serde_json` for MCP message handling.
 
-To build the project, you need a Rust toolchain installed.
+## :hammer_and_wrench: Build & Development
 
-### Local Build
-
+### Task-Based Workflow
+Utilizes `Taskfile.yml` to standardize development tasks:
 ```bash
 # Build in release mode
 task build
+
+# Run tests and lints
+task check
 ```
 
-The binary will be available at `target/debug/aria2-mcp-rs`.
+### Quality Assurance
+- **Docker Integration Tests:** Validates real-world interaction with aria2 containers.
+- **Unit Testing:** Comprehensive test suite for core logic.
+- **Release Optimization:** Link Time Optimization (LTO) and symbol stripping for minimal binary size.
 
 ## :rocket: Usage
 
-### :keyboard: Command Line Interface
-
-The server can be configured via CLI arguments or environment variables.
+### Command Line Interface
 
 ```bash
-./target/debug/aria2-mcp-rs --rpc-url "http://localhost:6800/jsonrpc" --rpc-secret "your-secret"
+./target/release/aria2-mcp-rs --rpc-url "http://localhost:6800/jsonrpc" --rpc-secret "your-secret"
 ```
 
-#### Available Arguments
+#### Configuration Options
 
 | Argument | Environment Variable | Description | Default |
 | :--- | :--- | :--- | :--- |
 | `--rpc-url` | `ARIA2_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
 | `--rpc-secret` | `ARIA2_RPC_SECRET` | aria2 RPC Secret | - |
 
-## :test_tube: Testing
-
-The project uses [go-task](https://taskfile.dev/) for development tasks.
-
-```bash
-# Run all checks (format, lint, unit tests)
-task check
-
-# Run unit tests only
-task test
-
-# Run Docker integration tests (requires Docker)
-cargo test --test docker_integration_test
-```
-
 ## :balance_scale: License
 
-​[MIT License](LICENSE)
+[MIT License](LICENSE)
 
 ## :writing_hand: Author
 
-​This project was started in 2026 by [Nicholas Wilde][2].
+This project was started in 2026 by [Nicholas Wilde][2].
 
 [2]: <https://github.com/nicholaswilde/>

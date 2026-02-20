@@ -65,6 +65,8 @@ impl Aria2Container {
         Config {
             rpc_url: format!("http://{}:{}/jsonrpc", self.host, self.port),
             rpc_secret: Some("test-secret".to_string()),
+            transport: aria2_mcp_rs::TransportType::Stdio,
+            port: 3000,
         }
     }
 }
