@@ -15,5 +15,6 @@
 ## Package Management: Cargo
 - **Reasoning**: The standard build system and package manager for Rust.
 
-## Testing: Built-in Rust Test Framework
-- **Reasoning**: Provides robust unit and integration testing capabilities out of the box.
+## Testing: Built-in Rust Test Framework & Testcontainers
+- **Reasoning**: Provides robust unit and integration testing capabilities out of the box. `testcontainers` is used to spin up real `aria2` instances for comprehensive integration testing.
+- **Library**: `testcontainers` (for Docker-based integration tests).
