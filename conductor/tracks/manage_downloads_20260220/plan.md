@@ -2,11 +2,12 @@
 
 ## Phase 1: Client Enhancements & Foundation
 
-### [ ] Task: Complete Aria2Client Management Methods
+### [x] Task: Complete Aria2Client Management Methods (971f1a0)
 - **Objective**: Ensure all necessary management methods are in the RPC client.
-- [ ] Task: Implement `remove` method in `Aria2Client`.
-- [ ] Task: Implement `move_position` method in `Aria2Client`.
-- [ ] Task: Implement `force_remove` and `force_pause` methods.
+- [x] Task: Implement `remove` method in `Aria2Client`. (971f1a0)
+- [x] Task: Implement `move_position` method in `Aria2Client`. (971f1a0)
+- [x] Task: Implement `force_remove` and `force_pause` methods. (971f1a0)
+
 
 ### [ ] Task: Define MCP Tool Schema
 - **Objective**: Create the request/response schema for the `manage_downloads` tool.
