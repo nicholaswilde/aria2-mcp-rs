@@ -4,6 +4,27 @@ use common::Aria2Container;
 use anyhow::Result;
 
 #[tokio::test]
+async fn test_pause_resume() -> Result<()> {
+    let container = Aria2Container::new().await?;
+    let client = container.client();
+    
+    let uris = vec!["https://p3terx.com".to_string()];
+    let gid = client.add_uri(uris, None).await?;
+    
+    // Pause
+    client.pause(&gid).await?;
+    let status = client.tell_status(&gid).await?;
+    assert_eq!(status["status"], "paused");
+    
+    // Resume
+    client.unpause(&gid).await?;
+    let status = client.tell_status(&gid).await?;
+    assert!(status["status"] == "active" || status["status"] == "waiting");
+    
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_status_reporting() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
