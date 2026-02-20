@@ -1,0 +1,8 @@
+{
+  "track_id": "coverage_90_coveralls_20260220",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-02-20T08:35:00Z",
+  "updated_at": "2026-02-20T08:35:00Z",
+  "description": "Create a track to increase code coverage using coveralls.io. use the task coverage, task coverage:report and task coverage:upload to help with the coverage."
+}
