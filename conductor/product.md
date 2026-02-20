@@ -10,13 +10,13 @@ A rust implementation of a aria2 MCP server.
 - **Power Users**: Power users who want to automate their download workflows.
 
 ## Core Features
-- **Download Control**: Support for adding, pausing, and removing downloads via MCP.
+- **Download Control**: Support for adding, pausing, resuming, and removing downloads via MCP. Includes advanced control like force-pause, force-remove, and moving download positions.
 - **Status Monitoring**: Ability to query current download status and progress.
 - **Configuration Management**: Tools to manage aria2 settings and configuration on the fly.
 
 ## User Experience
 The project provides a dual interface approach:
-- **MCP Server**: A pure MCP server for programmatic access by AI agents.
+- **MCP Server**: A pure MCP server for programmatic access by AI agents, supporting both Stdio and SSE transports.
 - **CLI**: A command-line tool for direct interaction alongside the MCP server.
 
 ## Success Criteria
