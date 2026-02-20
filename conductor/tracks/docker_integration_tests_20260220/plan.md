@@ -2,10 +2,10 @@
 
 ## Phase 1: Infrastructure & Test Environment Setup
 
-### [ ] Task: Configure Integration Test Dependencies
+### [x] Task: Configure Integration Test Dependencies (9ceed78)
 - **Objective**: Add necessary crates for containerized testing.
 - [x] Task: Add `testcontainers` and `testcontainers-modules` (if applicable) to `Cargo.toml` dev-dependencies. (527cab4)
-- [ ] Task: Update `Cargo.toml` and verify compilation.
+- [x] Task: Update `Cargo.toml` and verify compilation. (9ceed78)
 
 ### [ ] Task: Implement Aria2 Container Wrapper
 - **Objective**: Create a reusable abstraction for the `aria2` Docker container.
