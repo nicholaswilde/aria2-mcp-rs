@@ -23,11 +23,11 @@
 - [x] Task: Implement/Refine the `Aria2Client` or MCP tool to pass the test. (0cf31b9)
 - [x] Task: Verify the test passes and the download starts in the container. (0cf31b9)
 
-### [ ] Task: Implement Status Reporting Integration Test
+### [x] Task: Implement Status Reporting Integration Test (91637d4)
 - **Objective**: Ensure the server correctly retrieves and formats task status.
-- [ ] Task: Write a failing integration test for querying download progress and speed.
-- [ ] Task: Implement/Refine the status retrieval logic to pass the test.
-- [ ] Task: Verify the test passes with live data from the container.
+- [x] Task: Write a failing integration test for querying download progress and speed. (91637d4)
+- [x] Task: Implement/Refine the status retrieval logic to pass the test. (91637d4)
+- [x] Task: Verify the test passes with live data from the container. (91637d4)
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Functional Integration Tests' (Protocol in workflow.md)
 
