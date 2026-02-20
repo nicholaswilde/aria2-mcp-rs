@@ -16,7 +16,7 @@
 
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Client Enhancements & Foundation' (ca608f8)
 
-## Phase 2: MCP Tool Implementation [checkpoint: ca608f8]
+## Phase 2: MCP Tool Implementation [checkpoint: 4a737d1]
 
 ### [x] Task: Implement manage_downloads Tool (ca608f8)
 - **Objective**: Integrate the tool logic into the MCP server.
@@ -27,4 +27,4 @@
 - **Objective**: Verify the tool works with a real container.
 - [x] Task: Add integration tests in `tests/mcp_integration_test.rs` specifically for the MCP tool interface. (42cf3d9)
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (4a737d1)
