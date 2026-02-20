@@ -23,8 +23,8 @@
 - [x] Task: Implement the tool handler in `src/tools/manage_downloads.rs`. (ca608f8)
 - [x] Task: Register the tool in the server in `src/main.rs`. (ca608f8)
 
-### [x] Task: Add Integration Tests for manage_downloads (a706646)
+### [x] Task: Add Integration Tests for manage_downloads (42cf3d9)
 - **Objective**: Verify the tool works with a real container.
-- [x] Task: Add integration tests in `tests/mcp_integration_test.rs` specifically for the MCP tool interface. (a706646)
+- [x] Task: Add integration tests in `tests/mcp_integration_test.rs` specifically for the MCP tool interface. (42cf3d9)
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: MCP Tool Implementation' (Protocol in workflow.md)
