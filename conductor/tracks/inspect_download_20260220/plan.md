@@ -7,7 +7,7 @@
 - [~] Task: Implement `get_files` in `Aria2Client`.
 - [x] Task: Implement `get_uris` in `Aria2Client`.
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Client Inspection Methods' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Client Inspection Methods' (Protocol in workflow.md)
 
 ## Phase 2: MCP Tool Implementation
 
