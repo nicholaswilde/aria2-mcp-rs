@@ -7,11 +7,11 @@
 - [x] Task: Add `testcontainers` and `testcontainers-modules` (if applicable) to `Cargo.toml` dev-dependencies. (527cab4)
 - [x] Task: Update `Cargo.toml` and verify compilation. (9ceed78)
 
-### [ ] Task: Implement Aria2 Container Wrapper
+### [x] Task: Implement Aria2 Container Wrapper (ded899e)
 - **Objective**: Create a reusable abstraction for the `aria2` Docker container.
-- [ ] Task: Create `tests/common/mod.rs` (if not exists) and define an `Aria2Container` struct.
-- [ ] Task: Implement `testcontainers::Image` for `Aria2Container` using `aria2/aria2`.
-- [ ] Task: Write a basic test to verify the container starts and is reachable.
+- [x] Task: Create `tests/common/mod.rs` (if not exists) and define an `Aria2Container` struct. (ded899e)
+- [x] Task: Implement `testcontainers::Image` for `Aria2Container` using `aria2/aria2`. (ded899e)
+- [x] Task: Write a basic test to verify the container starts and is reachable. (ded899e)
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Test Environment Setup' (Protocol in workflow.md)
 
