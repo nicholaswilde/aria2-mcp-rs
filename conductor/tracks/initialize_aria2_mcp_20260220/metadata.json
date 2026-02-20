@@ -1,0 +1,8 @@
+{
+  "track_id": "initialize_aria2_mcp_20260220",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-20T12:00:00Z",
+  "updated_at": "2026-02-20T12:00:00Z",
+  "description": "use adguardhome-mcp-rs project as a starting point. The mcp server binary must be compiled as Rust. Multiple architectures must be compiled using cross. Task shall be used as the task runner."
+}

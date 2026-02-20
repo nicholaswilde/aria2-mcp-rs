@@ -1,0 +1,23 @@
+# Product Guide - aria2-mcp-rs
+
+## Initial Concept
+A rust implementation of a aria2 MCP server.
+
+## Overview
+`aria2-mcp-rs` is a robust and flexible Model Context Protocol (MCP) server for `aria2`, written in Rust. It enables seamless integration of `aria2`'s powerful download capabilities into the MCP ecosystem, allowing LLMs and other agents to manage downloads efficiently.
+
+## Target Users
+- **Power Users**: Power users who want to automate their download workflows.
+
+## Core Features
+- **Download Control**: Support for adding, pausing, and removing downloads via MCP.
+- **Status Monitoring**: Ability to query current download status and progress.
+- **Configuration Management**: Tools to manage aria2 settings and configuration on the fly.
+
+## User Experience
+The project provides a dual interface approach:
+- **MCP Server**: A pure MCP server for programmatic access by AI agents.
+- **CLI**: A command-line tool for direct interaction alongside the MCP server.
+
+## Success Criteria
+- **Robustness & Flexibility**: A robust and highly configurable server for complex use cases.
