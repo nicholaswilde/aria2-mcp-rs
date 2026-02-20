@@ -10,11 +10,11 @@
 - [x] Task: Write initial tests for project structure and error types. [7de0e6c]
 - [x] Task: Implement the basic `Config` structure in `src/config.rs`. [d9a69c2]
 
-### [ ] Task: Implement Core MCP Server Skeleton
+### [x] Task: Implement Core MCP Server Skeleton
 - **Objective**: Create a functional MCP server that can start and process basic requests.
-- [ ] Task: Create `src/mcp.rs` for the server implementation.
-- [ ] Task: Write unit tests for the MCP server's initialization and lifecycle.
-- [ ] Task: Implement the MCP server's identification and basic handlers.
+- [x] Task: Create `src/mcp.rs` for the server implementation. [b3005c8]
+- [x] Task: Write unit tests for the MCP server's initialization and lifecycle. [1265897]
+- [x] Task: Implement the MCP server's identification and basic handlers. [b3005c8]
 
 ### [ ] Task: Define aria2 Client Module Structure
 - **Objective**: Create the placeholder structure for interacting with `aria2`.
