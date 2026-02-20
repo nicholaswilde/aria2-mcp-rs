@@ -45,4 +45,4 @@
 - [x] Task: Implement/Refine the configuration update logic to pass the test. (d88a2ad)
 - [x] Task: Verify the setting change is reflected in the containerized instance. (d88a2ad)
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Advanced Control & Configuration Tests' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Advanced Control & Configuration Tests' (Protocol in workflow.md) (8d07cef)
