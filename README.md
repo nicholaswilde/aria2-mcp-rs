@@ -20,9 +20,11 @@ This project is a high-performance Model Context Protocol (MCP) server for [aria
 
 The server provides several high-level tools for managing and monitoring aria2:
 
-- **`manage_downloads`**: Add, pause, resume, and remove downloads (supports both single and bulk operations).
+- **`manage_downloads`**: Add, pause, resume, and remove individual downloads.
+- **`bulk_manage_downloads`**: Perform actions (pause, resume, remove) on multiple downloads simultaneously.
 - **`monitor_queue`**: Get real-time status of active, waiting, and stopped downloads, plus global statistics.
 - **`search_downloads`**: Find specific downloads by filename, URI, or status (optimized for token efficiency).
+- **`check_health`**: Identify stalled downloads and potential queue issues (e.g., low disk space).
 - **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
 
