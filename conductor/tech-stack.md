@@ -14,7 +14,7 @@
 
 ## Async Runtime: Tokio
 - **Reasoning**: The most powerful and widely-adopted asynchronous runtime for Rust, essential for handling high-concurrency MCP requests and I/O tasks.
-- **Library**: `tokio`.
+- **Library**: `tokio` (including `tokio::sync::RwLock` for dynamic tool state management).
 
 ## Communication: JSON-RPC over HTTP
 - **Reasoning**: `aria2` uses JSON-RPC for its remote interface.

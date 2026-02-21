@@ -16,8 +16,10 @@ A rust implementation of a aria2 MCP server.
 - **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly.
 - **Bandwidth Scheduling**: A tool to define bandwidth speed profiles and automatically activate them on a daily or weekly schedule (e.g., "Day Mode", "Night Mode").
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
+- **Lazy Mode**: A token-optimized mode that initially exposes a minimal toolset and allows for on-demand tool activation via a `manage_tools` meta-tool.
 
-## User Experience
+ ## User Experience
+
 The project provides a dual interface approach:
 - **MCP Server**: A pure MCP server for programmatic access by AI agents, supporting both Stdio and SSE transports.
 - **CLI**: A command-line tool for direct interaction alongside the MCP server.
@@ -25,4 +27,4 @@ The project provides a dual interface approach:
 ## Success Criteria
 - **Robustness & Flexibility**: A robust and highly configurable server for complex use cases.
 - **Reliability**: Maintained with high code coverage (>90%) to ensure long-term stability and prevent regressions.
-- **Token Efficiency**: Optimized to save on LLM tokens using MCP server best practices (e.g., concise tool outputs, structured data, and context-aware responses).
+- **Token Efficiency**: Optimized to save on LLM tokens using MCP server best practices (e.g., concise tool outputs, structured data, context-aware responses, and a "Lazy Mode" for on-demand tool activation).
