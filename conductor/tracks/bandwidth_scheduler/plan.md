@@ -1,6 +1,6 @@
 # Implementation Plan - Bandwidth Scheduler
 
-## Tasks
+## Tasks [checkpoint: 9b2bf62]
 - [x] Implement `schedule_limits` logic in a new file `src/tools/schedule_limits.rs`. 57d1c08
 - [x] Add the `schedule_limits` tool to the registry in `src/tools/registry.rs`. e855831
 - [x] Implement speed profile management. 57d1c08
