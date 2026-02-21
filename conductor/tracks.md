@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Bulk Operations
+## [x] Track: Bulk Operations
 - **ID:** bulk_manage_downloads
 - **Description:** Implement a tool to perform actions on multiple downloads simultaneously.
 - **Link:** [Track Folder](./tracks/bulk_manage_downloads/index.md)
