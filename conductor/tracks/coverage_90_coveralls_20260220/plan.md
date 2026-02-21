@@ -10,13 +10,13 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Tooling & Setup' (Protocol in workflow.md) 6a89a1a
 
 ## Phase 2: Server Logic Coverage
-- [ ] Task: Expand tests for `src/server/handler.rs`
-    - [ ] Write tests for MCP request handling (list_tools, tools/call)
-    - [ ] Verify coverage increase
-- [ ] Task: Expand tests for `src/server/sse.rs` and `src/server/stdio.rs`
-    - [ ] Write integration/unit tests for SSE routes and Stdio transport
-    - [ ] Verify coverage increase
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Server Logic Coverage' (Protocol in workflow.md)
+- [x] Task: Expand tests for `src/server/handler.rs` 789d159
+    - [x] Write tests for MCP request handling (list_tools, tools/call)
+    - [x] Verify coverage increase
+- [x] Task: Expand tests for `src/server/sse.rs` and `src/server/stdio.rs` 789d159
+    - [x] Write integration/unit tests for SSE routes and Stdio transport
+    - [x] Verify coverage increase
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Server Logic Coverage' (Protocol in workflow.md)
 
 ## Phase 3: Tools & Registry Coverage
 - [ ] Task: Expand tests for `src/tools/registry.rs`
