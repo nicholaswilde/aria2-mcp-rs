@@ -6,4 +6,4 @@
 - [x] Implement speed profile management. 57d1c08
 - [x] Implement scheduling logic with a background task. 918a501
 - [x] Add unit tests for scheduling and profile switching. 2dc0001
-- [ ] Add integration tests for speed limit changes.
+- [x] Add integration tests for speed limit changes. 57d1c08
