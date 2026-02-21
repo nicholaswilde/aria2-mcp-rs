@@ -27,6 +27,10 @@
 - **Reasoning**: Provides robust unit and integration testing capabilities out of the box. `testcontainers` is used to spin up real `aria2` instances for comprehensive integration testing.
 - **Library**: `testcontainers` (for Docker-based integration tests).
 
+## Coverage & Reporting: cargo-llvm-cov & Coveralls.io
+- **Reasoning**: Ensures high code quality and robustness by tracking test coverage and providing a public dashboard for visibility.
+- **Tools**: `cargo-llvm-cov` (for local coverage reports), `Coveralls.io` (for cloud-based tracking).
+
 ## Configuration Management: config & clap
 - **Reasoning**: `config` allows for dynamic configuration merging from multiple sources (CLI, environment variables, files). `clap` provides a powerful, type-safe CLI argument parser.
 - **Library**: `config`, `clap`.
