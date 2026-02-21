@@ -1,0 +1,50 @@
+# aria2 MCP Server Configuration Example
+
+# --- Required Fields (Defaults shown) ---
+
+# The URL of the aria2 JSON-RPC endpoint.
+rpc_url = "http://localhost:6800/jsonrpc"
+
+# The transport to use for the MCP server.
+# Options: "stdio" (local integration), "sse" (network-accessible server).
+transport = "stdio"
+
+# The port to listen on when using the "sse" transport.
+port = 3000
+
+# Enable "Lazy Mode" to initially hide most tool schemas and save tokens.
+# Tools can be enabled on-demand via the 'manage_tools' meta-tool.
+lazy_mode = false
+
+# --- Optional Fields ---
+
+# The RPC secret for authentication with aria2.
+# rpc_secret = "your-aria2-rpc-secret"
+
+# --- Bandwidth Management ---
+
+# Define named speed profiles.
+# [bandwidth_profiles.high_speed]
+# max_download = "0" # "0" means unlimited
+# max_upload = "0"
+
+# [bandwidth_profiles.night_mode]
+# max_download = "5M"
+# max_upload = "500K"
+
+# [bandwidth_profiles.work_mode]
+# max_download = "1M"
+# max_upload = "100K"
+
+# Define schedules to automatically activate profiles.
+# [[bandwidth_schedules]]
+# day = "daily" # Options: "daily", "mon", "tue", "wed", "thu", "fri", "sat", "sun"
+# start_time = "23:00"
+# end_time = "07:00"
+# profile_name = "night_mode"
+
+# [[bandwidth_schedules]]
+# day = "mon"
+# start_time = "09:00"
+# end_time = "17:00"
+# profile_name = "work_mode"
