@@ -87,6 +87,7 @@ dependencies = [
  "config",
  "env_logger",
  "futures-util",
+ "libc",
  "log",
  "mcp-sdk-rs",
  "openssl",

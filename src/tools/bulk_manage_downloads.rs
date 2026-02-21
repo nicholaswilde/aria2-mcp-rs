@@ -111,8 +111,14 @@ mod tests {
         let tool = BulkManageDownloadsTool;
         let schema = tool.schema().unwrap();
         assert_eq!(schema["type"], "object");
-        assert!(schema["required"].as_array().unwrap().contains(&json!("action")));
-        assert!(schema["required"].as_array().unwrap().contains(&json!("gids")));
+        assert!(schema["required"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("action")));
+        assert!(schema["required"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("gids")));
     }
 
     #[tokio::test]
@@ -140,6 +146,9 @@ mod tests {
         let result = tool.run(&client, args).await.unwrap();
         assert_eq!(result["success_count"], 0);
         assert_eq!(result["failure_count"], 1);
-        assert!(result["results"][0]["message"].as_str().unwrap().contains("Unknown action"));
+        assert!(result["results"][0]["message"]
+            .as_str()
+            .unwrap()
+            .contains("Unknown action"));
     }
 }

@@ -4,13 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [x] Track: Queue Health Monitor
-- **ID:** queue_health_monitor
-- **Description:** Implement a tool to identify stalled downloads and potential queue issues.
-- **Link:** [Track Folder](./tracks/queue_health_monitor/index.md)
-
----
-
 ## [ ] Track: BitTorrent Specialized Management
 - **ID:** bittorrent_management
 - **Description:** Implement specialized tools for managing BitTorrent downloads.
