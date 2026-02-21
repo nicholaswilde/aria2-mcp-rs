@@ -95,7 +95,9 @@ impl McpeTool for OrganizeCompletedTool {
         let rules = args.rules.unwrap_or_default();
 
         if rules.is_empty() {
-            return Ok(json!({ "status": "no_rules", "message": "No rules provided for organization" }));
+            return Ok(
+                json!({ "status": "no_rules", "message": "No rules provided for organization" }),
+            );
         }
 
         let mut organized_count = 0;
@@ -117,10 +119,10 @@ impl McpeTool for OrganizeCompletedTool {
             let stopped = client.tell_stopped(0, 1000, None).await?;
             if let Some(stopped_list) = stopped.as_array() {
                 for status in stopped_list {
-                    if status["status"] == "complete" {
-                        if self.organize_download(status, &rules).await? {
-                            organized_count += 1;
-                        }
+                    if status["status"] == "complete"
+                        && self.organize_download(status, &rules).await?
+                    {
+                        organized_count += 1;
                     }
                 }
             }
@@ -142,7 +144,7 @@ impl OrganizeCompletedTool {
             let path_str = file["path"]
                 .as_str()
                 .ok_or_else(|| anyhow::anyhow!("File path is missing"))?;
-            
+
             if path_str.is_empty() {
                 continue;
             }
@@ -162,7 +164,7 @@ impl OrganizeCompletedTool {
 
                     let target_path = target_dir.join(filename);
                     println!("Moving {} to {}", path_str, target_path.display());
-                    
+
                     // Standard fs::rename might fail across filesystems, but for now we use tokio::fs::rename
                     tokio::fs::rename(path, target_path).await?;
                     organized = true;

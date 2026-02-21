@@ -91,6 +91,7 @@ dependencies = [
  "log",
  "mcp-sdk-rs",
  "openssl",
+ "regex",
  "reqwest",
  "schemars 1.2.1",
  "serde",
