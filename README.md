@@ -16,6 +16,16 @@ This project is a high-performance Model Context Protocol (MCP) server for [aria
 - **Multi-Instance Support:** Enables a single MCP server to monitor and manage multiple aria2 instances simultaneously.
 - **Automated Schema Validation:** Tools use a robust registry system with automated JSON schema-based input validation.
 
+## Implemented Tools
+
+The server provides several high-level tools for managing and monitoring aria2:
+
+- **`manage_downloads`**: Add, pause, resume, and remove downloads (supports both single and bulk operations).
+- **`monitor_queue`**: Get real-time status of active, waiting, and stopped downloads, plus global statistics.
+- **`search_downloads`**: Find specific downloads by filename, URI, or status (optimized for token efficiency).
+- **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
+- **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
+
 ## Technical Stack & Components
 
 - **Tool Registry:** A modular system for registering and executing tools with strictly typed inputs.
