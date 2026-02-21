@@ -1,0 +1,7 @@
+{
+  "id": "queue_health_monitor",
+  "name": "Queue Health Monitor",
+  "description": "Implement a tool to identify stalled downloads and potential queue issues.",
+  "status": "todo",
+  "created_at": "2026-02-21T00:00:00Z"
+}

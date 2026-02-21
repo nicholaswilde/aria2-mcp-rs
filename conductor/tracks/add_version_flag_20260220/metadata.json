@@ -1,8 +1,0 @@
-{
-  "track_id": "add_version_flag_20260220",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-20T08:42:00Z",
-  "updated_at": "2026-02-20T08:42:00Z",
-  "description": "Add a command line argument to show the version of the app. Both --version and -V shall be supported. The output should be aria2-mcp-rs 0.1.0"
-}

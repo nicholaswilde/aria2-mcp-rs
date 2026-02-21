@@ -1,0 +1,7 @@
+{
+  "id": "bandwidth_scheduler",
+  "name": "Bandwidth Scheduler",
+  "description": "Implement a tool to schedule and manage bandwidth speed profiles.",
+  "status": "todo",
+  "created_at": "2026-02-21T00:00:00Z"
+}
