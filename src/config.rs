@@ -8,6 +8,7 @@ pub struct Config {
     pub rpc_secret: Option<String>,
     pub transport: TransportType,
     pub port: u16,
+    pub lazy_mode: bool,
     #[serde(default)]
     pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
     #[serde(default)]
@@ -22,9 +23,9 @@ pub struct BandwidthProfile {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct BandwidthSchedule {
-    pub day: String, // "daily", "mon", "tue", ...
+    pub day: String,        // "daily", "mon", "tue", ...
     pub start_time: String, // HH:MM
-    pub end_time: String, // HH:MM
+    pub end_time: String,   // HH:MM
     pub profile_name: String,
 }
 
@@ -42,6 +43,7 @@ impl Default for Config {
             rpc_secret: None,
             transport: TransportType::Stdio,
             port: 3000,
+            lazy_mode: false,
             bandwidth_profiles: HashMap::new(),
             bandwidth_schedules: Vec::new(),
         }
@@ -55,6 +57,7 @@ impl Config {
             .set_default("rpc_url", "http://localhost:6800/jsonrpc")?
             .set_default("transport", "stdio")?
             .set_default("port", 3000)?
+            .set_default("lazy_mode", false)?
             // Add configuration from files
             .add_source(File::with_name("aria2-mcp").required(false))
             // Add configuration from environment variables (with a prefix)

@@ -3,9 +3,11 @@ mod common;
 use anyhow::Result;
 use aria2_mcp_rs::server::handler::McpHandler;
 use aria2_mcp_rs::tools::registry::ToolRegistry;
+use aria2_mcp_rs::Config;
 use common::Aria2Container;
 use mcp_sdk_rs::server::ServerHandler;
 use std::sync::Arc;
+use tokio::sync::RwLock;
 
 #[tokio::test]
 async fn test_mcp_handler_tools_list() -> Result<()> {
@@ -14,7 +16,7 @@ async fn test_mcp_handler_tools_list() -> Result<()> {
     }
     let container = Aria2Container::new().await?;
     let client = container.client();
-    let registry = Arc::new(ToolRegistry::new());
+    let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let handler = McpHandler::new(registry, Arc::new(client));
 
     let result = handler.handle_method("tools/list", None).await?;
@@ -39,7 +41,7 @@ async fn test_mcp_handler_tools_call() -> Result<()> {
     }
     let container = Aria2Container::new().await?;
     let client = container.client();
-    let registry = Arc::new(ToolRegistry::new());
+    let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let handler = McpHandler::new(registry, Arc::new(client));
 
     let params = serde_json::json!({
@@ -70,7 +72,7 @@ async fn test_mcp_handler_unknown_method() -> Result<()> {
     }
     let container = Aria2Container::new().await?;
     let client = container.client();
-    let registry = Arc::new(ToolRegistry::new());
+    let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let handler = McpHandler::new(registry, Arc::new(client));
 
     let result = handler.handle_method("unknown/method", None).await;

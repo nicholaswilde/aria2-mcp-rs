@@ -5,18 +5,102 @@ use mcp_sdk_rs::{
     types::{ClientCapabilities, Implementation, ServerCapabilities},
 };
 use std::sync::Arc;
+use tokio::sync::RwLock;
 
 use crate::aria2::Aria2Client;
 use crate::tools::registry::ToolRegistry;
 
 pub struct McpHandler {
-    registry: Arc<ToolRegistry>,
+    registry: Arc<RwLock<ToolRegistry>>,
     client: Arc<Aria2Client>,
 }
 
 impl McpHandler {
-    pub fn new(registry: Arc<ToolRegistry>, client: Arc<Aria2Client>) -> Self {
+    pub fn new(registry: Arc<RwLock<ToolRegistry>>, client: Arc<Aria2Client>) -> Self {
         Self { registry, client }
+    }
+
+    async fn handle_manage_tools(
+        &self,
+        arguments: serde_json::Value,
+    ) -> Result<serde_json::Value, Error> {
+        let action = arguments
+            .get("action")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| {
+                Error::protocol(ErrorCode::InvalidParams, "Missing 'action' in manage_tools")
+            })?;
+
+        match action {
+            "list" => {
+                let registry = self.registry.read().await;
+                let tools = registry.list_available_tools();
+                Ok(serde_json::json!({
+                    "content": [{
+                        "type": "text",
+                        "text": serde_json::to_string_pretty(&tools).unwrap_or_default()
+                    }]
+                }))
+            }
+            "enable" => {
+                let tools_to_enable = arguments
+                    .get("tools")
+                    .and_then(|v| v.as_array())
+                    .ok_or_else(|| {
+                        Error::protocol(
+                            ErrorCode::InvalidParams,
+                            "Missing 'tools' in manage_tools enable",
+                        )
+                    })?;
+
+                let mut registry = self.registry.write().await;
+                let mut enabled_count = 0;
+                for t in tools_to_enable {
+                    if let Some(name) = t.as_str() {
+                        if registry.enable_tool(name) {
+                            enabled_count += 1;
+                        }
+                    }
+                }
+                Ok(serde_json::json!({
+                    "content": [{
+                        "type": "text",
+                        "text": format!("Enabled {} tools.", enabled_count)
+                    }]
+                }))
+            }
+            "disable" => {
+                let tools_to_disable = arguments
+                    .get("tools")
+                    .and_then(|v| v.as_array())
+                    .ok_or_else(|| {
+                        Error::protocol(
+                            ErrorCode::InvalidParams,
+                            "Missing 'tools' in manage_tools disable",
+                        )
+                    })?;
+
+                let mut registry = self.registry.write().await;
+                let mut disabled_count = 0;
+                for t in tools_to_disable {
+                    if let Some(name) = t.as_str() {
+                        if registry.disable_tool(name) {
+                            disabled_count += 1;
+                        }
+                    }
+                }
+                Ok(serde_json::json!({
+                    "content": [{
+                        "type": "text",
+                        "text": format!("Disabled {} tools.", disabled_count)
+                    }]
+                }))
+            }
+            _ => Err(Error::protocol(
+                ErrorCode::InvalidParams,
+                format!("Invalid action: {}", action),
+            )),
+        }
     }
 }
 
@@ -44,7 +128,8 @@ impl ServerHandler for McpHandler {
     ) -> Result<serde_json::Value, Error> {
         match method {
             "tools/list" => {
-                let tools = self.registry.list_tools();
+                let registry = self.registry.read().await;
+                let tools = registry.list_tools();
                 let mut tool_infos = Vec::new();
                 for t in tools {
                     let schema = t.schema().map_err(|e| {
@@ -54,6 +139,29 @@ impl ServerHandler for McpHandler {
                         "name": t.name(),
                         "description": t.description(),
                         "inputSchema": schema,
+                    }));
+                }
+
+                if registry.is_lazy_mode() {
+                    tool_infos.push(serde_json::json!({
+                        "name": "manage_tools",
+                        "description": "Manage available tools (enable/disable) to save tokens.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "action": {
+                                    "type": "string",
+                                    "enum": ["list", "enable", "disable"],
+                                    "description": "The action to perform."
+                                },
+                                "tools": {
+                                    "type": "array",
+                                    "items": { "type": "string" },
+                                    "description": "List of tool names to enable or disable."
+                                }
+                            },
+                            "required": ["action"]
+                        }
                     }));
                 }
 
@@ -76,12 +184,22 @@ impl ServerHandler for McpHandler {
                     .cloned()
                     .unwrap_or(serde_json::json!({}));
 
-                let tool = self.registry.get_tool(name).ok_or_else(|| {
+                if name == "manage_tools" {
+                    let registry = self.registry.read().await;
+                    if registry.is_lazy_mode() {
+                        drop(registry);
+                        return self.handle_manage_tools(arguments).await;
+                    }
+                }
+
+                let registry = self.registry.read().await;
+                let tool = registry.get_tool(name).ok_or_else(|| {
                     Error::protocol(
                         ErrorCode::MethodNotFound,
                         format!("Tool not found: {}", name),
                     )
                 })?;
+                drop(registry);
 
                 let result = tool
                     .run(&self.client, arguments)
@@ -112,7 +230,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_handler_tools_list() {
-        let registry = Arc::new(ToolRegistry::new());
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let client = Arc::new(Aria2Client::new(Config::default()));
         let handler = McpHandler::new(registry, client);
 
@@ -123,7 +241,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_handler_unknown_method() {
-        let registry = Arc::new(ToolRegistry::new());
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let client = Arc::new(Aria2Client::new(Config::default()));
         let handler = McpHandler::new(registry, client);
 
@@ -133,7 +251,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_handler_tools_call_missing_params() {
-        let registry = Arc::new(ToolRegistry::new());
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let client = Arc::new(Aria2Client::new(Config::default()));
         let handler = McpHandler::new(registry, client);
 
@@ -143,7 +261,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_handler_tools_call_missing_name() {
-        let registry = Arc::new(ToolRegistry::new());
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let client = Arc::new(Aria2Client::new(Config::default()));
         let handler = McpHandler::new(registry, client);
 
@@ -154,7 +272,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_handler_tools_call_not_found() {
-        let registry = Arc::new(ToolRegistry::new());
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let client = Arc::new(Aria2Client::new(Config::default()));
         let handler = McpHandler::new(registry, client);
 

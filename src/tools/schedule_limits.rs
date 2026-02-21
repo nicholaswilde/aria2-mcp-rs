@@ -215,7 +215,9 @@ impl McpeTool for ScheduleLimitsTool {
 
                 client.change_global_option(options).await?;
 
-                Ok(json!({ "status": "success", "message": format!("Profile '{}' activated", name) }))
+                Ok(
+                    json!({ "status": "success", "message": format!("Profile '{}' activated", name) }),
+                )
             }
             _ => Err(anyhow::anyhow!("Action '{}' not implemented yet", action)),
         }

@@ -44,7 +44,9 @@ async fn test_schedule_limits_tool_add_set_remove_profile() -> Result<()> {
     tool.run(&client, args_add).await?;
 
     // Verify profile added in list
-    let result_list = tool.run(&client, json!({"action": "list_profiles"})).await?;
+    let result_list = tool
+        .run(&client, json!({"action": "list_profiles"}))
+        .await?;
     assert!(result_list["profiles"]["night"].is_object());
 
     // Set profile
@@ -67,7 +69,9 @@ async fn test_schedule_limits_tool_add_set_remove_profile() -> Result<()> {
     tool.run(&client, args_remove).await?;
 
     // Verify profile removed
-    let result_list2 = tool.run(&client, json!({"action": "list_profiles"})).await?;
+    let result_list2 = tool
+        .run(&client, json!({"action": "list_profiles"}))
+        .await?;
     assert!(result_list2["profiles"]["night"].is_null());
 
     Ok(())
@@ -83,12 +87,16 @@ async fn test_schedule_limits_tool_manage_schedules() -> Result<()> {
     let tool = ScheduleLimitsTool;
 
     // Add profile first
-    tool.run(&client, json!({
-        "action": "add_profile",
-        "profile_name": "day",
-        "max_download": "1M",
-        "max_upload": "100K"
-    })).await?;
+    tool.run(
+        &client,
+        json!({
+            "action": "add_profile",
+            "profile_name": "day",
+            "max_download": "1M",
+            "max_upload": "100K"
+        }),
+    )
+    .await?;
 
     // Add schedule
     let args_add_sched = json!({
@@ -103,7 +111,9 @@ async fn test_schedule_limits_tool_manage_schedules() -> Result<()> {
     tool.run(&client, args_add_sched).await?;
 
     // List schedules
-    let result_list = tool.run(&client, json!({"action": "list_schedules"})).await?;
+    let result_list = tool
+        .run(&client, json!({"action": "list_schedules"}))
+        .await?;
     assert_eq!(result_list["schedules"].as_array().unwrap().len(), 1);
     assert_eq!(result_list["schedules"][0]["profile_name"], "day");
 
@@ -115,7 +125,9 @@ async fn test_schedule_limits_tool_manage_schedules() -> Result<()> {
     tool.run(&client, args_rem_sched).await?;
 
     // Verify removed
-    let result_list2 = tool.run(&client, json!({"action": "list_schedules"})).await?;
+    let result_list2 = tool
+        .run(&client, json!({"action": "list_schedules"}))
+        .await?;
     assert_eq!(result_list2["schedules"].as_array().unwrap().len(), 0);
 
     Ok(())

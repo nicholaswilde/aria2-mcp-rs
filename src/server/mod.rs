@@ -5,6 +5,7 @@ pub mod stdio;
 use anyhow::Result;
 use chrono::{Datelike, Local, Timelike};
 use std::sync::Arc;
+use tokio::sync::RwLock;
 use tokio::time::{self, Duration};
 
 use crate::aria2::Aria2Client;
@@ -13,7 +14,7 @@ use crate::tools::ToolRegistry;
 
 pub struct McpServer {
     config: Config,
-    registry: Arc<ToolRegistry>,
+    registry: Arc<RwLock<ToolRegistry>>,
     client: Arc<Aria2Client>,
 }
 
@@ -21,7 +22,7 @@ impl McpServer {
     pub fn new(config: Config, registry: ToolRegistry, client: Aria2Client) -> Self {
         Self {
             config,
-            registry: Arc::new(registry),
+            registry: Arc::new(RwLock::new(registry)),
             client: Arc::new(client),
         }
     }
@@ -173,7 +174,7 @@ mod tests {
     #[test]
     fn test_new_server() {
         let config = Config::default();
-        let registry = ToolRegistry::new();
+        let registry = ToolRegistry::new(&config);
         let client = Aria2Client::new(config.clone());
         let _server = McpServer::new(config, registry, client);
     }
@@ -185,7 +186,7 @@ mod tests {
             port: 1, // Likely to fail on most systems
             ..Default::default()
         };
-        let registry = ToolRegistry::new();
+        let registry = ToolRegistry::new(&config);
         let client = Aria2Client::new(config.clone());
         let server = McpServer::new(config, registry, client);
         let result = server.run().await;

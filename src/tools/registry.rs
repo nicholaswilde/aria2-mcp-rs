@@ -2,10 +2,11 @@ use anyhow::Result;
 use async_trait::async_trait;
 use serde::Serialize;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
+use crate::Config;
 
 use super::bulk_manage_downloads::BulkManageDownloadsTool;
 use super::check_health::CheckHealthTool;
@@ -37,18 +38,22 @@ pub trait McpeTool: Send + Sync {
 
 pub struct ToolRegistry {
     tools: HashMap<String, Arc<dyn McpeTool>>,
+    enabled_tools: HashSet<String>,
+    lazy_mode: bool,
 }
 
 impl Default for ToolRegistry {
     fn default() -> Self {
-        Self::new()
+        Self::new(&Config::default())
     }
 }
 
 impl ToolRegistry {
-    pub fn new() -> Self {
+    pub fn new(config: &Config) -> Self {
         let mut registry = Self {
             tools: HashMap::new(),
+            enabled_tools: HashSet::new(),
+            lazy_mode: config.lazy_mode,
         };
 
         registry.register(Arc::new(ManageDownloadsTool));
@@ -62,11 +67,21 @@ impl ToolRegistry {
         registry.register(Arc::new(OrganizeCompletedTool));
         registry.register(Arc::new(ScheduleLimitsTool));
 
+        // In lazy mode, only enable basic tools by default.
+        // register() already enables all tools if !lazy_mode.
+        if config.lazy_mode {
+            registry.enabled_tools.insert("monitor_queue".to_string());
+        }
+
         registry
     }
 
     pub fn register(&mut self, tool: Arc<dyn McpeTool>) {
-        self.tools.insert(tool.name(), tool);
+        let name = tool.name();
+        self.tools.insert(name.clone(), tool);
+        if !self.lazy_mode {
+            self.enabled_tools.insert(name);
+        }
     }
 
     pub fn get_tool(&self, name: &str) -> Option<Arc<dyn McpeTool>> {
@@ -74,7 +89,45 @@ impl ToolRegistry {
     }
 
     pub fn list_tools(&self) -> Vec<Arc<dyn McpeTool>> {
-        self.tools.values().cloned().collect()
+        self.tools
+            .iter()
+            .filter(|(name, _)| self.enabled_tools.contains(*name))
+            .map(|(_, tool)| tool.clone())
+            .collect()
+    }
+
+    pub fn enable_tool(&mut self, name: &str) -> bool {
+        if self.tools.contains_key(name) {
+            self.enabled_tools.insert(name.to_string());
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn disable_tool(&mut self, name: &str) -> bool {
+        self.enabled_tools.remove(name)
+    }
+
+    pub fn is_tool_enabled(&self, name: &str) -> bool {
+        self.enabled_tools.contains(name)
+    }
+
+    pub fn list_available_tools(&self) -> Vec<Value> {
+        let mut result = Vec::new();
+        for (name, tool) in &self.tools {
+            result.push(serde_json::json!({
+                "name": name,
+                "description": tool.description(),
+                "enabled": self.enabled_tools.contains(name)
+            }));
+        }
+        result.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
+        result
+    }
+
+    pub fn is_lazy_mode(&self) -> bool {
+        self.lazy_mode
     }
 }
 
@@ -91,16 +144,58 @@ mod tests {
 
     #[test]
     fn test_registry_new() {
-        let registry = ToolRegistry::new();
+        let registry = ToolRegistry::new(&Config::default());
         let tools = registry.list_tools();
         assert_eq!(tools.len(), 10);
     }
 
     #[test]
     fn test_registry_get_tool() {
-        let registry = ToolRegistry::new();
+        let registry = ToolRegistry::new(&Config::default());
         assert!(registry.get_tool("manage_downloads").is_some());
         assert!(registry.get_tool("unknown").is_none());
+    }
+
+    #[test]
+    fn test_registry_lazy_mode() {
+        let config = Config {
+            lazy_mode: true,
+            ..Default::default()
+        };
+        let registry = ToolRegistry::new(&config);
+        let tools = registry.list_tools();
+        assert_eq!(tools.len(), 1); // Only monitor_queue
+        assert_eq!(tools[0].name(), "monitor_queue");
+    }
+
+    #[test]
+    fn test_registry_enable_disable() {
+        let config = Config {
+            lazy_mode: true,
+            ..Default::default()
+        };
+        let mut registry = ToolRegistry::new(&config);
+
+        assert!(!registry.is_tool_enabled("manage_downloads"));
+
+        assert!(registry.enable_tool("manage_downloads"));
+        assert!(registry.is_tool_enabled("manage_downloads"));
+        assert_eq!(registry.list_tools().len(), 2);
+
+        assert!(registry.disable_tool("manage_downloads"));
+        assert!(!registry.is_tool_enabled("manage_downloads"));
+        assert_eq!(registry.list_tools().len(), 1);
+    }
+
+    #[test]
+    fn test_registry_list_available() {
+        let config = Config::default();
+        let registry = ToolRegistry::new(&config);
+        let available = registry.list_available_tools();
+        assert_eq!(available.len(), 10);
+        for tool in available {
+            assert!(tool["enabled"].as_bool().unwrap());
+        }
     }
 
     #[test]

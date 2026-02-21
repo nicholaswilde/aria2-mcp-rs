@@ -18,6 +18,8 @@ struct Args {
     transport: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_PORT", default_value = "3000")]
     port: Option<u16>,
+    #[arg(short, long, env = "ARIA2_MCP_LAZY", default_value = "false")]
+    lazy: bool,
 }
 
 #[tokio::main]
@@ -46,11 +48,14 @@ async fn run_app(args: Args) -> Result<()> {
     if let Some(port) = args.port {
         config.port = port;
     }
+    if args.lazy {
+        config.lazy_mode = true;
+    }
 
     log::info!("Starting aria2-mcp-rs with RPC URL: {}...", config.rpc_url);
 
     let client = Aria2Client::new(config.clone());
-    let registry = ToolRegistry::new();
+    let registry = ToolRegistry::new(&config);
 
     let server = McpServer::new(config, registry, client);
     server.run().await?;
