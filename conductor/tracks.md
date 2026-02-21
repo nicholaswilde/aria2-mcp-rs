@@ -4,13 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [x] Track: Bulk Operations
-- **ID:** bulk_manage_downloads
-- **Description:** Implement a tool to perform actions on multiple downloads simultaneously.
-- **Link:** [Track Folder](./tracks/bulk_manage_downloads/index.md)
-
----
-
 ## [ ] Track: Queue Health Monitor
 - **ID:** queue_health_monitor
 - **Description:** Implement a tool to identify stalled downloads and potential queue issues.
