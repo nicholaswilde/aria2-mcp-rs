@@ -8,6 +8,7 @@ use std::sync::Arc;
 use crate::aria2::Aria2Client;
 
 use super::bulk_manage_downloads::BulkManageDownloadsTool;
+use super::check_health::CheckHealthTool;
 use super::configure_aria2::ConfigureAria2Tool;
 use super::inspect_download::InspectDownloadTool;
 use super::manage_downloads::ManageDownloadsTool;
@@ -53,6 +54,7 @@ impl ToolRegistry {
         registry.register(Arc::new(ConfigureAria2Tool));
         registry.register(Arc::new(SearchDownloadsTool));
         registry.register(Arc::new(BulkManageDownloadsTool));
+        registry.register(Arc::new(CheckHealthTool));
 
         registry
     }
@@ -85,7 +87,7 @@ mod tests {
     fn test_registry_new() {
         let registry = ToolRegistry::new();
         let tools = registry.list_tools();
-        assert_eq!(tools.len(), 6);
+        assert_eq!(tools.len(), 7);
     }
 
     #[test]
