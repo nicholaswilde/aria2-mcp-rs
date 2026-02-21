@@ -9,6 +9,6 @@ pub use config::{Config, TransportType};
 pub use error::{Error, Result};
 pub use server::McpServer;
 pub use tools::{
-    ConfigureAria2Tool, InspectDownloadTool, ManageDownloadsTool, McpeTool, MonitorQueueTool,
-    SearchDownloadsTool, ToolRegistry,
+    BulkManageDownloadsTool, ConfigureAria2Tool, InspectDownloadTool, ManageDownloadsTool,
+    McpeTool, MonitorQueueTool, SearchDownloadsTool, ToolRegistry,
 };

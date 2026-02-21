@@ -3,6 +3,7 @@ use anyhow::Result;
 use reqwest::Client;
 
 #[allow(dead_code)]
+#[derive(Clone)]
 pub struct Aria2Client {
     config: Config,
     client: Client,
