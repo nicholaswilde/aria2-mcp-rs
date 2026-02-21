@@ -1,25 +1,38 @@
 use crate::Config;
 use anyhow::Result;
 use reqwest::Client;
+use std::sync::{Arc, RwLock};
 
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct Aria2Client {
-    config: Config,
+    config: Arc<RwLock<Config>>,
     client: Client,
 }
 
 impl Aria2Client {
     pub fn new(config: Config) -> Self {
         Self {
-            config,
+            config: Arc::new(RwLock::new(config)),
             client: Client::new(),
         }
     }
 
+    pub fn config(&self) -> Arc<RwLock<Config>> {
+        Arc::clone(&self.config)
+    }
+
     pub async fn tell_active(&self, keys: Option<Vec<String>>) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
+
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         if let Some(k) = keys {
@@ -33,12 +46,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -55,8 +63,15 @@ impl Aria2Client {
         num: i32,
         keys: Option<Vec<String>>,
     ) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(offset));
@@ -72,12 +87,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -94,8 +104,15 @@ impl Aria2Client {
         num: i32,
         keys: Option<Vec<String>>,
     ) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(offset));
@@ -111,12 +128,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -128,8 +140,15 @@ impl Aria2Client {
     }
 
     pub async fn get_global_stat(&self) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
 
@@ -140,12 +159,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -157,8 +171,15 @@ impl Aria2Client {
     }
 
     pub async fn get_global_option(&self) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
 
@@ -169,12 +190,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -186,8 +202,15 @@ impl Aria2Client {
     }
 
     pub async fn get_option(&self, gid: &str) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -199,12 +222,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -216,8 +234,15 @@ impl Aria2Client {
     }
 
     pub async fn change_global_option(&self, options: serde_json::Value) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(options);
@@ -229,12 +254,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -246,8 +266,15 @@ impl Aria2Client {
     }
 
     pub async fn change_option(&self, gid: &str, options: serde_json::Value) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -260,12 +287,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -277,8 +299,15 @@ impl Aria2Client {
     }
 
     pub async fn pause(&self, gid: &str) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -290,12 +319,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -307,8 +331,15 @@ impl Aria2Client {
     }
 
     pub async fn force_pause(&self, gid: &str) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -320,12 +351,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -337,8 +363,15 @@ impl Aria2Client {
     }
 
     pub async fn unpause(&self, gid: &str) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -350,12 +383,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -367,8 +395,15 @@ impl Aria2Client {
     }
 
     pub async fn remove(&self, gid: &str) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -380,12 +415,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -397,8 +427,15 @@ impl Aria2Client {
     }
 
     pub async fn force_remove(&self, gid: &str) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -410,12 +447,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -427,8 +459,15 @@ impl Aria2Client {
     }
 
     pub async fn move_position(&self, gid: &str, pos: i32, how: &str) -> Result<i32> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -442,12 +481,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -463,8 +497,15 @@ impl Aria2Client {
     }
 
     pub async fn tell_status(&self, gid: &str) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -476,12 +517,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -497,8 +533,15 @@ impl Aria2Client {
         uris: Vec<String>,
         options: Option<serde_json::Value>,
     ) -> Result<String> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(uris));
@@ -513,12 +556,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -534,8 +572,15 @@ impl Aria2Client {
     }
 
     pub async fn get_version(&self) -> Result<String> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
 
@@ -546,12 +591,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -567,8 +607,15 @@ impl Aria2Client {
     }
 
     pub async fn get_files(&self, gid: &str) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -580,12 +627,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -597,8 +639,15 @@ impl Aria2Client {
     }
 
     pub async fn get_uris(&self, gid: &str) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -610,12 +659,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 
@@ -627,8 +671,15 @@ impl Aria2Client {
     }
 
     pub async fn get_peers(&self, gid: &str) -> Result<serde_json::Value> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
         let mut params = Vec::new();
-        if let Some(secret) = &self.config.rpc_secret {
+        if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));
         }
         params.push(serde_json::json!(gid));
@@ -640,12 +691,7 @@ impl Aria2Client {
             "params": params,
         });
 
-        let resp = self
-            .client
-            .post(&self.config.rpc_url)
-            .json(&body)
-            .send()
-            .await?;
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
 
         let res: serde_json::Value = resp.json().await?;
 

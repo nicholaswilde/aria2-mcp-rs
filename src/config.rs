@@ -1,5 +1,6 @@
 use config::{Config as ConfigLoader, ConfigError, Environment, File};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -7,6 +8,24 @@ pub struct Config {
     pub rpc_secret: Option<String>,
     pub transport: TransportType,
     pub port: u16,
+    #[serde(default)]
+    pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
+    #[serde(default)]
+    pub bandwidth_schedules: Vec<BandwidthSchedule>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct BandwidthProfile {
+    pub max_download: String,
+    pub max_upload: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct BandwidthSchedule {
+    pub day: String, // "daily", "mon", "tue", ...
+    pub start_time: String, // HH:MM
+    pub end_time: String, // HH:MM
+    pub profile_name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -23,6 +42,8 @@ impl Default for Config {
             rpc_secret: None,
             transport: TransportType::Stdio,
             port: 3000,
+            bandwidth_profiles: HashMap::new(),
+            bandwidth_schedules: Vec::new(),
         }
     }
 }

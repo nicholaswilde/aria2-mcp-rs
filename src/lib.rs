@@ -11,5 +11,5 @@ pub use server::McpServer;
 pub use tools::{
     BulkManageDownloadsTool, CheckHealthTool, ConfigureAria2Tool, InspectDownloadTool,
     ManageDownloadsTool, ManageTorrentTool, McpeTool, MonitorQueueTool, OrganizeCompletedTool,
-    SearchDownloadsTool, ToolRegistry,
+    ScheduleLimitsTool, SearchDownloadsTool, ToolRegistry,
 };

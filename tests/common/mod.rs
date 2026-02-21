@@ -73,6 +73,7 @@ impl Aria2Container {
             rpc_secret: Some("test-secret".to_string()),
             transport: aria2_mcp_rs::TransportType::Stdio,
             port: 3000,
+            ..Default::default()
         }
     }
 }

@@ -7,6 +7,7 @@ pub mod manage_torrent;
 pub mod monitor_queue;
 pub mod organize_completed;
 pub mod registry;
+pub mod schedule_limits;
 pub mod search_downloads;
 
 pub use bulk_manage_downloads::BulkManageDownloadsTool;
@@ -18,4 +19,5 @@ pub use manage_torrent::ManageTorrentTool;
 pub use monitor_queue::MonitorQueueTool;
 pub use organize_completed::OrganizeCompletedTool;
 pub use registry::{McpeTool, ToolRegistry};
+pub use schedule_limits::ScheduleLimitsTool;
 pub use search_downloads::SearchDownloadsTool;
