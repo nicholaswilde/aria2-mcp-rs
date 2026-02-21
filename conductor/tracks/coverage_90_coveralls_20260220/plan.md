@@ -27,14 +27,14 @@
     - [x] Verify coverage increase
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Tools & Registry Coverage' (Protocol in workflow.md) db766aa
 
-## Phase 4: Main & Config Coverage
+## Phase 4: Main & Config Coverage [checkpoint: bb1d32d]
 - [x] Task: Expand tests for `src/main.rs` and `src/config.rs` 789d159
     - [x] Write tests for CLI argument parsing and configuration loading
     - [x] Verify coverage increase
-- [~] Task: Conductor - User Manual Verification 'Phase 4: Main & Config Coverage' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Main & Config Coverage' (Protocol in workflow.md) bb1d32d
 
 ## Phase 5: Final Verification & Upload
-- [ ] Task: Perform final coverage check
+- [~] Task: Perform final coverage check
     - [ ] Run `task coverage` and confirm TOTAL > 90%
 - [ ] Task: Upload to Coveralls
     - [ ] Run `task coverage:upload` and verify successful report submission
