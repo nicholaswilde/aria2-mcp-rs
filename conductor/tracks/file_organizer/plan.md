@@ -5,5 +5,5 @@
 - [x] Add the `organize_completed` tool to the registry in `src/tools/registry.rs`. (e958f3c)
 - [x] Implement rule parsing and matching logic. (e958f3c)
 - [x] Implement file moving logic. (e958f3c)
-- [ ] Add unit tests for rule matching and moving.
-- [ ] Add integration tests with mock files.
+- [x] Add unit tests for rule matching and moving. (fbe66ba)
+- [x] Add integration tests with mock files. (fbe66ba)
