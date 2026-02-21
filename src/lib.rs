@@ -10,5 +10,5 @@ pub use error::{Error, Result};
 pub use server::McpServer;
 pub use tools::{
     ConfigureAria2Tool, InspectDownloadTool, ManageDownloadsTool, McpeTool, MonitorQueueTool,
-    ToolRegistry,
+    SearchDownloadsTool, ToolRegistry,
 };

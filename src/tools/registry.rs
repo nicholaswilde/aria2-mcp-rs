@@ -11,6 +11,7 @@ use super::configure_aria2::ConfigureAria2Tool;
 use super::inspect_download::InspectDownloadTool;
 use super::manage_downloads::ManageDownloadsTool;
 use super::monitor_queue::MonitorQueueTool;
+use super::search_downloads::SearchDownloadsTool;
 
 #[async_trait]
 pub trait Tool: Send + Sync {
@@ -49,6 +50,7 @@ impl ToolRegistry {
         registry.register(Arc::new(MonitorQueueTool));
         registry.register(Arc::new(InspectDownloadTool));
         registry.register(Arc::new(ConfigureAria2Tool));
+        registry.register(Arc::new(SearchDownloadsTool));
 
         registry
     }
@@ -81,7 +83,7 @@ mod tests {
     fn test_registry_new() {
         let registry = ToolRegistry::new();
         let tools = registry.list_tools();
-        assert_eq!(tools.len(), 4);
+        assert_eq!(tools.len(), 5);
     }
 
     #[test]
