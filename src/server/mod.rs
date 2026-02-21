@@ -50,6 +50,32 @@ impl McpServer {
     }
 }
 
+fn get_active_profile(
+    current_day: &str,
+    current_time: &str,
+    schedules: &[crate::config::BandwidthSchedule],
+) -> Option<String> {
+    for schedule in schedules {
+        if schedule.day == "daily" || schedule.day == current_day {
+            let start = schedule.start_time.as_str();
+            let end = schedule.end_time.as_str();
+
+            if start <= end {
+                // Normal range
+                if current_time >= start && current_time < end {
+                    return Some(schedule.profile_name.clone());
+                }
+            } else {
+                // Wraps around midnight
+                if current_time >= start || current_time < end {
+                    return Some(schedule.profile_name.clone());
+                }
+            }
+        }
+    }
+    None
+}
+
 async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
     let mut interval = time::interval(Duration::from_secs(60));
     let mut last_profile: Option<String> = None;
@@ -80,17 +106,7 @@ async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
             )
         };
 
-        let mut active_profile_name: Option<String> = None;
-
-        for schedule in &schedules {
-            if (schedule.day == "daily" || schedule.day == current_day)
-                && current_time >= schedule.start_time
-                && current_time < schedule.end_time
-            {
-                active_profile_name = Some(schedule.profile_name.clone());
-                break;
-            }
-        }
+        let active_profile_name = get_active_profile(current_day, &current_time, &schedules);
 
         if let Some(profile_name) = active_profile_name {
             if last_profile.as_ref() != Some(&profile_name) {
@@ -108,10 +124,6 @@ async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
                 }
             }
         } else if last_profile.is_some() {
-            // No schedule active, but we had one.
-            // For now, we don't reset to "default" because we don't know what it is.
-            // Maybe we should just leave it.
-            // In a real app, you might want a "Default" profile.
             last_profile = None;
         }
     }
@@ -120,6 +132,43 @@ async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::BandwidthSchedule;
+
+    #[test]
+    fn test_get_active_profile() {
+        let schedules = vec![
+            BandwidthSchedule {
+                day: "mon".to_string(),
+                start_time: "09:00".to_string(),
+                end_time: "17:00".to_string(),
+                profile_name: "work".to_string(),
+            },
+            BandwidthSchedule {
+                day: "daily".to_string(),
+                start_time: "22:00".to_string(),
+                end_time: "06:00".to_string(), // Note: this simple logic won't handle midnight wrap correctly if not split, but let's test it as implemented
+                profile_name: "night".to_string(),
+            },
+        ];
+
+        // Monday 10:00 -> work
+        assert_eq!(
+            get_active_profile("mon", "10:00", &schedules),
+            Some("work".to_string())
+        );
+
+        // Tuesday 10:00 -> None
+        assert_eq!(get_active_profile("tue", "10:00", &schedules), None);
+
+        // Any day 23:00 -> night
+        assert_eq!(
+            get_active_profile("wed", "23:00", &schedules),
+            Some("night".to_string())
+        );
+
+        // Any day 07:00 -> None
+        assert_eq!(get_active_profile("thu", "07:00", &schedules), None);
+    }
 
     #[test]
     fn test_new_server() {
