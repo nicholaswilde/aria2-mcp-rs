@@ -59,6 +59,7 @@ impl Config {
             .set_default("port", 3000)?
             .set_default("lazy_mode", false)?
             // Add configuration from files
+            .add_source(File::with_name("config").required(false))
             .add_source(File::with_name("aria2-mcp").required(false))
             // Add configuration from environment variables (with a prefix)
             .add_source(Environment::with_prefix("ARIA2_MCP").separator("__"))
