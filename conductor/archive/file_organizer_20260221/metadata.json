@@ -1,0 +1,7 @@
+{
+  "id": "file_organizer",
+  "name": "Automatic File Organizer",
+  "description": "Implement a tool to move completed downloads based on user rules.",
+  "status": "todo",
+  "created_at": "2026-02-21T00:00:00Z"
+}
