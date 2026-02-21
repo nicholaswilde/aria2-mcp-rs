@@ -28,6 +28,7 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`manage_torrent`**: Manage BitTorrent-specific settings like fetching peers, selecting files, and adding/updating trackers.
 - **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
+- **`manage_tools`**: (Lazy Mode only) Enable or disable individual tools to optimize token usage.
 
 ## Technical Stack & Components
 
@@ -65,8 +66,9 @@ task check
 
 | Argument | Environment Variable | Description | Default |
 | :--- | :--- | :--- | :--- |
-| `--rpc-url` | `ARIA2_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
-| `--rpc-secret` | `ARIA2_RPC_SECRET` | aria2 RPC Secret | - |
+| `--rpc-url` | `ARIA2_MCP_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
+| `--rpc-secret` | `ARIA2_MCP_RPC_SECRET` | aria2 RPC Secret | - |
+| `--lazy` | `ARIA2_MCP_LAZY` | Enable Lazy Mode | `false` |
 
 ## :balance_scale: License
 

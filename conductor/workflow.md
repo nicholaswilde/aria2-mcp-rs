@@ -150,6 +150,8 @@ Before marking any task complete, verify:
 - [ ] No linting or static analysis errors (using the project's configured tools)
 - [ ] Works correctly on mobile (if applicable)
 - [ ] Documentation updated if needed
+- [ ] `config.toml.example` updated if new configuration parameters were introduced
+- [ ] `README.md` updated if tools were added or updated
 - [ ] No security vulnerabilities introduced
 
 ## Development Commands
@@ -274,11 +276,13 @@ A task is complete when:
 2. Unit tests written and passing
 3. Code coverage meets project requirements
 4. Documentation complete (if applicable)
-5. Code passes all configured linting and static analysis checks
-6. Works beautifully on mobile (if applicable)
-7. Implementation notes added to `plan.md`
-8. Changes committed with proper message
-9. Git note with task summary attached to the commit
+5. `config.toml.example` updated if new configuration parameters were introduced
+6. `README.md` updated if tools were added or updated
+7. Code passes all configured linting and static analysis checks
+8. Works beautifully on mobile (if applicable)
+9. Implementation notes added to `plan.md`
+10. Changes committed with proper message
+11. Git note with task summary attached to the commit
 
 ## Emergency Procedures
 
