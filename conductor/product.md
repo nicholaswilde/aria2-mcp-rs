@@ -11,7 +11,7 @@ A rust implementation of a aria2 MCP server.
 
 ## Core Features
 - **Download Control**: Support for adding, pausing, resuming, and removing downloads via MCP. Includes advanced control like force-pause, force-remove, moving download positions, and bulk management of multiple downloads.
-- **Status Monitoring**: High-level visibility into the download queue, including active, waiting, and stopped tasks, plus global statistics.
+- **Status Monitoring**: High-level visibility into the download queue, including active, waiting, and stopped tasks, global statistics, and automated health monitoring for stalled downloads and system resources.
 - **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly.
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
 
