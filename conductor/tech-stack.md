@@ -20,6 +20,10 @@
 - **Reasoning**: `aria2` uses JSON-RPC for its remote interface.
 - **Library**: `reqwest` for interacting with the `aria2` RPC endpoint.
 
+## Pattern Matching: Regex
+- **Reasoning**: Required for robust filename pattern matching in the automatic file organization tool.
+- **Library**: `regex`.
+
 ## Package Management: Cargo
 - **Reasoning**: The standard build system and package manager for Rust.
 
