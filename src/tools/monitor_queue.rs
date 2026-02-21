@@ -79,3 +79,34 @@ impl McpeTool for MonitorQueueTool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::aria2::Aria2Client;
+    use crate::config::Config;
+
+    #[tokio::test]
+    async fn test_monitor_queue_name() {
+        let tool = MonitorQueueTool;
+        assert_eq!(tool.name(), "monitor_queue");
+    }
+
+    #[tokio::test]
+    async fn test_monitor_queue_run_unknown_action() {
+        let tool = MonitorQueueTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "action": "unknown" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_monitor_queue_run_active_error() {
+        let tool = MonitorQueueTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "action": "active" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+}

@@ -40,3 +40,28 @@ impl McpServer {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_server() {
+        let config = Config::default();
+        let registry = ToolRegistry::new();
+        let client = Aria2Client::new(config.clone());
+        let _server = McpServer::new(config, registry, client);
+    }
+
+    #[tokio::test]
+    async fn test_server_run_sse_error() {
+        let mut config = Config::default();
+        config.transport = TransportType::Sse;
+        config.port = 1; // Likely to fail on most systems
+        let registry = ToolRegistry::new();
+        let client = Aria2Client::new(config.clone());
+        let server = McpServer::new(config, registry, client);
+        let result = server.run().await;
+        assert!(result.is_err());
+    }
+}

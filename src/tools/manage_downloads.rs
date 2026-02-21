@@ -134,3 +134,43 @@ impl McpeTool for ManageDownloadsTool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::aria2::Aria2Client;
+    use crate::config::Config;
+
+    #[tokio::test]
+    async fn test_manage_downloads_name() {
+        let tool = ManageDownloadsTool;
+        assert_eq!(tool.name(), "manage_downloads");
+    }
+
+    #[tokio::test]
+    async fn test_manage_downloads_run_unknown_action() {
+        let tool = ManageDownloadsTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "action": "unknown" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_manage_downloads_run_add_missing_uris() {
+        let tool = ManageDownloadsTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "action": "add" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_manage_downloads_run_pause_missing_gid() {
+        let tool = ManageDownloadsTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "action": "pause" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+}

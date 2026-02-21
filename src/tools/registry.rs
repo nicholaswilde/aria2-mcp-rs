@@ -72,3 +72,27 @@ pub struct ToolInfo {
     pub description: String,
     pub input_schema: Value,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_registry_new() {
+        let registry = ToolRegistry::new();
+        let tools = registry.list_tools();
+        assert_eq!(tools.len(), 4);
+    }
+
+    #[test]
+    fn test_registry_get_tool() {
+        let registry = ToolRegistry::new();
+        assert!(registry.get_tool("manage_downloads").is_some());
+        assert!(registry.get_tool("unknown").is_none());
+    }
+
+    #[test]
+    fn test_registry_default() {
+        let _registry = ToolRegistry::default();
+    }
+}

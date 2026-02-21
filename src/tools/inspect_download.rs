@@ -65,3 +65,25 @@ impl McpeTool for InspectDownloadTool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::aria2::Aria2Client;
+    use crate::config::Config;
+
+    #[tokio::test]
+    async fn test_inspect_download_name() {
+        let tool = InspectDownloadTool;
+        assert_eq!(tool.name(), "inspect_download");
+    }
+
+    #[tokio::test]
+    async fn test_inspect_download_run_status_error() {
+        let tool = InspectDownloadTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "gid": "dummy", "action": "status" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+}

@@ -18,3 +18,8 @@ pub async fn run_server(registry: Arc<ToolRegistry>, client: Arc<Aria2Client>) -
         .map_err(|e| anyhow::anyhow!("Server error: {:?}", e))?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    // We can't easily test run_server as it's blocking
+}

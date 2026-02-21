@@ -102,3 +102,64 @@ impl ServerHandler for McpHandler {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::aria2::Aria2Client;
+    use crate::config::Config;
+    use crate::tools::registry::ToolRegistry;
+
+    #[tokio::test]
+    async fn test_handler_tools_list() {
+        let registry = Arc::new(ToolRegistry::new());
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, client);
+
+        let result = handler.handle_method("tools/list", None).await.unwrap();
+        let tools = result["tools"].as_array().unwrap();
+        assert!(!tools.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_handler_unknown_method() {
+        let registry = Arc::new(ToolRegistry::new());
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, client);
+
+        let result = handler.handle_method("unknown", None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_handler_tools_call_missing_params() {
+        let registry = Arc::new(ToolRegistry::new());
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, client);
+
+        let result = handler.handle_method("tools/call", None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_handler_tools_call_missing_name() {
+        let registry = Arc::new(ToolRegistry::new());
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, client);
+
+        let params = serde_json::json!({ "arguments": {} });
+        let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_handler_tools_call_not_found() {
+        let registry = Arc::new(ToolRegistry::new());
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, client);
+
+        let params = serde_json::json!({ "name": "unknown", "arguments": {} });
+        let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+    }
+}

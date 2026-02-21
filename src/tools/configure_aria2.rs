@@ -82,3 +82,33 @@ impl McpeTool for ConfigureAria2Tool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Config;
+
+    #[tokio::test]
+    async fn test_configure_aria2_name() {
+        let tool = ConfigureAria2Tool;
+        assert_eq!(tool.name(), "configure_aria2");
+    }
+
+    #[tokio::test]
+    async fn test_configure_aria2_run_missing_action() {
+        let tool = ConfigureAria2Tool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({});
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_configure_aria2_run_unknown_action() {
+        let tool = ConfigureAria2Tool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({ "action": "unknown" });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+    }
+}

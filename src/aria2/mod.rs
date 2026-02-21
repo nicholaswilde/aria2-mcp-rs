@@ -625,3 +625,198 @@ impl Aria2Client {
         Ok(res["result"].clone())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Config;
+
+    #[tokio::test]
+    async fn test_new_client() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        
+        // Test with invalid URL to verify error handling
+        let result = client.get_version().await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_active_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_active(None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_get_global_stat_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.get_global_stat().await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_waiting_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_waiting(0, 10, None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_stopped_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_stopped(0, 10, None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_get_global_option_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.get_global_option().await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_get_option_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.get_option("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_change_global_option_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.change_global_option(serde_json::json!({})).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_change_option_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.change_option("dummy", serde_json::json!({})).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_pause_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.pause("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_force_pause_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.force_pause("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_unpause_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.unpause("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_remove_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.remove("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_force_remove_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.force_remove("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_move_position_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.move_position("dummy", 0, "dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_status_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_status("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_add_uri_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.add_uri(vec!["dummy".to_string()], None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_get_files_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.get_files("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_new_client_with_secret() {
+        let config = Config {
+            rpc_secret: Some("secret".to_string()),
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+        let result = client.get_version().await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_active_with_keys_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_active(Some(vec!["gid".to_string()])).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_waiting_with_keys_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_waiting(0, 10, Some(vec!["gid".to_string()])).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_tell_stopped_with_keys_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.tell_stopped(0, 10, Some(vec!["gid".to_string()])).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_move_position_how_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.move_position("dummy", 0, "POS_SET").await;
+        assert!(result.is_err());
+    }
+}

@@ -6,13 +6,13 @@ use clap::Parser;
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(
-        short,
+        short = 'u',
         long,
         env = "ARIA2_MCP_RPC_URL",
         default_value = "http://localhost:6800/jsonrpc"
     )]
     rpc_url: Option<String>,
-    #[arg(short, long, env = "ARIA2_MCP_RPC_SECRET")]
+    #[arg(short = 's', long, env = "ARIA2_MCP_RPC_SECRET")]
     rpc_secret: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_TRANSPORT", default_value = "stdio")]
     transport: Option<String>,
@@ -24,7 +24,10 @@ struct Args {
 async fn main() -> Result<()> {
     env_logger::init();
     let args = Args::parse();
+    run_app(args).await
+}
 
+async fn run_app(args: Args) -> Result<()> {
     let mut config = Config::load()?;
 
     // Override config with CLI arguments if provided
@@ -53,4 +56,77 @@ async fn main() -> Result<()> {
     server.run().await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_run_app_invalid_url() {
+        // We can't easily test run_app as it starts a server
+    }
+
+    #[test]
+    fn test_args_parse_transport_invalid() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs", "--transport", "unknown"]).unwrap();
+        assert_eq!(args.transport, Some("unknown".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_no_args() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs"]).unwrap();
+        assert_eq!(args.rpc_url, Some("http://localhost:6800/jsonrpc".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs", "-u", "http://test"]).unwrap();
+        assert_eq!(args.rpc_url, Some("http://test".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_long() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs", "--rpc-secret", "secret"]).unwrap();
+        assert_eq!(args.rpc_secret, Some("secret".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_transport_sse() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs", "--transport", "sse"]).unwrap();
+        assert_eq!(args.transport, Some("sse".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_port() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs", "--port", "4000"]).unwrap();
+        assert_eq!(args.port, Some(4000));
+    }
+
+    #[test]
+    fn test_args_parse_all() {
+        let args = Args::try_parse_from(&[
+            "aria2-mcp-rs",
+            "-u",
+            "http://test",
+            "-s",
+            "secret",
+            "--transport",
+            "sse",
+            "--port",
+            "5000",
+        ])
+        .unwrap();
+        assert_eq!(args.rpc_url, Some("http://test".to_string()));
+        assert_eq!(args.rpc_secret, Some("secret".to_string()));
+        assert_eq!(args.transport, Some("sse".to_string()));
+        assert_eq!(args.port, Some(5000));
+    }
+
+    #[test]
+    fn test_args_default() {
+        let args = Args::try_parse_from(&["aria2-mcp-rs"]).unwrap();
+        assert_eq!(args.rpc_url, Some("http://localhost:6800/jsonrpc".to_string()));
+        assert_eq!(args.transport, Some("stdio".to_string()));
+    }
 }

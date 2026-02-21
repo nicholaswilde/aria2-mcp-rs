@@ -25,3 +25,23 @@ pub enum Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_error_display() {
+        let err = Error::Internal("test".to_string());
+        assert_eq!(err.to_string(), "Internal error: test");
+
+        let err = Error::Config("test".to_string());
+        assert_eq!(err.to_string(), "Configuration error: test");
+
+        let err = Error::Aria2("test".to_string());
+        assert_eq!(err.to_string(), "Aria2 RPC error: test");
+
+        let err = Error::Mcp("test".to_string());
+        assert_eq!(err.to_string(), "MCP error: test");
+    }
+}

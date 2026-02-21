@@ -51,3 +51,29 @@ impl Config {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_config() {
+        let config = Config::default();
+        assert_eq!(config.rpc_url, "http://localhost:6800/jsonrpc");
+        assert_eq!(config.transport, TransportType::Stdio);
+        assert_eq!(config.port, 3000);
+    }
+
+    #[test]
+    fn test_config_new() {
+        let config = Config::new("http://test".to_string(), Some("secret".to_string()));
+        assert_eq!(config.rpc_url, "http://test");
+        assert_eq!(config.rpc_secret, Some("secret".to_string()));
+    }
+
+    #[test]
+    fn test_load_config() {
+        let config = Config::load();
+        assert!(config.is_ok());
+    }
+}
