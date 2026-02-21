@@ -11,6 +11,7 @@ use crate::tools::registry::McpeTool;
 pub struct OrganizeCompletedTool;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Rule {
     pub name: String,
     pub pattern: Option<String>,
@@ -192,8 +193,8 @@ mod tests {
         assert!(!rule.matches("document.pdf"));
     }
 
-    #[test]
-    fn test_rule_matches_pattern() {
+    #[tokio::test]
+    async fn test_rule_matches_pattern() {
         let rule = Rule {
             name: "Linux ISOs".to_string(),
             pattern: Some("ubuntu-.*\\.iso".to_string()),
@@ -203,5 +204,49 @@ mod tests {
 
         assert!(rule.matches("ubuntu-22.04-desktop-amd64.iso"));
         assert!(!rule.matches("fedora-36-x86_64.iso"));
+    }
+
+    #[tokio::test]
+    async fn test_organize_download() -> Result<()> {
+        let temp_dir = std::env::temp_dir().join("aria2_organize_test");
+        if temp_dir.exists() {
+            tokio::fs::remove_dir_all(&temp_dir).await?;
+        }
+        tokio::fs::create_dir_all(&temp_dir).await?;
+
+        let download_dir = temp_dir.join("downloads");
+        tokio::fs::create_dir_all(&download_dir).await?;
+
+        let movie_file = download_dir.join("movie.mp4");
+        tokio::fs::write(&movie_file, "dummy content").await?;
+
+        let status = json!({
+            "gid": "1",
+            "status": "complete",
+            "files": [
+                {
+                    "path": movie_file.to_str().unwrap(),
+                    "selected": "true"
+                }
+            ]
+        });
+
+        let target_dir = temp_dir.join("movies");
+        let rules = vec![Rule {
+            name: "Movies".to_string(),
+            pattern: None,
+            extensions: Some(vec!["mp4".to_string()]),
+            target_dir: target_dir.to_str().unwrap().to_string(),
+        }];
+
+        let tool = OrganizeCompletedTool;
+        let organized = tool.organize_download(&status, &rules).await?;
+
+        assert!(organized);
+        assert!(target_dir.join("movie.mp4").exists());
+        assert!(!movie_file.exists());
+
+        tokio::fs::remove_dir_all(&temp_dir).await?;
+        Ok(())
     }
 }
