@@ -146,6 +146,9 @@ mod tests {
         )
         .await;
         let body = serde_json::to_value(result.0).unwrap();
-        assert_eq!(body["content"][0]["text"].as_str().unwrap(), "{\"status\":\"ok\"}");
+        assert_eq!(
+            body["content"][0]["text"].as_str().unwrap(),
+            "{\"status\":\"ok\"}"
+        );
     }
 }

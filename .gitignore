@@ -25,3 +25,4 @@ config.toml
 config.yaml
 config.yml
 config.json
+lcov.info

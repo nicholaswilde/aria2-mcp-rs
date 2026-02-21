@@ -635,7 +635,7 @@ mod tests {
     async fn test_new_client() {
         let config = Config::default();
         let client = Aria2Client::new(config);
-        
+
         // Test with invalid URL to verify error handling
         let result = client.get_version().await;
         assert!(result.is_err());
@@ -800,7 +800,9 @@ mod tests {
     async fn test_tell_waiting_with_keys_error() {
         let config = Config::default();
         let client = Aria2Client::new(config);
-        let result = client.tell_waiting(0, 10, Some(vec!["gid".to_string()])).await;
+        let result = client
+            .tell_waiting(0, 10, Some(vec!["gid".to_string()]))
+            .await;
         assert!(result.is_err());
     }
 
@@ -808,7 +810,9 @@ mod tests {
     async fn test_tell_stopped_with_keys_error() {
         let config = Config::default();
         let client = Aria2Client::new(config);
-        let result = client.tell_stopped(0, 10, Some(vec!["gid".to_string()])).await;
+        let result = client
+            .tell_stopped(0, 10, Some(vec!["gid".to_string()]))
+            .await;
         assert!(result.is_err());
     }
 

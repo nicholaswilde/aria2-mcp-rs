@@ -55,9 +55,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_run_sse_error() {
-        let mut config = Config::default();
-        config.transport = TransportType::Sse;
-        config.port = 1; // Likely to fail on most systems
+        let config = Config {
+            transport: TransportType::Sse,
+            port: 1, // Likely to fail on most systems
+            ..Default::default()
+        };
         let registry = ToolRegistry::new();
         let client = Aria2Client::new(config.clone());
         let server = McpServer::new(config, registry, client);
