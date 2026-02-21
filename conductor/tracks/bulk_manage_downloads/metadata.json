@@ -1,7 +1,0 @@
-{
-  "id": "bulk_manage_downloads",
-  "name": "Bulk Operations",
-  "description": "Implement a tool to perform actions on multiple downloads simultaneously.",
-  "status": "todo",
-  "created_at": "2026-02-21T00:00:00Z"
-}

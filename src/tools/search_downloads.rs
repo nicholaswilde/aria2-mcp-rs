@@ -53,9 +53,9 @@ impl McpeTool for SearchDownloadsTool {
 
     async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
         let args: SearchDownloadsArgs = serde_json::from_value(args)?;
-        
+
         let mut all_downloads = Vec::new();
-        
+
         match args.status.as_deref() {
             Some("active") => {
                 let active = client.tell_active(args.keys.clone()).await?;
@@ -98,61 +98,75 @@ impl McpeTool for SearchDownloadsTool {
 
 impl SearchDownloadsTool {
     fn filter_downloads(&self, downloads: Vec<Value>, args: &SearchDownloadsArgs) -> Vec<Value> {
-        downloads.into_iter().filter(|item| {
-            // Filter by status if provided (paused is special as it's within waiting)
-            if let Some(status_filter) = &args.status {
-                let item_status = item.get("status").and_then(|s| s.as_str()).unwrap_or("");
-                if status_filter == "paused" {
-                    let paused = item.get("paused").and_then(|p| {
-                        p.as_str().map(|s| s == "true")
-                            .or_else(|| p.as_bool())
-                    }).unwrap_or(false);
-                    if item_status != "waiting" || !paused {
+        downloads
+            .into_iter()
+            .filter(|item| {
+                // Filter by status if provided (paused is special as it's within waiting)
+                if let Some(status_filter) = &args.status {
+                    let item_status = item.get("status").and_then(|s| s.as_str()).unwrap_or("");
+                    if status_filter == "paused" {
+                        let paused = item
+                            .get("paused")
+                            .and_then(|p| p.as_str().map(|s| s == "true").or_else(|| p.as_bool()))
+                            .unwrap_or(false);
+                        if item_status != "waiting" || !paused {
+                            return false;
+                        }
+                    } else if item_status != status_filter {
                         return false;
                     }
-                } else if item_status != status_filter {
-                    return false;
                 }
-            }
-            
-            // Filter by query if provided
-            if let Some(query) = &args.query {
-                let query = query.to_lowercase();
-                
-                // Check files for path/name
-                let files_match = if let Some(files) = item.get("files").and_then(|f| f.as_array()) {
-                    files.iter().any(|file| {
-                        file.get("path").and_then(|p| p.as_str()).map(|p| p.to_lowercase().contains(&query)).unwrap_or(false) ||
-                        file.get("uris").and_then(|u| u.as_array()).map(|uris| {
-                            uris.iter().any(|uri| {
-                                uri.get("uri").and_then(|u| u.as_str()).map(|u| u.to_lowercase().contains(&query)).unwrap_or(false)
+
+                // Filter by query if provided
+                if let Some(query) = &args.query {
+                    let query = query.to_lowercase();
+
+                    // Check files for path/name
+                    let files_match =
+                        if let Some(files) = item.get("files").and_then(|f| f.as_array()) {
+                            files.iter().any(|file| {
+                                file.get("path")
+                                    .and_then(|p| p.as_str())
+                                    .map(|p| p.to_lowercase().contains(&query))
+                                    .unwrap_or(false)
+                                    || file
+                                        .get("uris")
+                                        .and_then(|u| u.as_array())
+                                        .map(|uris| {
+                                            uris.iter().any(|uri| {
+                                                uri.get("uri")
+                                                    .and_then(|u| u.as_str())
+                                                    .map(|u| u.to_lowercase().contains(&query))
+                                                    .unwrap_or(false)
+                                            })
+                                        })
+                                        .unwrap_or(false)
                             })
-                        }).unwrap_or(false)
-                    })
-                } else {
-                    false
-                };
-                
-                if files_match {
-                    return true;
-                }
-                
-                // Check bittorrent name if available
-                if let Some(bt) = item.get("bittorrent") {
-                    if let Some(info) = bt.get("info") {
-                        if let Some(name) = info.get("name").and_then(|n| n.as_str()) {
-                            if name.to_lowercase().contains(&query) {
-                                return true;
+                        } else {
+                            false
+                        };
+
+                    if files_match {
+                        return true;
+                    }
+
+                    // Check bittorrent name if available
+                    if let Some(bt) = item.get("bittorrent") {
+                        if let Some(info) = bt.get("info") {
+                            if let Some(name) = info.get("name").and_then(|n| n.as_str()) {
+                                if name.to_lowercase().contains(&query) {
+                                    return true;
+                                }
                             }
                         }
                     }
+
+                    return false;
                 }
-                
-                return false;
-            }
-            
-            true
-        }).collect()
+
+                true
+            })
+            .collect()
     }
 }
 
@@ -196,13 +210,21 @@ mod tests {
         ];
 
         // Filter by active
-        let args = SearchDownloadsArgs { query: None, status: Some("active".to_string()), keys: None };
+        let args = SearchDownloadsArgs {
+            query: None,
+            status: Some("active".to_string()),
+            keys: None,
+        };
         let results = tool.filter_downloads(downloads.clone(), &args);
         assert_eq!(results.len(), 1);
         assert_eq!(results[0]["gid"], "1");
 
         // Filter by paused
-        let args = SearchDownloadsArgs { query: None, status: Some("paused".to_string()), keys: None };
+        let args = SearchDownloadsArgs {
+            query: None,
+            status: Some("paused".to_string()),
+            keys: None,
+        };
         let results = tool.filter_downloads(downloads.clone(), &args);
         assert_eq!(results.len(), 1);
         assert_eq!(results[0]["gid"], "3");
@@ -212,17 +234,21 @@ mod tests {
     fn test_filter_downloads_by_query_path() {
         let tool = SearchDownloadsTool;
         let downloads = vec![
-            json!({ 
-                "gid": "1", 
-                "files": [{ "path": "/downloads/movie.mp4", "uris": [] }] 
+            json!({
+                "gid": "1",
+                "files": [{ "path": "/downloads/movie.mp4", "uris": [] }]
             }),
-            json!({ 
-                "gid": "2", 
-                "files": [{ "path": "/downloads/other.txt", "uris": [] }] 
+            json!({
+                "gid": "2",
+                "files": [{ "path": "/downloads/other.txt", "uris": [] }]
             }),
         ];
 
-        let args = SearchDownloadsArgs { query: Some("movie".to_string()), status: None, keys: None };
+        let args = SearchDownloadsArgs {
+            query: Some("movie".to_string()),
+            status: None,
+            keys: None,
+        };
         let results = tool.filter_downloads(downloads, &args);
         assert_eq!(results.len(), 1);
         assert_eq!(results[0]["gid"], "1");
@@ -231,14 +257,16 @@ mod tests {
     #[test]
     fn test_filter_downloads_by_query_uri() {
         let tool = SearchDownloadsTool;
-        let downloads = vec![
-            json!({ 
-                "gid": "1", 
-                "files": [{ "path": "", "uris": [{ "uri": "https://example.com/file.zip" }] }] 
-            }),
-        ];
+        let downloads = vec![json!({
+            "gid": "1",
+            "files": [{ "path": "", "uris": [{ "uri": "https://example.com/file.zip" }] }]
+        })];
 
-        let args = SearchDownloadsArgs { query: Some("example".to_string()), status: None, keys: None };
+        let args = SearchDownloadsArgs {
+            query: Some("example".to_string()),
+            status: None,
+            keys: None,
+        };
         let results = tool.filter_downloads(downloads, &args);
         assert_eq!(results.len(), 1);
         assert_eq!(results[0]["gid"], "1");
@@ -247,14 +275,16 @@ mod tests {
     #[test]
     fn test_filter_downloads_by_query_bt_name() {
         let tool = SearchDownloadsTool;
-        let downloads = vec![
-            json!({ 
-                "gid": "1", 
-                "bittorrent": { "info": { "name": "Linux ISO" } }
-            }),
-        ];
+        let downloads = vec![json!({
+            "gid": "1",
+            "bittorrent": { "info": { "name": "Linux ISO" } }
+        })];
 
-        let args = SearchDownloadsArgs { query: Some("linux".to_string()), status: None, keys: None };
+        let args = SearchDownloadsArgs {
+            query: Some("linux".to_string()),
+            status: None,
+            keys: None,
+        };
         let results = tool.filter_downloads(downloads, &args);
         assert_eq!(results.len(), 1);
         assert_eq!(results[0]["gid"], "1");

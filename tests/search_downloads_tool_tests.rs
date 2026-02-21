@@ -28,14 +28,23 @@ async fn test_mcp_search_downloads_by_query() -> Result<()> {
     assert!(result.is_array());
     let results = result.as_array().unwrap();
     assert!(!results.is_empty());
-    
+
     // Check if the found item contains the query in its URIs
     let found = results.iter().any(|item| {
         if let Some(files) = item.get("files") {
             files.as_array().unwrap().iter().any(|file| {
-                file.get("uris").unwrap().as_array().unwrap().iter().any(|uri| {
-                    uri.get("uri").unwrap().as_str().unwrap().contains("search-test")
-                })
+                file.get("uris")
+                    .unwrap()
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|uri| {
+                        uri.get("uri")
+                            .unwrap()
+                            .as_str()
+                            .unwrap()
+                            .contains("search-test")
+                    })
             })
         } else {
             false
@@ -72,7 +81,7 @@ async fn test_mcp_search_downloads_by_status() -> Result<()> {
     assert!(result.is_array());
     let results = result.as_array().unwrap();
     assert!(!results.is_empty());
-    
+
     // Check if all found items have the correct status
     for item in results {
         assert_eq!(item.get("status").unwrap().as_str().unwrap(), "waiting");
@@ -104,7 +113,7 @@ async fn test_mcp_search_downloads_with_keys() -> Result<()> {
     assert!(result.is_array());
     let results = result.as_array().unwrap();
     assert!(!results.is_empty());
-    
+
     // Check if the found item only has the requested keys (aria2 might return more, but we should check at least these)
     let item = results.first().unwrap();
     assert!(item.get("gid").is_some());
