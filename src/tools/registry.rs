@@ -12,6 +12,7 @@ use super::check_health::CheckHealthTool;
 use super::configure_aria2::ConfigureAria2Tool;
 use super::inspect_download::InspectDownloadTool;
 use super::manage_downloads::ManageDownloadsTool;
+use super::manage_torrent::ManageTorrentTool;
 use super::monitor_queue::MonitorQueueTool;
 use super::search_downloads::SearchDownloadsTool;
 
@@ -55,6 +56,7 @@ impl ToolRegistry {
         registry.register(Arc::new(SearchDownloadsTool));
         registry.register(Arc::new(BulkManageDownloadsTool));
         registry.register(Arc::new(CheckHealthTool));
+        registry.register(Arc::new(ManageTorrentTool));
 
         registry
     }
@@ -87,7 +89,7 @@ mod tests {
     fn test_registry_new() {
         let registry = ToolRegistry::new();
         let tools = registry.list_tools();
-        assert_eq!(tools.len(), 7);
+        assert_eq!(tools.len(), 8);
     }
 
     #[test]

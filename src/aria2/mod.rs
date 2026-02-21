@@ -625,6 +625,36 @@ impl Aria2Client {
 
         Ok(res["result"].clone())
     }
+
+    pub async fn get_peers(&self, gid: &str) -> Result<serde_json::Value> {
+        let mut params = Vec::new();
+        if let Some(secret) = &self.config.rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.getPeers",
+            "params": params,
+        });
+
+        let resp = self
+            .client
+            .post(&self.config.rpc_url)
+            .json(&body)
+            .send()
+            .await?;
+
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(res["result"].clone())
+    }
 }
 
 #[cfg(test)]
@@ -775,6 +805,22 @@ mod tests {
         let config = Config::default();
         let client = Aria2Client::new(config);
         let result = client.get_files("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_get_peers_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.get_peers("dummy").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_get_uris_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.get_uris("dummy").await;
         assert!(result.is_err());
     }
 
