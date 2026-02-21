@@ -8,7 +8,9 @@ use testcontainers::{GenericImage, ImageExt};
 use tokio::io::AsyncBufReadExt;
 
 pub fn should_run_docker_tests() -> bool {
-    std::env::var("RUN_DOCKER_TESTS").map(|v| v == "true").unwrap_or(false)
+    std::env::var("RUN_DOCKER_TESTS")
+        .map(|v| v == "true")
+        .unwrap_or(false)
 }
 
 pub struct Aria2Container {

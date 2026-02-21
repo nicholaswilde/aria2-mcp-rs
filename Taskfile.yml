@@ -73,7 +73,7 @@ tasks:
   fmt:
     desc: Format code with rustfmt
     cmds:
-      - cargo fmt --all
+      - cargo fmt --all --check
 
   test:
     desc: Run all tests (fmt, lint, and unit tests)
