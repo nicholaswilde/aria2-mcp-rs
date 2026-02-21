@@ -6,7 +6,7 @@
 rpc_url = "http://localhost:6800/jsonrpc"
 
 # The transport to use for the MCP server.
-# Options: "stdio" (local integration), "sse" (network-accessible server).
+# Options: "stdio" (local integration), "sse" or "http" (network-accessible server).
 transport = "stdio"
 
 # The port to listen on when using the "sse" transport.
@@ -15,6 +15,10 @@ port = 3000
 # Enable "Lazy Mode" to initially hide most tool schemas and save tokens.
 # Tools can be enabled on-demand via the 'manage_tools' meta-tool.
 lazy_mode = false
+
+# Disable SSL certificate verification when connecting to aria2.
+# Useful for self-signed certificates.
+no_verify_ssl = true
 
 # --- Optional Fields ---
 

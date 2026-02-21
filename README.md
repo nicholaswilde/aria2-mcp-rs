@@ -68,7 +68,9 @@ task check
 | :--- | :--- | :--- | :--- |
 | `--rpc-url` | `ARIA2_MCP_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
 | `--rpc-secret` | `ARIA2_MCP_RPC_SECRET` | aria2 RPC Secret | - |
+| `--transport` | `ARIA2_MCP_TRANSPORT` | MCP Transport (stdio, sse, http) | `stdio` |
 | `--lazy` | `ARIA2_MCP_LAZY` | Enable Lazy Mode | `false` |
+| `--no-verify-ssl` | `ARIA2_MCP_NO_VERIFY_SSL` | Disable SSL verification | `true` |
 
 ## :balance_scale: License
 

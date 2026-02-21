@@ -12,9 +12,14 @@ pub struct Aria2Client {
 
 impl Aria2Client {
     pub fn new(config: Config) -> Self {
+        let client = Client::builder()
+            .danger_accept_invalid_certs(config.no_verify_ssl)
+            .build()
+            .unwrap_or_else(|_| Client::new());
+
         Self {
             config: Arc::new(RwLock::new(config)),
-            client: Client::new(),
+            client,
         }
     }
 

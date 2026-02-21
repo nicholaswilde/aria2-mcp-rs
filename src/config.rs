@@ -9,6 +9,7 @@ pub struct Config {
     pub transport: TransportType,
     pub port: u16,
     pub lazy_mode: bool,
+    pub no_verify_ssl: bool,
     #[serde(default)]
     pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
     #[serde(default)]
@@ -33,6 +34,7 @@ pub struct BandwidthSchedule {
 #[serde(rename_all = "lowercase")]
 pub enum TransportType {
     Stdio,
+    #[serde(alias = "http")]
     Sse,
 }
 
@@ -44,6 +46,7 @@ impl Default for Config {
             transport: TransportType::Stdio,
             port: 3000,
             lazy_mode: false,
+            no_verify_ssl: true,
             bandwidth_profiles: HashMap::new(),
             bandwidth_schedules: Vec::new(),
         }
@@ -58,6 +61,7 @@ impl Config {
             .set_default("transport", "stdio")?
             .set_default("port", 3000)?
             .set_default("lazy_mode", false)?
+            .set_default("no_verify_ssl", true)?
             // Add configuration from files
             .add_source(File::with_name("config").required(false))
             .add_source(File::with_name("aria2-mcp").required(false))

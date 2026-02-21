@@ -20,6 +20,10 @@ struct Args {
     port: Option<u16>,
     #[arg(short, long, env = "ARIA2_MCP_LAZY", default_value = "false")]
     lazy: bool,
+    #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL", default_value = "true")]
+    no_verify_ssl: bool,
+    #[arg(long, env = "ARIA2_MCP_VERIFY_SSL", default_value = "false")]
+    verify_ssl: bool,
 }
 
 #[tokio::main]
@@ -41,7 +45,7 @@ async fn run_app(args: Args) -> Result<()> {
     }
     if let Some(transport) = args.transport {
         config.transport = match transport.to_lowercase().as_str() {
-            "sse" => aria2_mcp_rs::TransportType::Sse,
+            "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
             _ => aria2_mcp_rs::TransportType::Stdio,
         };
     }
@@ -50,6 +54,11 @@ async fn run_app(args: Args) -> Result<()> {
     }
     if args.lazy {
         config.lazy_mode = true;
+    }
+    if args.verify_ssl {
+        config.no_verify_ssl = false;
+    } else if args.no_verify_ssl {
+        config.no_verify_ssl = true;
     }
 
     log::info!("Starting aria2-mcp-rs with RPC URL: {}...", config.rpc_url);
