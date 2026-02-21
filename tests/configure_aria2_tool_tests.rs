@@ -7,6 +7,9 @@ use serde_json::json;
 
 #[tokio::test]
 async fn test_configure_aria2_tool_get_global() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ConfigureAria2Tool;
@@ -26,6 +29,9 @@ async fn test_configure_aria2_tool_get_global() -> Result<()> {
 
 #[tokio::test]
 async fn test_configure_aria2_tool_change_global() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ConfigureAria2Tool;
@@ -48,6 +54,9 @@ async fn test_configure_aria2_tool_change_global() -> Result<()> {
 
 #[tokio::test]
 async fn test_configure_aria2_tool_local_options() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ConfigureAria2Tool;

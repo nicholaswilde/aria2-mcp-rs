@@ -5,6 +5,9 @@ use common::Aria2Container;
 
 #[tokio::test]
 async fn test_tell_active() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -21,6 +24,9 @@ async fn test_tell_active() -> Result<()> {
 
 #[tokio::test]
 async fn test_tell_waiting() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -41,6 +47,9 @@ async fn test_tell_waiting() -> Result<()> {
 
 #[tokio::test]
 async fn test_tell_stopped() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -58,6 +67,9 @@ async fn test_tell_stopped() -> Result<()> {
 
 #[tokio::test]
 async fn test_get_global_stat() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 

@@ -7,6 +7,9 @@ use serde_json::json;
 
 #[tokio::test]
 async fn test_mcp_monitor_queue_stats() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = MonitorQueueTool;
@@ -23,6 +26,9 @@ async fn test_mcp_monitor_queue_stats() -> Result<()> {
 
 #[tokio::test]
 async fn test_mcp_monitor_queue_active() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = MonitorQueueTool;
@@ -44,6 +50,9 @@ async fn test_mcp_monitor_queue_active() -> Result<()> {
 
 #[tokio::test]
 async fn test_mcp_monitor_queue_waiting() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = MonitorQueueTool;
@@ -69,6 +78,9 @@ async fn test_mcp_monitor_queue_waiting() -> Result<()> {
 
 #[tokio::test]
 async fn test_mcp_monitor_queue_stopped() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = MonitorQueueTool;

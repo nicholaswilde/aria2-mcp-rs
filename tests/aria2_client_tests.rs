@@ -4,6 +4,9 @@ mod common;
 
 #[tokio::test]
 async fn test_get_uris() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 

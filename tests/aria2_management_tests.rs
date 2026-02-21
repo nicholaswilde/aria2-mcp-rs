@@ -5,6 +5,9 @@ use common::Aria2Container;
 
 #[tokio::test]
 async fn test_remove_download() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -31,6 +34,9 @@ async fn test_remove_download() -> Result<()> {
 
 #[tokio::test]
 async fn test_move_position() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -53,6 +59,9 @@ async fn test_move_position() -> Result<()> {
 
 #[tokio::test]
 async fn test_force_pause_remove() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 

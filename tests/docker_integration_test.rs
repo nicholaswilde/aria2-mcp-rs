@@ -7,6 +7,9 @@ use serde_json::json;
 
 #[tokio::test]
 async fn test_configure_aria2_tool_integration() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ConfigureAria2Tool;
@@ -51,6 +54,9 @@ async fn test_configure_aria2_tool_integration() -> Result<()> {
 
 #[tokio::test]
 async fn test_config_update() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -86,6 +92,9 @@ async fn test_config_update() -> Result<()> {
 
 #[tokio::test]
 async fn test_pause_resume() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -107,6 +116,9 @@ async fn test_pause_resume() -> Result<()> {
 
 #[tokio::test]
 async fn test_status_reporting() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -145,6 +157,9 @@ async fn test_status_reporting() -> Result<()> {
 
 #[tokio::test]
 async fn test_add_download() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -166,6 +181,9 @@ async fn test_add_download() -> Result<()> {
 
 #[tokio::test]
 async fn test_inspect_download_files_and_uris() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -198,6 +216,9 @@ async fn test_inspect_download_files_and_uris() -> Result<()> {
 
 #[tokio::test]
 async fn test_container_starts_and_is_reachable() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let version = client.get_version().await?;

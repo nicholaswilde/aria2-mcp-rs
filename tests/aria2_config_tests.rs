@@ -6,6 +6,9 @@ use serde_json::json;
 
 #[tokio::test]
 async fn test_aria2_client_get_option() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 
@@ -24,6 +27,9 @@ async fn test_aria2_client_get_option() -> Result<()> {
 
 #[tokio::test]
 async fn test_aria2_client_change_option() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
 

@@ -7,6 +7,9 @@ use serde_json::json;
 
 #[tokio::test]
 async fn test_mcp_manage_downloads_add() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ManageDownloadsTool;
@@ -28,6 +31,9 @@ async fn test_mcp_manage_downloads_add() -> Result<()> {
 
 #[tokio::test]
 async fn test_mcp_manage_downloads_pause_resume() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ManageDownloadsTool;
@@ -63,6 +69,9 @@ async fn test_mcp_manage_downloads_pause_resume() -> Result<()> {
 
 #[tokio::test]
 async fn test_mcp_manage_downloads_remove() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
     let container = Aria2Container::new().await?;
     let client = container.client();
     let tool = ManageDownloadsTool;
