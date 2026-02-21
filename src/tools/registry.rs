@@ -14,6 +14,7 @@ use super::inspect_download::InspectDownloadTool;
 use super::manage_downloads::ManageDownloadsTool;
 use super::manage_torrent::ManageTorrentTool;
 use super::monitor_queue::MonitorQueueTool;
+use super::organize_completed::OrganizeCompletedTool;
 use super::search_downloads::SearchDownloadsTool;
 
 #[async_trait]
@@ -57,6 +58,7 @@ impl ToolRegistry {
         registry.register(Arc::new(BulkManageDownloadsTool));
         registry.register(Arc::new(CheckHealthTool));
         registry.register(Arc::new(ManageTorrentTool));
+        registry.register(Arc::new(OrganizeCompletedTool));
 
         registry
     }
@@ -89,7 +91,7 @@ mod tests {
     fn test_registry_new() {
         let registry = ToolRegistry::new();
         let tools = registry.list_tools();
-        assert_eq!(tools.len(), 8);
+        assert_eq!(tools.len(), 9);
     }
 
     #[test]

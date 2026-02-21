@@ -10,6 +10,6 @@ pub use error::{Error, Result};
 pub use server::McpServer;
 pub use tools::{
     BulkManageDownloadsTool, CheckHealthTool, ConfigureAria2Tool, InspectDownloadTool,
-    ManageDownloadsTool, ManageTorrentTool, McpeTool, MonitorQueueTool, SearchDownloadsTool,
-    ToolRegistry,
+    ManageDownloadsTool, ManageTorrentTool, McpeTool, MonitorQueueTool, OrganizeCompletedTool,
+    SearchDownloadsTool, ToolRegistry,
 };

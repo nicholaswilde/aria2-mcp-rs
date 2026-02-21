@@ -5,6 +5,7 @@ pub mod inspect_download;
 pub mod manage_downloads;
 pub mod manage_torrent;
 pub mod monitor_queue;
+pub mod organize_completed;
 pub mod registry;
 pub mod search_downloads;
 
@@ -15,5 +16,6 @@ pub use inspect_download::InspectDownloadTool;
 pub use manage_downloads::ManageDownloadsTool;
 pub use manage_torrent::ManageTorrentTool;
 pub use monitor_queue::MonitorQueueTool;
+pub use organize_completed::OrganizeCompletedTool;
 pub use registry::{McpeTool, ToolRegistry};
 pub use search_downloads::SearchDownloadsTool;
