@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Search & Filter Downloads
+## [x] Track: Search & Filter Downloads
 - **ID:** search_downloads
 - **Description:** Implement a tool to search and filter downloads by various criteria.
 - **Link:** [Track Folder](./tracks/search_downloads/index.md)
