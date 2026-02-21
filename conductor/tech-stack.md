@@ -20,6 +20,10 @@
 - **Reasoning**: `aria2` uses JSON-RPC for its remote interface.
 - **Library**: `reqwest` for interacting with the `aria2` RPC endpoint.
 
+## Time Management: Chrono
+- **Reasoning**: Required for robust time-of-day and day-of-week logic in the bandwidth scheduler.
+- **Library**: `chrono`.
+
 ## Pattern Matching: Regex
 - **Reasoning**: Required for robust filename pattern matching in the automatic file organization tool.
 - **Library**: `regex`.

@@ -14,6 +14,7 @@ A rust implementation of a aria2 MCP server.
 - **Status Monitoring**: High-level visibility into the download queue, including active, waiting, and stopped tasks, global statistics, and automated health monitoring for stalled downloads and system resources.
 - **Automatic File Organization**: A tool to automatically move completed downloads to specific directories based on user-defined rules (e.g., file extensions, filename patterns).
 - **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly.
+- **Bandwidth Scheduling**: A tool to define bandwidth speed profiles and automatically activate them on a daily or weekly schedule (e.g., "Day Mode", "Night Mode").
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
 
 ## User Experience
