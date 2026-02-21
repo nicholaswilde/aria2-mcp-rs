@@ -28,10 +28,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Tools & Registry Coverage' (Protocol in workflow.md) db766aa
 
 ## Phase 4: Main & Config Coverage
-- [~] Task: Expand tests for `src/main.rs` and `src/config.rs`
-    - [ ] Write tests for CLI argument parsing and configuration loading
-    - [ ] Verify coverage increase
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Main & Config Coverage' (Protocol in workflow.md)
+- [x] Task: Expand tests for `src/main.rs` and `src/config.rs` 789d159
+    - [x] Write tests for CLI argument parsing and configuration loading
+    - [x] Verify coverage increase
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Main & Config Coverage' (Protocol in workflow.md)
 
 ## Phase 5: Final Verification & Upload
 - [ ] Task: Perform final coverage check
