@@ -52,7 +52,7 @@ async fn test_check_health_with_stalled() -> Result<()> {
     let _gid = client.add_uri(uris, None).await?;
 
     // Wait a bit for it to be processed
-    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
     let args = json!({});
     let result = tool.run(&client, args).await?;

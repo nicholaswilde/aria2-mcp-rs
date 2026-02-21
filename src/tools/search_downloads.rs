@@ -56,35 +56,58 @@ impl McpeTool for SearchDownloadsTool {
 
         let mut all_downloads = Vec::new();
 
+        // If query is provided, we need files and bittorrent info to search
+        let mut keys = args.keys.clone();
+        if args.query.is_some() || args.status.is_some() {
+            if let Some(ref mut k) = keys {
+                if args.query.is_some() {
+                    if !k.contains(&"files".to_string()) {
+                        k.push("files".to_string());
+                    }
+                    if !k.contains(&"bittorrent".to_string()) {
+                        k.push("bittorrent".to_string());
+                    }
+                }
+                if args.status.is_some() {
+                    if !k.contains(&"status".to_string()) {
+                        k.push("status".to_string());
+                    }
+                    if !k.contains(&"paused".to_string()) {
+                        k.push("paused".to_string());
+                    }
+                }
+            }
+        }
+
         match args.status.as_deref() {
             Some("active") => {
-                let active = client.tell_active(args.keys.clone()).await?;
+                let active = client.tell_active(keys).await?;
                 if let Some(arr) = active.as_array() {
                     all_downloads.extend(arr.clone());
                 }
             }
             Some("waiting") | Some("paused") => {
-                let waiting = client.tell_waiting(0, 1000, args.keys.clone()).await?;
+                let waiting = client.tell_waiting(0, 1000, keys).await?;
                 if let Some(arr) = waiting.as_array() {
                     all_downloads.extend(arr.clone());
                 }
             }
             Some("error") | Some("complete") | Some("removed") => {
-                let stopped = client.tell_stopped(0, 1000, args.keys.clone()).await?;
+                let stopped = client.tell_stopped(0, 1000, keys).await?;
                 if let Some(arr) = stopped.as_array() {
                     all_downloads.extend(arr.clone());
                 }
             }
             _ => {
-                let active = client.tell_active(args.keys.clone()).await?;
+                let active = client.tell_active(keys.clone()).await?;
                 if let Some(arr) = active.as_array() {
                     all_downloads.extend(arr.clone());
                 }
-                let waiting = client.tell_waiting(0, 1000, args.keys.clone()).await?;
+                let waiting = client.tell_waiting(0, 1000, keys.clone()).await?;
                 if let Some(arr) = waiting.as_array() {
                     all_downloads.extend(arr.clone());
                 }
-                let stopped = client.tell_stopped(0, 1000, args.keys.clone()).await?;
+                let stopped = client.tell_stopped(0, 1000, keys).await?;
                 if let Some(arr) = stopped.as_array() {
                     all_downloads.extend(arr.clone());
                 }
@@ -105,11 +128,11 @@ impl SearchDownloadsTool {
                 if let Some(status_filter) = &args.status {
                     let item_status = item.get("status").and_then(|s| s.as_str()).unwrap_or("");
                     if status_filter == "paused" {
-                        let paused = item
+                        let paused_flag = item
                             .get("paused")
                             .and_then(|p| p.as_str().map(|s| s == "true").or_else(|| p.as_bool()))
                             .unwrap_or(false);
-                        if item_status != "waiting" || !paused {
+                        if item_status != "paused" && (item_status != "waiting" || !paused_flag) {
                             return false;
                         }
                     } else if item_status != status_filter {
