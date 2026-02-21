@@ -19,13 +19,13 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Server Logic Coverage' (Protocol in workflow.md) ae9b944
 
 ## Phase 3: Tools & Registry Coverage
-- [~] Task: Expand tests for `src/tools/registry.rs`
-    - [ ] Write tests for tool registration and retrieval
-    - [ ] Verify coverage increase
-- [ ] Task: Expand tests for `src/tools/manage_downloads.rs` and `src/tools/monitor_queue.rs`
-    - [ ] Write unit tests for tool execution logic and argument parsing
-    - [ ] Verify coverage increase
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Tools & Registry Coverage' (Protocol in workflow.md)
+- [x] Task: Expand tests for `src/tools/registry.rs` 789d159
+    - [x] Write tests for tool registration and retrieval
+    - [x] Verify coverage increase
+- [x] Task: Expand tests for `src/tools/manage_downloads.rs` and `src/tools/monitor_queue.rs` 789d159
+    - [x] Write unit tests for tool execution logic and argument parsing
+    - [x] Verify coverage increase
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Tools & Registry Coverage' (Protocol in workflow.md)
 
 ## Phase 4: Main & Config Coverage
 - [ ] Task: Expand tests for `src/main.rs` and `src/config.rs`
