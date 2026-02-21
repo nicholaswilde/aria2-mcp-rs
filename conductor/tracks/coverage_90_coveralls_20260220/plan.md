@@ -1,13 +1,13 @@
 # Implementation Plan: Increase Code Coverage to >90% with Coveralls
 
 ## Phase 1: Tooling & Setup
-- [ ] Task: Verify `Taskfile.yml` coverage commands
-    - [ ] Run `task coverage` and verify summary output
-    - [ ] Run `task coverage:report` and verify `lcov.info` and `html/` generation
-- [ ] Task: Configure Coveralls Secret
-    - [ ] Ensure `COVERALLS_REPO_TOKEN` is present in `.env`
-    - [ ] Run `task encrypt` to update `.env.enc`
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Tooling & Setup' (Protocol in workflow.md)
+- [x] Task: Verify `Taskfile.yml` coverage commands d53fa74
+    - [x] Run `task coverage` and verify summary output
+    - [x] Run `task coverage:report` and verify `lcov.info` and `html/` generation
+- [x] Task: Configure Coveralls Secret d53fa74
+    - [x] Ensure `COVERALLS_REPO_TOKEN` is present in `.env`
+    - [x] Run `task encrypt` to update `.env.enc`
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Tooling & Setup' (Protocol in workflow.md)
 
 ## Phase 2: Server Logic Coverage
 - [ ] Task: Expand tests for `src/server/handler.rs`
