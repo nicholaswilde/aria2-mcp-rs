@@ -34,7 +34,7 @@ async fn test_check_health_basic() -> Result<()> {
 
     assert!(result.get("summary").is_some());
     assert!(result.get("issues").is_some());
-    
+
     Ok(())
 }
 
@@ -60,6 +60,6 @@ async fn test_check_health_with_stalled() -> Result<()> {
     let issues = result["issues"].as_array().unwrap();
     // It should identify at least one issue if it's stalled or has errors
     assert!(!issues.is_empty());
-    
+
     Ok(())
 }

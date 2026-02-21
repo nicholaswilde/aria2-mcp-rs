@@ -30,34 +30,53 @@ impl McpeTool for CheckHealthTool {
         let active = client.tell_active(None).await?;
         let _waiting = client.tell_waiting(0, 1000, None).await?;
         let stopped = client.tell_stopped(0, 1000, None).await?;
-        
+
         let global_options = client.get_global_option().await?;
-        let download_dir = global_options.get("dir").and_then(|v| v.as_str()).unwrap_or(".");
+        let download_dir = global_options
+            .get("dir")
+            .and_then(|v| v.as_str())
+            .unwrap_or(".");
 
         // Check disk space
         let disk_info = get_disk_info(download_dir).ok();
-        
+
         let report = self.analyze_health(stats, active, stopped, disk_info, download_dir);
         Ok(report)
     }
 }
 
 impl CheckHealthTool {
-    fn analyze_health(&self, stats: Value, active: Value, stopped: Value, disk_info: Option<DiskInfo>, download_dir: &str) -> Value {
+    fn analyze_health(
+        &self,
+        stats: Value,
+        active: Value,
+        stopped: Value,
+        disk_info: Option<DiskInfo>,
+        download_dir: &str,
+    ) -> Value {
         let mut issues = Vec::new();
         let mut recommendations = Vec::new();
 
         // Check for stalled active downloads
         if let Some(active_arr) = active.as_array() {
             for item in active_arr {
-                let gid = item.get("gid").and_then(|v| v.as_str()).unwrap_or("unknown");
-                let connections = item.get("connections").and_then(|v| v.as_str()).and_then(|v| v.parse::<u64>().ok())
+                let gid = item
+                    .get("gid")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("unknown");
+                let connections = item
+                    .get("connections")
+                    .and_then(|v| v.as_str())
+                    .and_then(|v| v.parse::<u64>().ok())
                     .or_else(|| item.get("connections").and_then(|v| v.as_u64()))
                     .unwrap_or(0);
-                let download_speed = item.get("downloadSpeed").and_then(|v| v.as_str()).and_then(|v| v.parse::<u64>().ok())
+                let download_speed = item
+                    .get("downloadSpeed")
+                    .and_then(|v| v.as_str())
+                    .and_then(|v| v.parse::<u64>().ok())
                     .or_else(|| item.get("downloadSpeed").and_then(|v| v.as_u64()))
                     .unwrap_or(0);
-                
+
                 if connections == 0 && download_speed == 0 {
                     issues.push(json!({
                         "type": "stalled_download",
@@ -74,28 +93,42 @@ impl CheckHealthTool {
             for item in stopped_arr {
                 let status = item.get("status").and_then(|v| v.as_str()).unwrap_or("");
                 if status == "error" {
-                    let gid = item.get("gid").and_then(|v| v.as_str()).unwrap_or("unknown");
-                    let error_code = item.get("errorCode").and_then(|v| v.as_str()).unwrap_or("unknown");
-                    let error_msg = item.get("errorMessage").and_then(|v| v.as_str()).unwrap_or("No error message provided.");
-                    
+                    let gid = item
+                        .get("gid")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("unknown");
+                    let error_code = item
+                        .get("errorCode")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("unknown");
+                    let error_msg = item
+                        .get("errorMessage")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("No error message provided.");
+
                     issues.push(json!({
                         "type": "download_error",
                         "gid": gid,
                         "message": format!("Download {} failed with error code {}: {}", gid, error_code, error_msg)
                     }));
-                    recommendations.push(format!("Check the error details for download {} and retry if appropriate.", gid));
+                    recommendations.push(format!(
+                        "Check the error details for download {} and retry if appropriate.",
+                        gid
+                    ));
                 }
             }
         }
 
         // Check disk space
         if let Some(info) = &disk_info {
-            if info.available < 1024 * 1024 * 1024 { // Less than 1GB
+            if info.available < 1024 * 1024 * 1024 {
+                // Less than 1GB
                 issues.push(json!({
                     "type": "low_disk_space",
                     "message": format!("Available disk space in {} is low: {:.2} GB", download_dir, info.available as f64 / 1e9)
                 }));
-                recommendations.push("Clean up completed downloads or increase disk space.".to_string());
+                recommendations
+                    .push("Clean up completed downloads or increase disk space.".to_string());
             }
         }
 
@@ -146,7 +179,7 @@ fn get_disk_info<P: AsRef<Path>>(_path: P) -> Result<DiskInfo> {
     // Fallback for non-linux systems if needed, or just return dummy info
     Ok(DiskInfo {
         available: 10 * 1024 * 1024 * 1024, // 10GB dummy
-        _total: 100 * 1024 * 1024 * 1024, // 100GB dummy
+        _total: 100 * 1024 * 1024 * 1024,   // 100GB dummy
     })
 }
 
@@ -176,8 +209,11 @@ mod tests {
         let stats = json!({ "numActive": "0", "numWaiting": "0", "numStopped": "0", "downloadSpeed": "0", "uploadSpeed": "0" });
         let active = json!([]);
         let stopped = json!([]);
-        let disk_info = Some(DiskInfo { available: 10 * 1024 * 1024 * 1024, _total: 100 * 1024 * 1024 * 1024 });
-        
+        let disk_info = Some(DiskInfo {
+            available: 10 * 1024 * 1024 * 1024,
+            _total: 100 * 1024 * 1024 * 1024,
+        });
+
         let report = tool.analyze_health(stats, active, stopped, disk_info, "/tmp");
         assert_eq!(report["status"], "healthy");
         assert!(report["issues"].as_array().unwrap().is_empty());
@@ -189,7 +225,7 @@ mod tests {
         let stats = json!({ "numActive": "1", "numWaiting": "0", "numStopped": "0", "downloadSpeed": "0", "uploadSpeed": "0" });
         let active = json!([{ "gid": "1", "connections": "0", "downloadSpeed": "0" }]);
         let stopped = json!([]);
-        
+
         let report = tool.analyze_health(stats, active, stopped, None, "/tmp");
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "stalled_download");
@@ -200,8 +236,9 @@ mod tests {
         let tool = CheckHealthTool;
         let stats = json!({ "numActive": "0", "numWaiting": "0", "numStopped": "1", "downloadSpeed": "0", "uploadSpeed": "0" });
         let active = json!([]);
-        let stopped = json!([{ "gid": "2", "status": "error", "errorCode": "1", "errorMessage": "Failed" }]);
-        
+        let stopped =
+            json!([{ "gid": "2", "status": "error", "errorCode": "1", "errorMessage": "Failed" }]);
+
         let report = tool.analyze_health(stats, active, stopped, None, "/tmp");
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "download_error");
@@ -213,8 +250,11 @@ mod tests {
         let stats = json!({ "numActive": "0", "numWaiting": "0", "numStopped": "0", "downloadSpeed": "0", "uploadSpeed": "0" });
         let active = json!([]);
         let stopped = json!([]);
-        let disk_info = Some(DiskInfo { available: 500 * 1024 * 1024, _total: 100 * 1024 * 1024 * 1024 });
-        
+        let disk_info = Some(DiskInfo {
+            available: 500 * 1024 * 1024,
+            _total: 100 * 1024 * 1024 * 1024,
+        });
+
         let report = tool.analyze_health(stats, active, stopped, disk_info, "/tmp");
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "low_disk_space");
