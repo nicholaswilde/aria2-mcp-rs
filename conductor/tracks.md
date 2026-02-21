@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Queue Health Monitor
+## [x] Track: Queue Health Monitor
 - **ID:** queue_health_monitor
 - **Description:** Implement a tool to identify stalled downloads and potential queue issues.
 - **Link:** [Track Folder](./tracks/queue_health_monitor/index.md)
