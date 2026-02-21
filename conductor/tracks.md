@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Automatic File Organizer
+## [x] Track: Automatic File Organizer
 - **ID:** file_organizer
 - **Description:** Implement a tool to move completed downloads based on user rules.
 - **Link:** [Track Folder](./tracks/file_organizer/index.md)
