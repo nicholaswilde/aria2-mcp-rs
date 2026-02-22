@@ -8,7 +8,7 @@
 
 ## Phase 2: Implement Specific Prompts
 - [x] Task: Implement `DiagnoseDownloadPrompt` logic. 2ebbbb2
-- [ ] Task: Implement `OptimizeSchedulePrompt` logic.
+- [x] Task: Implement `OptimizeSchedulePrompt` logic. 81e5ad5
 
 ## Phase 3: Integration & Testing
 - [ ] Task: Add unit tests for prompt registry and handlers.
