@@ -2,15 +2,15 @@
 
 This plan outlines the steps to implement multi-instance support in `aria2-mcp-rs`, enabling management of multiple `aria2` servers from a single MCP interface.
 
-## Phase 1: Configuration & Client Management
+## Phase 1: Configuration & Client Management [checkpoint: 2e17e56]
 - [x] Task: Write failing tests for multi-instance configuration parsing (TOML & Env vars). ffeb5a3
 - [x] Task: Update `Config` struct and loading logic to support `instances` list and `ARIA2_INSTANCES__<N>__<FIELD>` environment variables. ffeb5a3
 - [x] Task: Write failing tests for multi-client initialization in `McpServer`. ceca578
 - [x] Task: Update `McpServer` to initialize and store a list of `Aria2Client` instances. ceca578
-- [~] Task: Conductor - User Manual Verification 'Configuration & Client Management' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Configuration & Client Management' (Protocol in workflow.md)
 
 ## Phase 2: Tool Argument & Routing
-- [ ] Task: Write failing tests for `instance` argument parsing and routing in `McpHandler`.
+- [~] Task: Write failing tests for `instance` argument parsing and routing in `McpHandler`.
 - [ ] Task: Update `ToolRegistry` to include optional `instance` (integer) parameter in all tool schemas.
 - [ ] Task: Refactor `McpHandler` to route tool calls to the correct `Aria2Client` based on the `instance` argument (defaulting to index 0).
 - [ ] Task: Conductor - User Manual Verification 'Tool Argument & Routing' (Protocol in workflow.md)
