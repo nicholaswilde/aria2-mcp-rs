@@ -1,7 +1,7 @@
 # Implementation Plan - Implement Real-Time Notifications
 
 ## Phase 1: WebSocket Client Integration
-- [ ] Task: Add `tokio-tungstenite` or similar crate for WebSocket support.
+- [x] Task: Add `tokio-tungstenite` or similar crate for WebSocket support. 73b847a
 - [ ] Task: Update `Aria2Client` to establish and maintain a WebSocket connection.
 - [ ] Task: Implement a background task to read from the WebSocket stream.
 
