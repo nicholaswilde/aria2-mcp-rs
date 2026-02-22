@@ -8,8 +8,8 @@
 - [x] Task: Implement `resources/read` handler in `McpHandler`. 8dec05f
 
 ## Phase 2: Implement Specific Resources
-- [ ] Task: Implement `GlobalStatusResource` (`aria2://status/global`).
-- [ ] Task: Implement `ActiveDownloadsResource` (`aria2://downloads/active`).
+- [x] Task: Implement `GlobalStatusResource` (`aria2://status/global`). 8dec05f
+- [~] Task: Implement `ActiveDownloadsResource` (`aria2://downloads/active`).
 - [ ] Task: Implement `RecentLogsResource` (`aria2://logs/recent`) with a ring buffer or file reader.
 
 ## Phase 3: Integration & Testing
