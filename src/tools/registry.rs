@@ -42,6 +42,52 @@ pub struct ToolRegistry {
     lazy_mode: bool,
 }
 
+struct ToolWrapper {
+    tool: Arc<dyn McpeTool>,
+}
+
+#[async_trait]
+impl McpeTool for ToolWrapper {
+    fn name(&self) -> String {
+        self.tool.name()
+    }
+
+    fn description(&self) -> String {
+        self.tool.description()
+    }
+
+    fn schema(&self) -> Result<Value> {
+        let mut schema = self.tool.schema()?;
+        if let Some(properties) = schema.get_mut("properties") {
+            if let Some(props_obj) = properties.as_object_mut() {
+                props_obj.insert(
+                    "instance".to_string(),
+                    serde_json::json!({
+                        "type": "integer",
+                        "description": "The index of the aria2 instance to target (0, 1, etc.). Defaults to 0."
+                    }),
+                );
+            }
+        } else {
+            // If no properties, create them
+            schema["properties"] = serde_json::json!({
+                "instance": {
+                    "type": "integer",
+                    "description": "The index of the aria2 instance to target (0, 1, etc.). Defaults to 0."
+                }
+            });
+            if schema["type"].is_null() {
+                schema["type"] = serde_json::json!("object");
+            }
+        }
+        Ok(schema)
+    }
+
+    async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
+        self.tool.run(client, args).await
+    }
+}
+
 impl Default for ToolRegistry {
     fn default() -> Self {
         Self::new(&Config::default())
@@ -77,8 +123,9 @@ impl ToolRegistry {
     }
 
     pub fn register(&mut self, tool: Arc<dyn McpeTool>) {
-        let name = tool.name();
-        self.tools.insert(name.clone(), tool);
+        let wrapped = Arc::new(ToolWrapper { tool });
+        let name = wrapped.name();
+        self.tools.insert(name.clone(), wrapped);
         if !self.lazy_mode {
             self.enabled_tools.insert(name);
         }
@@ -196,6 +243,15 @@ mod tests {
         for tool in available {
             assert!(tool["enabled"].as_bool().unwrap());
         }
+    }
+
+    #[test]
+    fn test_registry_tool_schema_has_instance() {
+        let registry = ToolRegistry::new(&Config::default());
+        let tool = registry.get_tool("manage_downloads").unwrap();
+        let schema = tool.schema().unwrap();
+        assert!(schema["properties"]["instance"].is_object());
+        assert_eq!(schema["properties"]["instance"]["type"], "integer");
     }
 
     #[test]

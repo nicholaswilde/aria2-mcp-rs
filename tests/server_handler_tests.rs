@@ -17,7 +17,7 @@ async fn test_mcp_handler_tools_list() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
-    let handler = McpHandler::new(registry, Arc::new(client));
+    let handler = McpHandler::new(registry, vec![Arc::new(client)]);
 
     let result = handler.handle_method("tools/list", None).await?;
     let tools = result["tools"]
@@ -42,7 +42,7 @@ async fn test_mcp_handler_tools_call() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
-    let handler = McpHandler::new(registry, Arc::new(client));
+    let handler = McpHandler::new(registry, vec![Arc::new(client)]);
 
     let params = serde_json::json!({
         "name": "manage_downloads",
@@ -73,7 +73,7 @@ async fn test_mcp_handler_unknown_method() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
-    let handler = McpHandler::new(registry, Arc::new(client));
+    let handler = McpHandler::new(registry, vec![Arc::new(client)]);
 
     let result = handler.handle_method("unknown/method", None).await;
     assert!(result.is_err());
