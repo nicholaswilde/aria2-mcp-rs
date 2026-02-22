@@ -2,6 +2,8 @@ use crate::Config;
 use anyhow::Result;
 use reqwest::Client;
 use std::sync::{Arc, RwLock};
+use tokio::net::TcpStream;
+use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
 
 #[allow(dead_code)]
 #[derive(Clone)]
@@ -12,6 +14,12 @@ pub struct Aria2Client {
 }
 
 impl Aria2Client {
+    pub async fn connect_notifications(&self) -> Result<WebSocketStream<MaybeTlsStream<TcpStream>>> {
+        let url = self.ws_url()?;
+        let (ws_stream, _) = connect_async(url).await?;
+        Ok(ws_stream)
+    }
+
     pub fn new(config: Config) -> Self {
         let client = Client::builder()
             .danger_accept_invalid_certs(config.no_verify_ssl)
@@ -45,6 +53,24 @@ impl Aria2Client {
 
     pub fn config(&self) -> Arc<RwLock<Config>> {
         Arc::clone(&self.config)
+    }
+
+    pub fn ws_url(&self) -> Result<String> {
+        let rpc_url = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            config.rpc_url.clone()
+        };
+
+        if rpc_url.starts_with("http://") {
+            Ok(rpc_url.replace("http://", "ws://"))
+        } else if rpc_url.starts_with("https://") {
+            Ok(rpc_url.replace("https://", "wss://"))
+        } else {
+            Err(anyhow::anyhow!("Invalid RPC URL protocol: {}", rpc_url))
+        }
     }
 
     pub async fn tell_active(&self, keys: Option<Vec<String>>) -> Result<serde_json::Value> {
