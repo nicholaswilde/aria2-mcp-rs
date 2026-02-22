@@ -12,6 +12,10 @@ transport = "stdio"
 # The port to listen on when using the "sse" or "http" transport.
 http_port = 3000
 
+# Bearer token for HTTP security (Recommended for HTTP mode)
+# Clients must provide this in the Authorization header: "Bearer <token>"
+# http_auth_token = "your-secure-token"
+
 # Enable "Lazy Mode" to initially hide most tool schemas and save tokens.
 # Tools can be enabled on-demand via the 'manage_tools' meta-tool.
 lazy_mode = false

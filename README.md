@@ -70,6 +70,7 @@ task check
 | `--rpc-secret` | `ARIA2_MCP_RPC_SECRET` | aria2 RPC Secret | - |
 | `--transport` | `ARIA2_MCP_TRANSPORT` | MCP Transport (stdio, sse, http) | `stdio` |
 | `--http-port` | `ARIA2_MCP_HTTP_PORT` | HTTP Port for SSE | `3000` |
+| `--http-auth-token` | `ARIA2_MCP_HTTP_AUTH_TOKEN` | Bearer token for SSE security | (none) |
 | `--lazy` | `ARIA2_MCP_LAZY` | Enable Lazy Mode | `false` |
 | `--no-verify-ssl` | `ARIA2_MCP_NO_VERIFY_SSL` | Disable SSL verification | `true` |
 
