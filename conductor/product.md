@@ -17,6 +17,7 @@ A rust implementation of a aria2 MCP server.
 - **Bandwidth Scheduling**: A tool to define bandwidth speed profiles and automatically activate them on a daily or weekly schedule (e.g., "Day Mode", "Night Mode").
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
 - **Lazy Mode**: A token-optimized mode that initially exposes a minimal toolset and allows for on-demand tool activation via a `manage_tools` meta-tool.
+- **Multi-Instance Management**: Support for managing multiple `aria2` instances simultaneously from a single MCP server, with tools for targeting specific instances or performing bulk operations across all of them.
 
  ## User Experience
 
