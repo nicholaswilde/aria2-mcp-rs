@@ -8,8 +8,8 @@ This plan outlines the steps to refine the `http_port` configuration and impleme
 - [x] Task: Conductor - User Manual Verification 'Bearer Token Authentication' (Protocol in workflow.md)
 
 ## Phase 2: Port Availability Check
-- [ ] Task: Write failing tests for the port availability check utility.
-- [ ] Task: Implement the port availability check and integrate it into the server startup logic.
+- [x] Task: Write failing tests for the port availability check utility. [a94062f]
+- [x] Task: Implement the port availability check and integrate it into the server startup logic. [a94062f]
 - [ ] Task: Conductor - User Manual Verification 'Port Availability Check' (Protocol in workflow.md)
 
 ## Phase 3: Documentation & Final Integration
