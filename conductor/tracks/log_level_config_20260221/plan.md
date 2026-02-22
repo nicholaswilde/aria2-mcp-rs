@@ -14,6 +14,6 @@ This plan outlines the steps to make the application's log level configurable fr
 - [x] Task: Conductor - User Manual Verification 'Logic Refinement & Validation' (Protocol in workflow.md)
 
 ## Phase 3: Documentation & Verification
-- [ ] Task: Update `config.toml.example` and `README.md` to document the new `log_level` parameter.
-- [ ] Task: Perform final project-wide verification and quality gate checks.
+- [x] Task: Update `config.toml.example` and `README.md` to document the new `log_level` parameter. [b6d26bc]
+- [~] Task: Perform final project-wide verification and quality gate checks.
 - [ ] Task: Conductor - User Manual Verification 'Documentation & Verification' (Protocol in workflow.md)
