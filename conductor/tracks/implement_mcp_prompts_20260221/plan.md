@@ -4,7 +4,7 @@
 - [x] Task: Define `Prompt` struct and `PromptRegistry` in `src/prompts/mod.rs`. bf74e8f
 - [x] Task: Update `McpServer` to initialize and use `PromptRegistry`. 9e8d5ef
 - [x] Task: Implement `prompts/list` handler in `McpHandler`. 7e1378a
-- [ ] Task: Implement `prompts/get` handler in `McpHandler`.
+- [x] Task: Implement `prompts/get` handler in `McpHandler`. fa4b7ec
 
 ## Phase 2: Implement Specific Prompts
 - [ ] Task: Implement `DiagnoseDownloadPrompt` logic.
