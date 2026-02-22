@@ -7,10 +7,10 @@
 - [x] Task: Define schema for `list_download_files` tool. febe196
 
 ## Phase 2: Tool Implementation
-- [ ] Task: Implement `ListDownloadFilesTool` using `PathSandbox`.
-- [ ] Task: Register the tool in `ToolRegistry`.
+- [x] Task: Implement `ListDownloadFilesTool` using `PathSandbox`.
+- [x] Task: Register the tool in `ToolRegistry`.
 
 ## Phase 3: Verification & Security Testing
-- [ ] Task: Add unit tests for `PathSandbox` covering edge cases (symlinks, `..`, unicode).
-- [ ] Task: Add integration tests simulating tool usage.
-- [ ] Task: Verify security against common path traversal attacks.
+- [x] Task: Add unit tests for `PathSandbox` covering edge cases (symlinks, `..`, unicode).
+- [x] Task: Add integration tests simulating tool usage.
+- [x] Task: Verify security against common path traversal attacks.

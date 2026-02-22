@@ -12,6 +12,7 @@ use super::bulk_manage_downloads::BulkManageDownloadsTool;
 use super::check_health::CheckHealthTool;
 use super::configure_aria2::ConfigureAria2Tool;
 use super::inspect_download::InspectDownloadTool;
+use super::list_download_files::ListDownloadFilesTool;
 use super::manage_all_instances::ManageAllInstancesTool;
 use super::manage_downloads::ManageDownloadsTool;
 use super::manage_torrent::ManageTorrentTool;
@@ -133,6 +134,7 @@ impl ToolRegistry {
         registry.register(Arc::new(ManageDownloadsTool));
         registry.register(Arc::new(MonitorQueueTool));
         registry.register(Arc::new(InspectDownloadTool));
+        registry.register(Arc::new(ListDownloadFilesTool));
         registry.register(Arc::new(ConfigureAria2Tool));
         registry.register(Arc::new(SearchDownloadsTool));
         registry.register(Arc::new(BulkManageDownloadsTool));

@@ -46,8 +46,74 @@ impl McpeTool for ListDownloadFilesTool {
         }))
     }
 
-    async fn run(&self, _client: &Aria2Client, _args: Value) -> Result<Value> {
-        // Implementation will come in next phase
-        Ok(json!({ "status": "todo" }))
+    async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
+        let args: ListDownloadFilesArgs = serde_json::from_value(args)?;
+
+        // Fetch the download directory from aria2
+        let global_options = client.get_global_option().await?;
+        let dir_str = global_options
+            .get("dir")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| anyhow::anyhow!("Failed to get 'dir' option from aria2"))?;
+
+        self.run_with_dir(std::path::Path::new(dir_str), args)
+    }
+}
+
+impl ListDownloadFilesTool {
+    pub fn run_with_dir(&self, base_dir: &std::path::Path, args: ListDownloadFilesArgs) -> Result<Value> {
+        let max_depth = args.max_depth.unwrap_or(1);
+        let sandbox = crate::tools::sandbox::PathSandbox::new(base_dir.to_path_buf());
+        let resolved_path = sandbox.resolve(&args.path)?;
+
+        let mut entries = Vec::new();
+        self.list_recursive(&resolved_path, &sandbox, max_depth, 0, &mut entries)?;
+
+        Ok(json!({
+            "baseDir": base_dir.to_string_lossy(),
+            "path": args.path,
+            "entries": entries
+        }))
+    }
+
+    fn list_recursive(
+        &self,
+        current_path: &std::path::Path,
+        sandbox: &crate::tools::sandbox::PathSandbox,
+        max_depth: u32,
+        current_depth: u32,
+        entries: &mut Vec<Value>,
+    ) -> Result<()> {
+        if current_depth >= max_depth {
+            return Ok(());
+        }
+
+        let read_dir = std::fs::read_dir(current_path)
+            .map_err(|e| anyhow::anyhow!("Failed to read directory {:?}: {}", current_path, e))?;
+
+        for entry in read_dir {
+            let entry = entry?;
+            let path = entry.path();
+            let metadata = entry.metadata()?;
+            let is_dir = metadata.is_dir();
+            
+            // Get relative path for output
+            let rel_path = path.strip_prefix(sandbox.base_dir())
+                .unwrap_or(&path)
+                .to_string_lossy()
+                .to_string();
+
+            entries.push(json!({
+                "path": rel_path,
+                "isDir": is_dir,
+                "size": if is_dir { None } else { Some(metadata.len()) }
+            }));
+
+            if is_dir {
+                self.list_recursive(&path, sandbox, max_depth, current_depth + 1, entries)?;
+            }
+        }
+
+        Ok(())
     }
 }
