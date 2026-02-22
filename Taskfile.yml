@@ -111,6 +111,41 @@ tasks:
       - task: lint
       - task: test
 
+  docker:build:
+    desc: Build the Docker image for multiple architectures (amd64, arm64)
+    cmds:
+      - docker buildx build --platform linux/amd64,linux/arm64 -t aria2-mcp-rs .
+
+  docker:run:
+    desc: Run the Docker image
+    cmds:
+      - docker run --rm -it aria2-mcp-rs
+
+  docker:load:
+    desc: Build and load the Docker image into the local daemon (single arch)
+    cmds:
+      - docker buildx build --load -t aria2-mcp-rs .
+
+  compose:up:
+    desc: Start services with Docker Compose
+    cmds:
+      - docker compose up -d
+
+  compose:down:
+    desc: Stop services with Docker Compose
+    cmds:
+      - docker compose down
+
+  compose:logs:
+    desc: Show Docker Compose logs
+    cmds:
+      - docker compose logs -f
+
+  compose:restart:
+    desc: Restart services with Docker Compose
+    cmds:
+      - docker compose restart
+
   clean:
     desc: Clean build artifacts
     cmds:
