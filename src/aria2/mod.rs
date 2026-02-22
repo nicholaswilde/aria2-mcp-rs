@@ -29,7 +29,7 @@ impl Aria2Client {
 
     pub async fn start_notifications(
         &self,
-        tx: tokio::sync::mpsc::Sender<serde_json::Value>,
+        tx: tokio::sync::mpsc::Sender<Aria2Notification>,
     ) -> Result<()> {
         let client = self.clone();
         tokio::spawn(async move {
@@ -40,10 +40,10 @@ impl Aria2Client {
                         while let Some(msg) = ws_stream.next().await {
                             match msg {
                                 Ok(tokio_tungstenite::tungstenite::Message::Text(text)) => {
-                                    if let Ok(json) =
-                                        serde_json::from_str::<serde_json::Value>(&text)
+                                    if let Ok(notification) =
+                                        serde_json::from_str::<Aria2Notification>(&text)
                                     {
-                                        if tx.send(json).await.is_err() {
+                                        if tx.send(notification).await.is_err() {
                                             log::error!("Notification channel closed");
                                             return;
                                         }

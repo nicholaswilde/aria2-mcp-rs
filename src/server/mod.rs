@@ -8,6 +8,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio::time::{self, Duration};
 
+use crate::aria2::notifications::Aria2Notification;
 use crate::aria2::Aria2Client;
 use crate::config::{Config, TransportType};
 use crate::prompts::PromptRegistry;
@@ -44,7 +45,22 @@ impl McpServer {
     }
 
     pub async fn run(&self) -> Result<()> {
+        let (notification_tx, notification_rx) =
+            tokio::sync::mpsc::channel::<Aria2Notification>(100);
+
         for client in &self.clients {
+            let client_clone = Arc::clone(client);
+            let tx_clone = notification_tx.clone();
+            tokio::spawn(async move {
+                if let Err(e) = client_clone.start_notifications(tx_clone).await {
+                    log::error!(
+                        "Notification error for instance {}: {}",
+                        client_clone.name,
+                        e
+                    );
+                }
+            });
+
             let client_clone = Arc::clone(client);
             tokio::spawn(async move {
                 if let Err(e) = start_scheduler(client_clone).await {
@@ -60,6 +76,7 @@ impl McpServer {
                     Arc::clone(&self.resource_registry),
                     Arc::clone(&self.prompt_registry),
                     self.clients.clone(),
+                    notification_rx,
                 )
                 .await
             }
@@ -77,6 +94,7 @@ impl McpServer {
                     Arc::clone(&self.resource_registry),
                     Arc::clone(&self.prompt_registry),
                     self.clients.clone(),
+                    notification_rx,
                 )
                 .await
             }

@@ -39,9 +39,10 @@ impl Aria2Notification {
             Aria2Event::BtDownloadComplete => "bt_download_complete",
         };
 
-        let gid = self.params.get(0).map(|p| p.gid.as_str()).unwrap_or("");
+        let gid = self.params.first().map(|p| p.gid.as_str()).unwrap_or("");
 
         serde_json::json!({
+            "jsonrpc": "2.0",
             "method": "notifications/aria2/event",
             "params": {
                 "event": event_name,
@@ -50,4 +51,3 @@ impl Aria2Notification {
         })
     }
 }
-

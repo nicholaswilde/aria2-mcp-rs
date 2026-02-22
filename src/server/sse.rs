@@ -11,6 +11,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 
+use crate::aria2::notifications::Aria2Notification;
 use crate::aria2::Aria2Client;
 use crate::prompts::PromptRegistry;
 use crate::resources::ResourceRegistry;
@@ -23,7 +24,16 @@ pub async fn run_server(
     resource_registry: Arc<RwLock<ResourceRegistry>>,
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
+    mut notification_rx: tokio::sync::mpsc::Receiver<Aria2Notification>,
 ) -> Result<()> {
+    // For now, we'll just drain the notifications or ignore them in SSE
+    // until a proper SSE endpoint is implemented.
+    tokio::spawn(async move {
+        while notification_rx.recv().await.is_some() {
+            // Ignored for now in SSE
+        }
+    });
+
     let mut app = Router::new()
         .route("/tools", get(list_tools))
         .route("/tools/execute", post(execute_tool))

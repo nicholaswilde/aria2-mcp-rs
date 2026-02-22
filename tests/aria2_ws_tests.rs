@@ -74,23 +74,27 @@ async fn test_aria2_client_receive_notification() {
             .unwrap();
     });
 
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<serde_json::Value>(10);
+    let (tx, mut rx) =
+        tokio::sync::mpsc::channel::<aria2_mcp_rs::aria2::notifications::Aria2Notification>(10);
     client.start_notifications(tx).await.unwrap();
 
     let received = rx.recv().await.unwrap();
-    assert_eq!(received["method"], "aria2.onDownloadComplete");
+    assert_eq!(
+        received.method,
+        aria2_mcp_rs::aria2::notifications::Aria2Event::DownloadComplete
+    );
 }
 
 #[test]
 fn test_parse_aria2_notification() {
     use aria2_mcp_rs::aria2::notifications::{Aria2Event, Aria2Notification};
-    
+
     let json = r#"{
         "jsonrpc": "2.0",
         "method": "aria2.onDownloadComplete",
         "params": [{"gid": "123"}]
     }"#;
-    
+
     let notification: Aria2Notification = serde_json::from_str(json).unwrap();
     assert_eq!(notification.method, Aria2Event::DownloadComplete);
     assert_eq!(notification.params[0].gid, "123");
@@ -98,14 +102,16 @@ fn test_parse_aria2_notification() {
 
 #[test]
 fn test_to_mcp_notification() {
-    use aria2_mcp_rs::aria2::notifications::{Aria2Event, Aria2Notification, Aria2EventParams};
-    
+    use aria2_mcp_rs::aria2::notifications::{Aria2Event, Aria2EventParams, Aria2Notification};
+
     let notification = Aria2Notification {
         jsonrpc: "2.0".to_string(),
         method: Aria2Event::DownloadComplete,
-        params: vec![Aria2EventParams { gid: "123".to_string() }],
+        params: vec![Aria2EventParams {
+            gid: "123".to_string(),
+        }],
     };
-    
+
     let mcp = notification.to_mcp_notification();
     assert_eq!(mcp["method"], "notifications/aria2/event");
     assert_eq!(mcp["params"]["event"], "download_complete");
