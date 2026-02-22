@@ -7,7 +7,7 @@
 - [x] Task: Implement `prompts/get` handler in `McpHandler`. fa4b7ec
 
 ## Phase 2: Implement Specific Prompts
-- [ ] Task: Implement `DiagnoseDownloadPrompt` logic.
+- [x] Task: Implement `DiagnoseDownloadPrompt` logic. 2ebbbb2
 - [ ] Task: Implement `OptimizeSchedulePrompt` logic.
 
 ## Phase 3: Integration & Testing
