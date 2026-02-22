@@ -95,3 +95,19 @@ fn test_parse_aria2_notification() {
     assert_eq!(notification.method, Aria2Event::DownloadComplete);
     assert_eq!(notification.params[0].gid, "123");
 }
+
+#[test]
+fn test_to_mcp_notification() {
+    use aria2_mcp_rs::aria2::notifications::{Aria2Event, Aria2Notification, Aria2EventParams};
+    
+    let notification = Aria2Notification {
+        jsonrpc: "2.0".to_string(),
+        method: Aria2Event::DownloadComplete,
+        params: vec![Aria2EventParams { gid: "123".to_string() }],
+    };
+    
+    let mcp = notification.to_mcp_notification();
+    assert_eq!(mcp["method"], "notifications/aria2/event");
+    assert_eq!(mcp["params"]["event"], "download_complete");
+    assert_eq!(mcp["params"]["gid"], "123");
+}
