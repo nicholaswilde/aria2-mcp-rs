@@ -7,7 +7,7 @@
 > [!WARNING]
 > This project is currently in active development (v0.1.11) and is **not production-ready**. Features may change, and breaking changes may occur without notice. **Use this MCP server at your own risk.**
 
-This project is a high-performance Model Context Protocol (MCP) server for [aria2](https://aria2.github.io/), built with Rust. It provides a comprehensive interface for LLMs to monitor and manage downloads.
+This project is a high-performance Model Context Protocol (MCP) server for [aria2](https://aria2.github.io/), built with Rust. It provides a comprehensive interface for LLMs to monitor and manage downloads through **interactive tools**, **read-only resources**, **contextual prompts**, and **real-time notifications**.
 
 ## Core Architectural Features
 
@@ -35,22 +35,22 @@ The server provides several high-level tools for managing and monitoring aria2:
 
 ## Implemented Resources
 
-In addition to tools, the server exposes several read-only resources for direct context:
+In addition to tools, the server exposes several read-only resources for direct context. All resources return data in a **multi-instance format**, providing status for all configured aria2 instances simultaneously:
 
-- **`aria2://status/global`**: Real-time global statistics (speeds, counts) across one or all instances.
+- **`aria2://status/global`**: Real-time global statistics (speeds, counts) across all instances.
 - **`aria2://downloads/active`**: List of currently active downloads with their GIDs and progress.
-- **`aria2://logs/recent`**: The last N lines of the application log (configurable path and length).
+- **`aria2://logs/recent`**: The last N lines of the application log (useful for debugging connectivity issues).
 
 ## Implemented Prompts
 
 Prompts provide structured interaction templates for common tasks:
 
-- **`diagnose-download`**: Guides you through diagnosing issues with a specific download or the entire queue.
-- **`optimize-schedule`**: Helps you review and optimize your bandwidth schedules.
+- **`diagnose-download`**: Guides you through diagnosing issues with a specific download (accepts optional `gid`) or the entire queue.
+- **`optimize-schedule`**: Helps you review and optimize your bandwidth schedules by providing an analysis of current settings.
 
 ## Real-Time Notifications
 
-The server supports real-time notifications via aria2's WebSocket stream (currently supported in **Stdio** transport). The server proactively broadcasts events to connected MCP clients:
+The server supports real-time notifications via aria2's WebSocket stream (currently supported in **Stdio** transport). The server proactively broadcasts events from **all configured instances** to connected MCP clients:
 
 - **`download_start`**: Triggered when a download begins.
 - **`download_pause`**: Triggered when a download is paused.
@@ -85,6 +85,32 @@ export ARIA2_MCP__INSTANCES__0__RPC_URL="http://localhost:6800/jsonrpc"
 export ARIA2_MCP__INSTANCES__1__NAME="remote-box"
 export ARIA2_MCP__INSTANCES__1__RPC_URL="http://192.168.1.10:6800/jsonrpc"
 export ARIA2_MCP__INSTANCES__1__RPC_SECRET="your-secret"
+```
+
+## :timer_clock: Bandwidth Scheduling
+
+The server can automatically adjust aria2 bandwidth limits based on a schedule. You can define profiles and schedules in `config.toml`:
+
+```toml
+[bandwidth_profiles.work]
+max_download = "500K"
+max_upload = "50K"
+
+[bandwidth_profiles.night]
+max_download = "0" # Unlimited
+max_upload = "0"
+
+[[bandwidth_schedules]]
+day = "daily"
+start_time = "09:00"
+end_time = "17:00"
+profile_name = "work"
+
+[[bandwidth_schedules]]
+day = "daily"
+start_time = "22:00"
+end_time = "06:00"
+profile_name = "night"
 ```
 
 ## :package: Installation
@@ -126,14 +152,15 @@ task check
 
 | Argument | Environment Variable | Description | Default |
 | :--- | :--- | :--- | :--- |
-| `--rpc-url` | `ARIA2_MCP_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
-| `--rpc-secret` | `ARIA2_MCP_RPC_SECRET` | aria2 RPC Secret | - |
-| `--transport` | `ARIA2_MCP_TRANSPORT` | MCP Transport (stdio, sse, http) | `stdio` |
+| `-u`, `--rpc-url` | `ARIA2_MCP_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
+| `-s`, `--rpc-secret` | `ARIA2_MCP_RPC_SECRET` | aria2 RPC Secret | - |
+| `-t`, `--transport` | `ARIA2_MCP_TRANSPORT` | MCP Transport (stdio, sse, http) | `stdio` |
 | `--http-port` | `ARIA2_MCP_HTTP_PORT` | HTTP Port for SSE | `3000` |
 | `--http-auth-token` | `ARIA2_MCP_HTTP_AUTH_TOKEN` | Bearer token for SSE security | (none) |
-| `--log-level` | `ARIA2_MCP_LOG_LEVEL` | Application log level | `info` |
-| `--lazy` | `ARIA2_MCP_LAZY` | Enable Lazy Mode | `false` |
-| `--no-verify-ssl` | `ARIA2_MCP_NO_VERIFY_SSL` | Disable SSL verification | `true` |
+| `-L`, `--log-level` | `ARIA2_MCP_LOG_LEVEL` | Application log level | `info` |
+| `-l`, `--lazy` | `ARIA2_MCP_LAZY` | Enable Lazy Mode | `false` |
+| `--no-verify-ssl` | `ARIA2_MCP_NO_VERIFY_SSL` | Disable SSL verification (default) | `true` |
+| `--verify-ssl` | `ARIA2_MCP_VERIFY_SSL` | Enable SSL verification | `false` |
 
 ## :balance_scale: License
 
