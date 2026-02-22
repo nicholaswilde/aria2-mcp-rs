@@ -26,6 +26,8 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`search_downloads`**: Find specific downloads by filename, URI, or status (optimized for token efficiency).
 - **`check_health`**: Identify stalled downloads and potential queue issues (e.g., low disk space).
 - **`manage_torrent`**: Manage BitTorrent-specific settings like fetching peers, selecting files, and adding/updating trackers.
+- **`schedule_limits`**: Define bandwidth speed profiles and automatically activate them on a schedule.
+- **`organize_completed`**: Automatically move completed downloads to target directories based on rules (extension or pattern).
 - **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
 - **`manage_tools`**: (Lazy Mode only) Enable or disable individual tools to optimize token usage.
