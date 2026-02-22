@@ -12,5 +12,5 @@
 
 ## Phase 3: Robustness & Testing
 - [x] Task: Implement exponential backoff for reconnection logic. 109b9a2
-- [ ] Task: Add integration tests simulating aria2 events and verifying MCP output.
+- [x] Task: Add integration tests simulating aria2 events and verifying MCP output. 1294c9d
 - [ ] Task: Verify behavior with multiple aria2 instances.
