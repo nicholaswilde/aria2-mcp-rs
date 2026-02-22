@@ -1,7 +1,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 use serde_json::Value;
+use anyhow::Result;
+use async_trait::async_trait;
+
+use crate::aria2::Aria2Client;
 use super::McpResource;
+
+use super::active_downloads::ActiveDownloadsResource;
+use super::global_status::GlobalStatusResource;
 
 pub struct ResourceRegistry {
     resources: HashMap<String, Arc<dyn McpResource>>,
@@ -15,9 +22,14 @@ impl Default for ResourceRegistry {
 
 impl ResourceRegistry {
     pub fn new() -> Self {
-        Self {
+        let mut registry = Self {
             resources: HashMap::new(),
-        }
+        };
+
+        registry.register(Arc::new(GlobalStatusResource));
+        registry.register(Arc::new(ActiveDownloadsResource));
+
+        registry
     }
 
     pub fn register(&mut self, resource: Arc<dyn McpResource>) {
@@ -52,6 +64,7 @@ impl ResourceRegistry {
 mod tests {
     use super::*;
     use crate::aria2::Aria2Client;
+    use crate::config::Config;
     use anyhow::Result;
     use async_trait::async_trait;
 
