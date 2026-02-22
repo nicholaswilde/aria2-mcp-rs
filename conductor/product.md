@@ -13,7 +13,7 @@ A rust implementation of a aria2 MCP server.
 - **Download Control**: Support for adding, pausing, resuming, and removing downloads via MCP. Includes advanced control like force-pause, force-remove, moving download positions, bulk management, and specialized BitTorrent management (trackers, peers, file selection).
 - **Status Monitoring**: High-level visibility into the download queue, including active, waiting, and stopped tasks, global statistics, and automated health monitoring for stalled downloads and system resources.
 - **Automatic File Organization**: A tool to automatically move completed downloads to specific directories based on user-defined rules (e.g., file extensions, filename patterns).
-- **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly, with support for secure network access via Bearer Token authentication.
+- **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly, with support for secure network access via Bearer Token authentication and configurable application log levels.
 - **Bandwidth Scheduling**: A tool to define bandwidth speed profiles and automatically activate them on a daily or weekly schedule (e.g., "Day Mode", "Night Mode").
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
 - **Lazy Mode**: A token-optimized mode that initially exposes a minimal toolset and allows for on-demand tool activation via a `manage_tools` meta-tool.
