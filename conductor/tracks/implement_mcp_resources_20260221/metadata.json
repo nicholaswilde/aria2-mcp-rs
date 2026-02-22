@@ -1,0 +1,8 @@
+{
+  "track_id": "implement_mcp_resources_20260221",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-21T12:00:00Z",
+  "updated_at": "2026-02-21T12:00:00Z",
+  "description": "Implement MCP Resources capability to expose read-only data (global stats, active downloads, recent logs) directly to LLMs without tool execution."
+}
