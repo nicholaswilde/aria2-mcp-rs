@@ -33,10 +33,14 @@ impl Aria2Client {
     ) -> Result<()> {
         let client = self.clone();
         tokio::spawn(async move {
+            let mut backoff = tokio::time::Duration::from_secs(1);
+            let max_backoff = tokio::time::Duration::from_secs(60);
+
             loop {
                 match client.connect_notifications().await {
                     Ok(mut ws_stream) => {
                         log::info!("Connected to aria2 WebSocket for instance: {}", client.name);
+                        backoff = tokio::time::Duration::from_secs(1); // Reset backoff on success
                         while let Some(msg) = ws_stream.next().await {
                             match msg {
                                 Ok(tokio_tungstenite::tungstenite::Message::Text(text)) => {
@@ -59,10 +63,16 @@ impl Aria2Client {
                         }
                     }
                     Err(e) => {
-                        log::error!("Failed to connect to aria2 WebSocket: {}", e);
+                        log::error!(
+                            "Failed to connect to aria2 WebSocket for {}: {}. Retrying in {:?}...",
+                            client.name,
+                            e,
+                            backoff
+                        );
                     }
                 }
-                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                tokio::time::sleep(backoff).await;
+                backoff = std::cmp::min(backoff * 2, max_backoff);
             }
         });
         Ok(())
