@@ -40,6 +40,12 @@ impl McpServer {
                 stdio::run_server(Arc::clone(&self.registry), Arc::clone(&self.client)).await
             }
             TransportType::Sse => {
+                if !check_port_available(self.config.http_port).await {
+                    return Err(anyhow::anyhow!(
+                        "HTTP port {} is already in use",
+                        self.config.http_port
+                    ));
+                }
                 sse::run_server(
                     self.config.http_port,
                     self.config.http_auth_token.clone(),
@@ -50,6 +56,11 @@ impl McpServer {
             }
         }
     }
+}
+
+async fn check_port_available(port: u16) -> bool {
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
+    tokio::net::TcpListener::bind(addr).await.is_ok()
 }
 
 fn get_active_profile(
@@ -192,5 +203,20 @@ mod tests {
         let server = McpServer::new(config, registry, client);
         let result = server.run().await;
         assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_check_port_available() {
+        // Find a free port
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+
+        // Port is occupied by 'listener', so check_port_available should return false
+        assert!(!super::check_port_available(port).await);
+
+        drop(listener);
+
+        // Port is now free
+        assert!(super::check_port_available(port).await);
     }
 }
