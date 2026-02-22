@@ -18,8 +18,9 @@ async fn test_lazy_mode_initial_tools() -> Result<()> {
 
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config.clone()));
-    let handler = McpHandler::new(registry, resource_registry, vec![client]);
+    let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
 
     let result = handler.handle_method("tools/list", None).await?;
     let tools = result["tools"].as_array().expect("Should have tools array");
@@ -43,8 +44,9 @@ async fn test_lazy_mode_manage_tools_list() -> Result<()> {
 
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config.clone()));
-    let handler = McpHandler::new(registry, resource_registry, vec![client]);
+    let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
 
     // Call a tool
     let params = serde_json::json!({
@@ -75,8 +77,9 @@ async fn test_lazy_mode_enable_tool() -> Result<()> {
 
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config.clone()));
-    let handler = McpHandler::new(registry, resource_registry, vec![client]);
+    let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
 
     // Enable manage_downloads
     let params = serde_json::json!({
@@ -110,8 +113,14 @@ async fn test_lazy_mode_disable_tool() -> Result<()> {
 
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config.clone()));
-    let handler = McpHandler::new(registry.clone(), resource_registry, vec![client]);
+    let handler = McpHandler::new(
+        registry.clone(),
+        resource_registry,
+        prompt_registry,
+        vec![client],
+    );
 
     // Enable then disable
     let registry_clone = Arc::clone(&registry);
@@ -145,8 +154,9 @@ async fn test_non_lazy_mode_no_manage_tools() -> Result<()> {
 
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config.clone()));
-    let handler = McpHandler::new(registry, resource_registry, vec![client]);
+    let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
 
     let result = handler.handle_method("tools/list", None).await?;
     let tools = result["tools"].as_array().unwrap();
@@ -164,10 +174,12 @@ async fn test_lazy_mode_token_savings() -> Result<()> {
     let config_normal = Config::default();
     let registry_normal = Arc::new(RwLock::new(ToolRegistry::new(&config_normal)));
     let resource_registry_normal = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry_normal = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client_normal = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config_normal.clone()));
     let handler_normal = McpHandler::new(
         registry_normal,
         resource_registry_normal,
+        prompt_registry_normal,
         vec![client_normal],
     );
 
@@ -181,8 +193,14 @@ async fn test_lazy_mode_token_savings() -> Result<()> {
     };
     let registry_lazy = Arc::new(RwLock::new(ToolRegistry::new(&config_lazy)));
     let resource_registry_lazy = Arc::new(RwLock::new(ResourceRegistry::default()));
+    let prompt_registry_lazy = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let client_lazy = Arc::new(aria2_mcp_rs::aria2::Aria2Client::new(config_lazy.clone()));
-    let handler_lazy = McpHandler::new(registry_lazy, resource_registry_lazy, vec![client_lazy]);
+    let handler_lazy = McpHandler::new(
+        registry_lazy,
+        resource_registry_lazy,
+        prompt_registry_lazy,
+        vec![client_lazy],
+    );
 
     let result_lazy = handler_lazy.handle_method("tools/list", None).await?;
     let size_lazy = serde_json::to_string(&result_lazy)?.len();

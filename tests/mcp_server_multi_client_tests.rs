@@ -30,7 +30,14 @@ fn test_mcp_server_multi_client_initialization() {
         })
         .collect::<Vec<_>>();
 
-    let server = McpServer::new(config, registry, resource_registry, clients);
+    let prompt_registry = aria2_mcp_rs::PromptRegistry::default();
+    let server = McpServer::new(
+        config,
+        registry,
+        resource_registry,
+        prompt_registry,
+        clients,
+    );
 
     assert_eq!(server.clients().len(), 2);
 }

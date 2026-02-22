@@ -19,7 +19,13 @@ async fn test_mcp_handler_resources_list() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client.clone())]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client.clone())],
+    );
 
     let result = handler.handle_method("resources/list", None).await?;
     let resources = result["resources"]
@@ -47,7 +53,13 @@ async fn test_mcp_handler_resources_read_global_status() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client.clone())]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client.clone())],
+    );
 
     let params = serde_json::json!({
         "uri": "aria2://status/global"
@@ -79,7 +91,13 @@ async fn test_mcp_handler_resources_read_active_downloads() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client.clone())]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client.clone())],
+    );
 
     // Add a download to make it active
     client
@@ -116,7 +134,13 @@ async fn test_mcp_handler_resources_read_not_found() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client.clone())]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client.clone())],
+    );
 
     let params = serde_json::json!({
         "uri": "aria2://unknown"

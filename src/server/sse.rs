@@ -12,6 +12,7 @@ use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 
 use crate::aria2::Aria2Client;
+use crate::prompts::PromptRegistry;
 use crate::resources::ResourceRegistry;
 use crate::tools::ToolRegistry;
 
@@ -20,6 +21,7 @@ pub async fn run_server(
     http_auth_token: Option<String>,
     registry: Arc<RwLock<ToolRegistry>>,
     resource_registry: Arc<RwLock<ResourceRegistry>>,
+    prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
 ) -> Result<()> {
     let mut app = Router::new()
@@ -27,6 +29,7 @@ pub async fn run_server(
         .route("/tools/execute", post(execute_tool))
         .layer(Extension(registry))
         .layer(Extension(resource_registry))
+        .layer(Extension(prompt_registry))
         .layer(Extension(clients));
 
     if let Some(token) = http_auth_token {

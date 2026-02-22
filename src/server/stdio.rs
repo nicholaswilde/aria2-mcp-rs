@@ -5,6 +5,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use crate::aria2::Aria2Client;
+use crate::prompts::PromptRegistry;
 use crate::resources::ResourceRegistry;
 use crate::server::handler::McpHandler;
 use crate::tools::ToolRegistry;
@@ -12,10 +13,16 @@ use crate::tools::ToolRegistry;
 pub async fn run_server(
     registry: Arc<RwLock<ToolRegistry>>,
     resource_registry: Arc<RwLock<ResourceRegistry>>,
+    prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
 ) -> Result<()> {
     let (transport, _sender) = StdioTransport::new();
-    let handler = Arc::new(McpHandler::new(registry, resource_registry, clients));
+    let handler = Arc::new(McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        clients,
+    ));
     let server = Server::new(Arc::new(transport), handler);
 
     server

@@ -10,6 +10,7 @@ use tokio::time::{self, Duration};
 
 use crate::aria2::Aria2Client;
 use crate::config::{Config, TransportType};
+use crate::prompts::PromptRegistry;
 use crate::resources::ResourceRegistry;
 use crate::tools::ToolRegistry;
 
@@ -17,6 +18,7 @@ pub struct McpServer {
     config: Config,
     registry: Arc<RwLock<ToolRegistry>>,
     resource_registry: Arc<RwLock<ResourceRegistry>>,
+    prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
 }
 
@@ -25,12 +27,14 @@ impl McpServer {
         config: Config,
         registry: ToolRegistry,
         resource_registry: ResourceRegistry,
+        prompt_registry: PromptRegistry,
         clients: Vec<Aria2Client>,
     ) -> Self {
         Self {
             config,
             registry: Arc::new(RwLock::new(registry)),
             resource_registry: Arc::new(RwLock::new(resource_registry)),
+            prompt_registry: Arc::new(RwLock::new(prompt_registry)),
             clients: clients.into_iter().map(Arc::new).collect(),
         }
     }
@@ -54,6 +58,7 @@ impl McpServer {
                 stdio::run_server(
                     Arc::clone(&self.registry),
                     Arc::clone(&self.resource_registry),
+                    Arc::clone(&self.prompt_registry),
                     self.clients.clone(),
                 )
                 .await
@@ -70,6 +75,7 @@ impl McpServer {
                     self.config.http_auth_token.clone(),
                     Arc::clone(&self.registry),
                     Arc::clone(&self.resource_registry),
+                    Arc::clone(&self.prompt_registry),
                     self.clients.clone(),
                 )
                 .await
@@ -208,8 +214,15 @@ mod tests {
         let config = Config::default();
         let registry = ToolRegistry::new(&config);
         let resource_registry = ResourceRegistry::default();
+        let prompt_registry = PromptRegistry::default();
         let client = Aria2Client::new(config.clone());
-        let _server = McpServer::new(config, registry, resource_registry, vec![client]);
+        let _server = McpServer::new(
+            config,
+            registry,
+            resource_registry,
+            prompt_registry,
+            vec![client],
+        );
     }
 
     #[tokio::test]
@@ -225,8 +238,15 @@ mod tests {
         };
         let registry = ToolRegistry::new(&config);
         let resource_registry = ResourceRegistry::default();
+        let prompt_registry = PromptRegistry::default();
         let client = Aria2Client::new(config.clone());
-        let server = McpServer::new(config, registry, resource_registry, vec![client]);
+        let server = McpServer::new(
+            config,
+            registry,
+            resource_registry,
+            prompt_registry,
+            vec![client],
+        );
         let result = server.run().await;
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("already in use"));

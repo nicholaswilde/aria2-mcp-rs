@@ -106,8 +106,15 @@ async fn run_app(config: Config) -> Result<()> {
     resource_registry.register(std::sync::Arc::new(
         aria2_mcp_rs::resources::GlobalStatusResource,
     ));
+    let prompt_registry = aria2_mcp_rs::PromptRegistry::default();
 
-    let server = McpServer::new(config, registry, resource_registry, clients);
+    let server = McpServer::new(
+        config,
+        registry,
+        resource_registry,
+        prompt_registry,
+        clients,
+    );
     server.run().await?;
 
     Ok(())

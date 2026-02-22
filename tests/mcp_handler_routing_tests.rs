@@ -15,9 +15,11 @@ async fn test_mcp_handler_routing_default() {
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
     let client1 = Arc::new(Aria2Client::new(config.clone()));
     let client2 = Arc::new(Aria2Client::new(config.clone()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let handler = McpHandler::new(
         registry,
         resource_registry,
+        prompt_registry,
         vec![client1.clone(), client2.clone()],
     );
 
@@ -39,9 +41,11 @@ async fn test_mcp_handler_routing_specific_instance() {
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
     let client1 = Arc::new(Aria2Client::new(config.clone()));
     let client2 = Arc::new(Aria2Client::new(config.clone()));
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
     let handler = McpHandler::new(
         registry,
         resource_registry,
+        prompt_registry,
         vec![client1.clone(), client2.clone()],
     );
 
@@ -62,7 +66,13 @@ async fn test_mcp_handler_routing_invalid_instance() {
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
     let client1 = Arc::new(Aria2Client::new(config.clone()));
-    let handler = McpHandler::new(registry, resource_registry, vec![client1.clone()]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![client1.clone()],
+    );
 
     // Call a tool with non-existent instance 1
     let params = serde_json::json!({

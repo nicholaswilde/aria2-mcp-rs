@@ -19,7 +19,13 @@ async fn test_mcp_handler_tools_list() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client)]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client)],
+    );
 
     let result = handler.handle_method("tools/list", None).await?;
     let tools = result["tools"]
@@ -45,7 +51,13 @@ async fn test_mcp_handler_tools_call() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client)]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client)],
+    );
 
     let params = serde_json::json!({
         "name": "manage_downloads",
@@ -77,7 +89,13 @@ async fn test_mcp_handler_unknown_method() -> Result<()> {
     let client = container.client();
     let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
     let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
-    let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client)]);
+    let prompt_registry = Arc::new(RwLock::new(aria2_mcp_rs::PromptRegistry::default()));
+    let handler = McpHandler::new(
+        registry,
+        resource_registry,
+        prompt_registry,
+        vec![Arc::new(client)],
+    );
 
     let result = handler.handle_method("unknown/method", None).await;
     assert!(result.is_err());
