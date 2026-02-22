@@ -1,7 +1,7 @@
 # Implementation Plan - Implement MCP Resources
 
 ## Phase 1: Resource Registry & Core Logic
-- [ ] Task: Define `Resource` trait or struct in `src/resources/mod.rs`.
+- [x] Task: Define `Resource` trait or struct in `src/resources/mod.rs`. bb487c3
 - [ ] Task: Implement `ResourceRegistry` to manage resources.
 - [ ] Task: Update `McpServer` to initialize and use `ResourceRegistry`.
 - [ ] Task: Implement `resources/list` handler in `McpHandler`.
