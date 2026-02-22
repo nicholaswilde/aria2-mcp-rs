@@ -6,7 +6,7 @@
 - [x] Task: Implement a background task to read from the WebSocket stream. aac518a
 
 ## Phase 2: Event Mapping & Dispatch
-- [ ] Task: Define internal event structures for aria2 notifications.
+- [x] Task: Define internal event structures for aria2 notifications. e86902a
 - [ ] Task: Implement mapping logic from aria2 events to MCP notification format.
 - [ ] Task: Update `McpServer` to broadcast notifications to active transport channels.
 
