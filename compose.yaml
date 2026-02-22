@@ -1,0 +1,59 @@
+services:
+  aria2:
+    image: p3terx/aria2-pro
+    container_name: aria2
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - RPC_SECRET=your_secret_token
+      - RPC_PORT=6800
+      - LISTEN_PORT=6888
+    ports:
+      - "6800:6800"
+      - "6888:6888"
+      - "6888:6888/udp"
+    volumes:
+      - ./aria2-config:/config
+      - ./downloads:/downloads
+    restart: unless-stopped
+
+  aria2-mcp-rs:
+    image: ghcr.io/nicholaswilde/aria2-mcp-rs:latest
+    container_name: aria2-mcp-rs
+    environment:
+      # Required Configuration
+      # URL for the aria2 RPC interface
+      - ARIA2_MCP__RPC_URL=http://aria2:6800/jsonrpc
+      # Secret token for aria2 RPC authentication
+      - ARIA2_MCP__RPC_SECRET=your_secret_token
+
+      # Optional Configuration
+      # Transport type: stdio or sse (default: stdio)
+      # - ARIA2_MCP__TRANSPORT=sse
+      
+      # Port for SSE transport (default: 3000)
+      # - ARIA2_MCP__HTTP_PORT=3000
+      
+      # Authentication token for SSE endpoints
+      # - ARIA2_MCP__HTTP_AUTH_TOKEN=your_auth_token
+      
+      # Log level: error, warn, info, debug, trace (default: info)
+      # - ARIA2_MCP__LOG_LEVEL=info
+      
+      # Enable Lazy Mode to reduce initial tool count (default: false)
+      # - ARIA2_MCP__LAZY_MODE=false
+      
+      # Disable SSL verification for RPC connection (default: true)
+      # - ARIA2_MCP__NO_VERIFY_SSL=true
+
+      # Multi-Instance Configuration (Example)
+      # - ARIA2_MCP__INSTANCES__0__NAME=primary
+      # - ARIA2_MCP__INSTANCES__0__RPC_URL=http://aria2:6800/jsonrpc
+      # - ARIA2_MCP__INSTANCES__0__RPC_SECRET=your_secret_token
+      
+      # - ARIA2_MCP__INSTANCES__1__NAME=secondary
+      # - ARIA2_MCP__INSTANCES__1__RPC_URL=http://other-aria2:6800/jsonrpc
+      # - ARIA2_MCP__INSTANCES__1__RPC_SECRET=other_secret
+    depends_on:
+      - aria2
+    restart: unless-stopped
