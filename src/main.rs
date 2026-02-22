@@ -127,7 +127,8 @@ mod tests {
 
     #[test]
     fn test_args_parse_auth_token() {
-        let args = Args::try_parse_from(["aria2-mcp-rs", "--http-auth-token", "test-token"]).unwrap();
+        let args =
+            Args::try_parse_from(["aria2-mcp-rs", "--http-auth-token", "test-token"]).unwrap();
         assert_eq!(args.http_auth_token, Some("test-token".to_string()));
     }
 

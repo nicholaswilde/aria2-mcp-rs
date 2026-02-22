@@ -9,8 +9,8 @@ rpc_url = "http://localhost:6800/jsonrpc"
 # Options: "stdio" (local integration), "sse" or "http" (network-accessible server).
 transport = "stdio"
 
-# The port to listen on when using the "sse" transport.
-port = 3000
+# The port to listen on when using the "sse" or "http" transport.
+http_port = 3000
 
 # Enable "Lazy Mode" to initially hide most tool schemas and save tokens.
 # Tools can be enabled on-demand via the 'manage_tools' meta-tool.

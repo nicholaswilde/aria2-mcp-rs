@@ -3,8 +3,8 @@
 This plan outlines the steps to refine the `http_port` configuration and implement Bearer token authentication for the SSE transport mode, following a Test-Driven Development (TDD) approach.
 
 ## Phase 1: Bearer Token Authentication
-- [ ] Task: Write failing tests for Bearer Token validation in `sse.rs` and `Config` loading.
-- [ ] Task: Implement `http_auth_token` in `Config` and `Args`, and add Axum middleware for validation.
+- [x] Task: Write failing tests for Bearer Token validation in `sse.rs` and `Config` loading. [2f37543]
+- [x] Task: Implement `http_auth_token` in `Config` and `Args`, and add Axum middleware for validation. [2f37543]
 - [ ] Task: Conductor - User Manual Verification 'Bearer Token Authentication' (Protocol in workflow.md)
 
 ## Phase 2: Port Availability Check

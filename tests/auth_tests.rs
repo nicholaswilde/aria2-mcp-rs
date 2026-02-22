@@ -1,4 +1,4 @@
-use aria2_mcp_rs::{Config, TransportType};
+use aria2_mcp_rs::Config;
 
 #[test]
 fn test_config_auth_token_default() {
@@ -8,7 +8,9 @@ fn test_config_auth_token_default() {
 
 #[test]
 fn test_config_auth_token_override() {
-    let mut config = Config::default();
-    config.http_auth_token = Some("secret-token".to_string());
+    let config = Config {
+        http_auth_token: Some("secret-token".to_string()),
+        ..Config::default()
+    };
     assert_eq!(config.http_auth_token, Some("secret-token".to_string()));
 }
