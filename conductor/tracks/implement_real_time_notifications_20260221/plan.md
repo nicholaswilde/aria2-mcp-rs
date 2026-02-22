@@ -8,7 +8,7 @@
 ## Phase 2: Event Mapping & Dispatch
 - [x] Task: Define internal event structures for aria2 notifications. e86902a
 - [x] Task: Implement mapping logic from aria2 events to MCP notification format. 8a5db6c
-- [ ] Task: Update `McpServer` to broadcast notifications to active transport channels.
+- [x] Task: Update `McpServer` to broadcast notifications to active transport channels. ba651f2
 
 ## Phase 3: Robustness & Testing
 - [ ] Task: Implement exponential backoff for reconnection logic.
