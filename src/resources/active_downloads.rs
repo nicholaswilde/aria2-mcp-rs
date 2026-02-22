@@ -1,7 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::Value;
-use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
 use crate::resources::McpResource;

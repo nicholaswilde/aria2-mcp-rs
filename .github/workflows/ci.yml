@@ -31,7 +31,7 @@ jobs:
         - build: stable
           os: ubuntu-latest
           rust: stable
-          run_docker: true
+          run_docker: false
         - build: beta
           os: ubuntu-latest
           rust: beta

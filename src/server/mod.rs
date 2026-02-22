@@ -214,9 +214,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_run_sse_error() {
+        // Find a port and keep it occupied
+        let listener = std::net::TcpListener::bind("0.0.0.0:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+
         let config = Config {
             transport: TransportType::Sse,
-            http_port: 1, // Likely to fail on most systems
+            http_port: port,
             ..Default::default()
         };
         let registry = ToolRegistry::new(&config);
@@ -225,6 +229,7 @@ mod tests {
         let server = McpServer::new(config, registry, resource_registry, vec![client]);
         let result = server.run().await;
         assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("already in use"));
     }
 
     #[tokio::test]

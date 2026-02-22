@@ -1,4 +1,4 @@
-use aria2_mcp_rs::{Aria2Client, Config, McpServer, ToolRegistry};
+use aria2_mcp_rs::{Aria2Client, Config, McpServer, ResourceRegistry, ToolRegistry};
 
 #[test]
 fn test_mcp_server_multi_client_initialization() {
@@ -17,6 +17,7 @@ fn test_mcp_server_multi_client_initialization() {
     ];
 
     let registry = ToolRegistry::new(&config);
+    let resource_registry = ResourceRegistry::default();
 
     // This should change to handle multiple clients
     let clients = config
@@ -29,7 +30,7 @@ fn test_mcp_server_multi_client_initialization() {
         })
         .collect::<Vec<_>>();
 
-    let server = McpServer::new(config, registry, clients);
+    let server = McpServer::new(config, registry, resource_registry, clients);
 
     assert_eq!(server.clients().len(), 2);
 }
