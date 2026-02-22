@@ -6,6 +6,10 @@ use std::sync::{Arc, RwLock};
 use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
 
+pub mod notifications;
+
+pub use notifications::{Aria2Event, Aria2Notification};
+
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct Aria2Client {

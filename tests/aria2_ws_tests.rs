@@ -80,3 +80,18 @@ async fn test_aria2_client_receive_notification() {
     let received = rx.recv().await.unwrap();
     assert_eq!(received["method"], "aria2.onDownloadComplete");
 }
+
+#[test]
+fn test_parse_aria2_notification() {
+    use aria2_mcp_rs::aria2::notifications::{Aria2Event, Aria2Notification};
+    
+    let json = r#"{
+        "jsonrpc": "2.0",
+        "method": "aria2.onDownloadComplete",
+        "params": [{"gid": "123"}]
+    }"#;
+    
+    let notification: Aria2Notification = serde_json::from_str(json).unwrap();
+    assert_eq!(notification.method, Aria2Event::DownloadComplete);
+    assert_eq!(notification.params[0].gid, "123");
+}
