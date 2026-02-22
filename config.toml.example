@@ -24,6 +24,12 @@ lazy_mode = false
 # Useful for self-signed certificates.
 no_verify_ssl = true
 
+# --- Logging ---
+
+# Log level: "error", "warn", "info", "debug", "trace"
+# Default: "info"
+log_level = "info"
+
 # --- Optional Fields ---
 
 # The RPC secret for authentication with aria2.
