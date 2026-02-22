@@ -32,6 +32,7 @@ openssl = { version = "0.10", features = ["vendored"] }
 tokio-test = "0.4"
 testcontainers = "0.26.3"
 toml = "0.8"
+tempfile = "3.8"
 
 # Profile for final production releases (smaller, faster)
 [profile.release]
