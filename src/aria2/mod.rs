@@ -15,7 +15,9 @@ pub struct Aria2Client {
 }
 
 impl Aria2Client {
-    pub async fn connect_notifications(&self) -> Result<WebSocketStream<MaybeTlsStream<TcpStream>>> {
+    pub async fn connect_notifications(
+        &self,
+    ) -> Result<WebSocketStream<MaybeTlsStream<TcpStream>>> {
         let url = self.ws_url()?;
         let (ws_stream, _) = connect_async(url).await?;
         Ok(ws_stream)
@@ -34,7 +36,9 @@ impl Aria2Client {
                         while let Some(msg) = ws_stream.next().await {
                             match msg {
                                 Ok(tokio_tungstenite::tungstenite::Message::Text(text)) => {
-                                    if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
+                                    if let Ok(json) =
+                                        serde_json::from_str::<serde_json::Value>(&text)
+                                    {
                                         if tx.send(json).await.is_err() {
                                             log::error!("Notification channel closed");
                                             return;
