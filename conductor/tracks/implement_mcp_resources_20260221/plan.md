@@ -2,7 +2,7 @@
 
 ## Phase 1: Resource Registry & Core Logic
 - [x] Task: Define `Resource` trait or struct in `src/resources/mod.rs`. bb487c3
-- [ ] Task: Implement `ResourceRegistry` to manage resources.
+- [x] Task: Implement `ResourceRegistry` to manage resources. c466ecd
 - [ ] Task: Update `McpServer` to initialize and use `ResourceRegistry`.
 - [ ] Task: Implement `resources/list` handler in `McpHandler`.
 - [ ] Task: Implement `resources/read` handler in `McpHandler`.
