@@ -98,12 +98,15 @@ fn parse_log_level(level: &str) -> &str {
 }
 
 async fn run_app(config: Config) -> Result<()> {
-    log::info!("Starting aria2-mcp-rs with RPC URL: {}...", config.rpc_url);
+    log::info!("Starting aria2-mcp-rs with {} instances...", config.instances.len());
 
-    let client = Aria2Client::new(config.clone());
+    let clients: Vec<Aria2Client> = config.instances.iter()
+        .map(|instance| Aria2Client::new_with_instance(config.clone(), instance.clone()))
+        .collect();
+    
     let registry = ToolRegistry::new(&config);
 
-    let server = McpServer::new(config, registry, client);
+    let server = McpServer::new(config, registry, clients);
     server.run().await?;
 
     Ok(())

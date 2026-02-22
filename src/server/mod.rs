@@ -15,29 +15,39 @@ use crate::tools::ToolRegistry;
 pub struct McpServer {
     config: Config,
     registry: Arc<RwLock<ToolRegistry>>,
-    client: Arc<Aria2Client>,
+    clients: Vec<Arc<Aria2Client>>,
 }
 
 impl McpServer {
-    pub fn new(config: Config, registry: ToolRegistry, client: Aria2Client) -> Self {
+    pub fn new(config: Config, registry: ToolRegistry, clients: Vec<Aria2Client>) -> Self {
         Self {
             config,
             registry: Arc::new(RwLock::new(registry)),
-            client: Arc::new(client),
+            clients: clients.into_iter().map(Arc::new).collect(),
         }
     }
 
+    pub fn clients(&self) -> &[Arc<Aria2Client>] {
+        &self.clients
+    }
+
     pub async fn run(&self) -> Result<()> {
-        let client_clone = Arc::clone(&self.client);
-        tokio::spawn(async move {
-            if let Err(e) = start_scheduler(client_clone).await {
-                log::error!("Scheduler error: {}", e);
-            }
-        });
+        for client in &self.clients {
+            let client_clone = Arc::clone(client);
+            tokio::spawn(async move {
+                if let Err(e) = start_scheduler(client_clone).await {
+                    log::error!("Scheduler error: {}", e);
+                }
+            });
+        }
+
+        let first_client = self.clients.first().ok_or_else(|| {
+            anyhow::anyhow!("No clients configured")
+        })?;
 
         match self.config.transport {
             TransportType::Stdio => {
-                stdio::run_server(Arc::clone(&self.registry), Arc::clone(&self.client)).await
+                stdio::run_server(Arc::clone(&self.registry), Arc::clone(first_client)).await
             }
             TransportType::Sse => {
                 if !check_port_available(self.config.http_port).await {
@@ -50,7 +60,7 @@ impl McpServer {
                     self.config.http_port,
                     self.config.http_auth_token.clone(),
                     Arc::clone(&self.registry),
-                    Arc::clone(&self.client),
+                    Arc::clone(first_client),
                 )
                 .await
             }
@@ -188,7 +198,7 @@ mod tests {
         let config = Config::default();
         let registry = ToolRegistry::new(&config);
         let client = Aria2Client::new(config.clone());
-        let _server = McpServer::new(config, registry, client);
+        let _server = McpServer::new(config, registry, vec![client]);
     }
 
     #[tokio::test]
@@ -200,7 +210,7 @@ mod tests {
         };
         let registry = ToolRegistry::new(&config);
         let client = Aria2Client::new(config.clone());
-        let server = McpServer::new(config, registry, client);
+        let server = McpServer::new(config, registry, vec![client]);
         let result = server.run().await;
         assert!(result.is_err());
     }

@@ -8,6 +8,7 @@ use std::sync::{Arc, RwLock};
 pub struct Aria2Client {
     config: Arc<RwLock<Config>>,
     client: Client,
+    pub name: String,
 }
 
 impl Aria2Client {
@@ -20,6 +21,25 @@ impl Aria2Client {
         Self {
             config: Arc::new(RwLock::new(config)),
             client,
+            name: "default".to_string(),
+        }
+    }
+
+    pub fn new_with_instance(config: Config, instance: crate::config::Aria2Instance) -> Self {
+        let mut config = config;
+        config.rpc_url = instance.rpc_url;
+        config.rpc_secret = instance.rpc_secret;
+        let name = instance.name.clone();
+
+        let client = Client::builder()
+            .danger_accept_invalid_certs(config.no_verify_ssl)
+            .build()
+            .unwrap_or_else(|_| Client::new());
+
+        Self {
+            config: Arc::new(RwLock::new(config)),
+            client,
+            name,
         }
     }
 
