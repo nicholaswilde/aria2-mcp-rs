@@ -48,6 +48,17 @@ Prompts provide structured interaction templates for common tasks:
 - **`diagnose-download`**: Guides you through diagnosing issues with a specific download or the entire queue.
 - **`optimize-schedule`**: Helps you review and optimize your bandwidth schedules.
 
+## Real-Time Notifications
+
+The server supports real-time notifications via aria2's WebSocket stream (currently supported in **Stdio** transport). The server proactively broadcasts events to connected MCP clients:
+
+- **`download_start`**: Triggered when a download begins.
+- **`download_pause`**: Triggered when a download is paused.
+- **`download_stop`**: Triggered when a download is stopped.
+- **`download_complete`**: Triggered when a download finished.
+- **`download_error`**: Triggered when a download fails.
+- **`bt_download_complete`**: Triggered when a BitTorrent download finished.
+
 ## Technical Stack & Components
 
 - **Tool Registry:** A modular system for registering and executing tools with strictly typed inputs.
