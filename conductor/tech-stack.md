@@ -16,9 +16,9 @@
 - **Reasoning**: The most powerful and widely-adopted asynchronous runtime for Rust, essential for handling high-concurrency MCP requests and I/O tasks.
 - **Library**: `tokio` (including `tokio::sync::RwLock` for dynamic tool state management).
 
-## Communication: JSON-RPC over HTTP
-- **Reasoning**: `aria2` uses JSON-RPC for its remote interface.
-- **Library**: `reqwest` for interacting with the `aria2` RPC endpoint.
+## Communication: JSON-RPC over HTTP & WebSockets
+- **Reasoning**: `aria2` uses JSON-RPC for its remote interface, and WebSockets for real-time notification events.
+- **Libraries**: `reqwest` (HTTP), `tokio-tungstenite` (WebSockets).
 
 ## Time Management: Chrono
 - **Reasoning**: Required for robust time-of-day and day-of-week logic in the bandwidth scheduler.
