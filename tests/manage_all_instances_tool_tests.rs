@@ -1,11 +1,5 @@
-use mcp_sdk_rs::server::ServerHandler;
-use std::sync::Arc;
-use tokio::sync::RwLock;
-
-use aria2_mcp_rs::aria2::Aria2Client;
-use aria2_mcp_rs::config::Config;
-use aria2_mcp_rs::server::handler::McpHandler;
 use aria2_mcp_rs::tools::registry::ToolRegistry;
+use aria2_mcp_rs::config::Config;
 
 #[tokio::test]
 async fn test_manage_all_instances_tool_exists() {

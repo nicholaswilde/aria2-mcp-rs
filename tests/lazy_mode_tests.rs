@@ -58,7 +58,7 @@ async fn test_lazy_mode_manage_tools_list() -> Result<()> {
     let available: serde_json::Value = serde_json::from_str(content)?;
 
     assert!(available.is_array());
-    assert_eq!(available.as_array().unwrap().len(), 10);
+    assert_eq!(available.as_array().unwrap().len(), 11);
 
     Ok(())
 }
@@ -147,7 +147,7 @@ async fn test_non_lazy_mode_no_manage_tools() -> Result<()> {
     let names: Vec<&str> = tools.iter().map(|t| t["name"].as_str().unwrap()).collect();
 
     assert!(!names.contains(&"manage_tools"));
-    assert_eq!(tools.len(), 10);
+    assert_eq!(tools.len(), 11);
 
     Ok(())
 }

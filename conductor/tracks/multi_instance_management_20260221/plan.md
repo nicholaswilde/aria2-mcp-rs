@@ -16,11 +16,11 @@ This plan outlines the steps to implement multi-instance support in `aria2-mcp-r
 - [x] Task: Conductor - User Manual Verification 'Tool Argument & Routing' (Protocol in workflow.md)
 
 ## Phase 3: Global Commands & Health Monitoring
-- [~] Task: Write failing tests for `manage_all_instances` tool.
-- [ ] Task: Implement `manage_all_instances` tool to perform bulk operations across all clients.
-- [ ] Task: Write failing tests for multi-instance health reporting in `check_health`.
-- [ ] Task: Update `check_health` tool to iterate over all clients and report aggregate/individual status.
-- [ ] Task: Conductor - User Manual Verification 'Global Commands & Health Monitoring' (Protocol in workflow.md)
+- [x] Task: Write failing tests for `manage_all_instances` tool. af1bd95
+- [x] Task: Implement `manage_all_instances` tool to perform bulk operations across all clients. af1bd95
+- [x] Task: Write failing tests for multi-instance health reporting in `check_health`. af1bd95
+- [x] Task: Update `check_health` tool to iterate over all clients and report aggregate/individual status. af1bd95
+- [~] Task: Conductor - User Manual Verification 'Global Commands & Health Monitoring' (Protocol in workflow.md)
 
 ## Phase 4: Final Documentation & Quality Gates
 - [ ] Task: Update `config.toml.example` with multi-instance configuration examples.
