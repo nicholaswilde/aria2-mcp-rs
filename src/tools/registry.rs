@@ -39,7 +39,9 @@ pub trait McpeTool: Send + Sync {
     /// Run the tool with multiple clients.
     /// Default implementation just uses the first client or returns an error if no clients.
     async fn run_multi(&self, clients: &[Arc<Aria2Client>], args: Value) -> Result<Value> {
-        let client = clients.first().ok_or_else(|| anyhow::anyhow!("No clients provided"))?;
+        let client = clients
+            .first()
+            .ok_or_else(|| anyhow::anyhow!("No clients provided"))?;
         self.run(client, args).await
     }
 }
@@ -98,15 +100,15 @@ impl McpeTool for ToolWrapper {
     async fn run_multi(&self, clients: &[Arc<Aria2Client>], args: Value) -> Result<Value> {
         // If this is a global tool (like manage_all_instances), it will override run_multi in its implementation.
         // But since we are wrapping it, we need to decide whether to route or let it handle all.
-        
-        // Strategy: 
+
+        // Strategy:
         // 1. If 'instance' is provided, route to specific client.
         // 2. If 'instance' is NOT provided, call the underlying tool's run_multi.
-        
+
         if let Some(instance_idx) = args.get("instance").and_then(|v| v.as_u64()) {
-            let client = clients.get(instance_idx as usize).ok_or_else(|| {
-                anyhow::anyhow!("Invalid instance index: {}", instance_idx)
-            })?;
+            let client = clients
+                .get(instance_idx as usize)
+                .ok_or_else(|| anyhow::anyhow!("Invalid instance index: {}", instance_idx))?;
             self.tool.run(client, args).await
         } else {
             self.tool.run_multi(clients, args).await

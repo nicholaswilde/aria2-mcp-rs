@@ -15,17 +15,21 @@ fn test_mcp_server_multi_client_initialization() {
             rpc_secret: Some("secret".to_string()),
         },
     ];
-    
+
     let registry = ToolRegistry::new(&config);
-    
+
     // This should change to handle multiple clients
-    let clients = config.instances.iter().map(|instance_config| {
-        // We might need a way to create client from instance config
-        // Or just let McpServer handle it
-        Aria2Client::new_with_instance(config.clone(), instance_config.clone())
-    }).collect::<Vec<_>>();
-    
+    let clients = config
+        .instances
+        .iter()
+        .map(|instance_config| {
+            // We might need a way to create client from instance config
+            // Or just let McpServer handle it
+            Aria2Client::new_with_instance(config.clone(), instance_config.clone())
+        })
+        .collect::<Vec<_>>();
+
     let server = McpServer::new(config, registry, clients);
-    
+
     assert_eq!(server.clients().len(), 2);
 }

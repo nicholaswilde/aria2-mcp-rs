@@ -20,7 +20,7 @@ async fn test_mcp_handler_routing_default() {
         "name": "check_health",
         "arguments": {}
     });
-    
+
     // We can't easily check which client was used without mocking Aria2Client
     // but we can check if it compiles and runs.
     let _ = handler.handle_method("tools/call", Some(params)).await;
@@ -41,7 +41,7 @@ async fn test_mcp_handler_routing_specific_instance() {
             "instance": 1
         }
     });
-    
+
     let _ = handler.handle_method("tools/call", Some(params)).await;
 }
 
@@ -59,7 +59,7 @@ async fn test_mcp_handler_routing_invalid_instance() {
             "instance": 1
         }
     });
-    
+
     let result = handler.handle_method("tools/call", Some(params)).await;
     assert!(result.is_err());
     // Should return a clear error about invalid instance

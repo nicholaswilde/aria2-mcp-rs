@@ -35,6 +35,22 @@ log_level = "info"
 # The RPC secret for authentication with aria2.
 # rpc_secret = "your-aria2-rpc-secret"
 
+# --- Multi-Instance Management ---
+
+# Define multiple aria2 instances to manage simultaneously.
+# If this section is provided, the top-level `rpc_url` and `rpc_secret` are used 
+# as the default (index 0) if no other instances are defined.
+
+# [[instances]]
+# name = "primary"
+# rpc_url = "http://localhost:6800/jsonrpc"
+# rpc_secret = "secret1"
+
+# [[instances]]
+# name = "secondary"
+# rpc_url = "http://192.168.1.10:6800/jsonrpc"
+# # rpc_secret = "secret2"
+
 # --- Bandwidth Management ---
 
 # Define named speed profiles.

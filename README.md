@@ -21,6 +21,7 @@ This project is a high-performance Model Context Protocol (MCP) server for [aria
 The server provides several high-level tools for managing and monitoring aria2:
 
 - **`manage_downloads`**: Add, pause, resume, and remove individual downloads.
+- **`manage_all_instances`**: Perform bulk operations (pause, resume, purge) across all configured instances simultaneously.
 - **`bulk_manage_downloads`**: Perform actions (pause, resume, remove) on multiple downloads simultaneously.
 - **`monitor_queue`**: Get real-time status of active, waiting, and stopped downloads, plus global statistics.
 - **`search_downloads`**: Find specific downloads by filename, URI, or status (optimized for token efficiency).
@@ -38,6 +39,27 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **Dynamic Configuration:** Uses the `config` crate to merge settings from CLI arguments, environment variables, and configuration files (TOML, YAML, JSON).
 - **Async Runtime:** Built on `tokio`, utilizing background tasks for efficient I/O and instance management.
 - **API & Serialization:** Leverages `axum` for web transport and `serde`/`serde_json` for MCP message handling.
+
+## Multi-Instance Management
+
+The server can manage multiple aria2 instances simultaneously.
+
+### Targeting Instances
+All tools accept an optional `instance` argument (integer) to target a specific instance by its index in the configuration (defaulting to `0`).
+
+### Configuration
+You can define multiple instances in `config.toml` or via environment variables using the `ARIA2_MCP__INSTANCES__<N>__<FIELD>` format:
+
+```bash
+# Instance 0 (Primary)
+export ARIA2_MCP__INSTANCES__0__NAME="primary"
+export ARIA2_MCP__INSTANCES__0__RPC_URL="http://localhost:6800/jsonrpc"
+
+# Instance 1 (Secondary)
+export ARIA2_MCP__INSTANCES__1__NAME="remote-box"
+export ARIA2_MCP__INSTANCES__1__RPC_URL="http://192.168.1.10:6800/jsonrpc"
+export ARIA2_MCP__INSTANCES__1__RPC_SECRET="your-secret"
+```
 
 ## :hammer_and_wrench: Build & Development
 

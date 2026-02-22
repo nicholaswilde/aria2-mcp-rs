@@ -280,4 +280,38 @@ mod tests {
         let result = handler.handle_method("tools/call", Some(params)).await;
         assert!(result.is_err());
     }
+
+    #[tokio::test]
+    async fn test_handler_manage_tools_errors() {
+        let config = Config {
+            lazy_mode: true,
+            ..Default::default()
+        };
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let client = Arc::new(Aria2Client::new(config.clone()));
+        let handler = McpHandler::new(registry, vec![client]);
+
+        // Missing action
+        let params = serde_json::json!({ "name": "manage_tools", "arguments": {} });
+        let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+
+        // Invalid action
+        let params =
+            serde_json::json!({ "name": "manage_tools", "arguments": { "action": "invalid" } });
+        let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+
+        // Missing tools in enable
+        let params =
+            serde_json::json!({ "name": "manage_tools", "arguments": { "action": "enable" } });
+        let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+
+        // Missing tools in disable
+        let params =
+            serde_json::json!({ "name": "manage_tools", "arguments": { "action": "disable" } });
+        let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+    }
 }

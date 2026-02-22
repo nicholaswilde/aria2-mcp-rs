@@ -74,7 +74,7 @@ async fn test_check_health_multi_instance() -> Result<()> {
     let tool = CheckHealthTool;
 
     let args = json!({});
-    let result = tool.run_multi(&[client.clone()], args).await?;
+    let result = tool.run_multi(std::slice::from_ref(&client), args).await?;
 
     // Multi-instance health should return a list of results
     assert!(result.get("results").is_some());

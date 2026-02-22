@@ -15,7 +15,8 @@ impl McpeTool for ManageAllInstancesTool {
     }
 
     fn description(&self) -> String {
-        "Perform bulk operations (pause, resume, stop) on all configured aria2 instances at once.".to_string()
+        "Perform bulk operations (pause, resume, stop) on all configured aria2 instances at once."
+            .to_string()
     }
 
     fn schema(&self) -> Result<Value> {
