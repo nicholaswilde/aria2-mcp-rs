@@ -9,7 +9,7 @@
 
 ## Phase 2: Implement Specific Resources
 - [x] Task: Implement `GlobalStatusResource` (`aria2://status/global`). 8dec05f
-- [~] Task: Implement `ActiveDownloadsResource` (`aria2://downloads/active`).
+- [x] Task: Implement `ActiveDownloadsResource` (`aria2://downloads/active`). fc30a05
 - [ ] Task: Implement `RecentLogsResource` (`aria2://logs/recent`) with a ring buffer or file reader.
 
 ## Phase 3: Integration & Testing
