@@ -12,5 +12,5 @@
 
 ## Phase 3: Integration & Testing
 - [x] Task: Add unit tests for prompt registry and handlers. 43be131
-- [ ] Task: Add integration tests verifying `prompts/list` and `prompts/get` via MCP protocol.
+- [x] Task: Add integration tests verifying `prompts/list` and `prompts/get` via MCP protocol. d661b3a
 - [ ] Task: Update documentation to list available prompts.
