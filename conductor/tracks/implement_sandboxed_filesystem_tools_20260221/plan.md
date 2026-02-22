@@ -4,7 +4,7 @@
 - [x] Task: Implement `PathSandbox` struct/module to handle safe path resolution. 81cddeb
     - Check canonical paths to prevent symlink bypass.
     - Ensure resolved path starts with the base directory.
-- [ ] Task: Define schema for `list_download_files` tool.
+- [x] Task: Define schema for `list_download_files` tool. febe196
 
 ## Phase 2: Tool Implementation
 - [ ] Task: Implement `ListDownloadFilesTool` using `PathSandbox`.
