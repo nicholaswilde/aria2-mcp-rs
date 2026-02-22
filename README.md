@@ -41,6 +41,13 @@ In addition to tools, the server exposes several read-only resources for direct 
 - **`aria2://downloads/active`**: List of currently active downloads with their GIDs and progress.
 - **`aria2://logs/recent`**: The last N lines of the application log (configurable path and length).
 
+## Implemented Prompts
+
+Prompts provide structured interaction templates for common tasks:
+
+- **`diagnose-download`**: Guides you through diagnosing issues with a specific download or the entire queue.
+- **`optimize-schedule`**: Helps you review and optimize your bandwidth schedules.
+
 ## Technical Stack & Components
 
 - **Tool Registry:** A modular system for registering and executing tools with strictly typed inputs.
