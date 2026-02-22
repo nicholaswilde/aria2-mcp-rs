@@ -20,20 +20,6 @@ impl McpHandler {
         Self { registry, clients }
     }
 
-    fn get_client(&self, arguments: &serde_json::Value) -> Result<Arc<Aria2Client>, Error> {
-        let instance_idx = arguments
-            .get("instance")
-            .and_then(|v| v.as_u64())
-            .unwrap_or(0) as usize;
-
-        self.clients.get(instance_idx).cloned().ok_or_else(|| {
-            Error::protocol(
-                ErrorCode::InvalidParams,
-                format!("Invalid instance index: {}", instance_idx),
-            )
-        })
-    }
-
     async fn handle_manage_tools(
         &self,
         arguments: serde_json::Value,
@@ -215,10 +201,8 @@ impl ServerHandler for McpHandler {
                 })?;
                 drop(registry);
 
-                let client = self.get_client(&arguments)?;
-
                 let result = tool
-                    .run(&client, arguments)
+                    .run_multi(&self.clients, arguments)
                     .await
                     .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
 

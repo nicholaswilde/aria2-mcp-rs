@@ -117,20 +117,6 @@ async fn execute_tool(
     let name = req["name"].as_str().unwrap_or_default();
     let args = req["arguments"].clone();
 
-    let instance_idx = args.get("instance").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
-    let client = match clients.get(instance_idx) {
-        Some(c) => c,
-        None => {
-            return Json(serde_json::json!({
-                "isError": true,
-                "content": [{
-                    "type": "text",
-                    "text": format!("Invalid instance index: {}", instance_idx)
-                }]
-            }));
-        }
-    };
-
     if name == "manage_tools" {
         let registry_guard = registry.read().await;
         if registry_guard.is_lazy_mode() {
@@ -206,7 +192,7 @@ async fn execute_tool(
             );
         }
         drop(registry);
-        match tool.run(client, args).await {
+        match tool.run_multi(&clients, args).await {
             Ok(result) => Json(
                 serde_json::json!({ "content": [{ "type": "text", "text": result.to_string() }] }),
             ),

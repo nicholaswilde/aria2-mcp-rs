@@ -63,3 +63,24 @@ async fn test_check_health_with_stalled() -> Result<()> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn test_check_health_multi_instance() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
+    let container = Aria2Container::new().await?;
+    let client = std::sync::Arc::new(container.client());
+    let tool = CheckHealthTool;
+
+    let args = json!({});
+    let result = tool.run_multi(&[client.clone()], args).await?;
+
+    // Multi-instance health should return a list of results
+    assert!(result.get("results").is_some());
+    let results = result["results"].as_array().unwrap();
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0]["instance"], client.name);
+
+    Ok(())
+}

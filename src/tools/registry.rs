@@ -12,6 +12,7 @@ use super::bulk_manage_downloads::BulkManageDownloadsTool;
 use super::check_health::CheckHealthTool;
 use super::configure_aria2::ConfigureAria2Tool;
 use super::inspect_download::InspectDownloadTool;
+use super::manage_all_instances::ManageAllInstancesTool;
 use super::manage_downloads::ManageDownloadsTool;
 use super::manage_torrent::ManageTorrentTool;
 use super::monitor_queue::MonitorQueueTool;
@@ -34,6 +35,13 @@ pub trait McpeTool: Send + Sync {
     fn description(&self) -> String;
     fn schema(&self) -> Result<Value>;
     async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value>;
+
+    /// Run the tool with multiple clients.
+    /// Default implementation just uses the first client or returns an error if no clients.
+    async fn run_multi(&self, clients: &[Arc<Aria2Client>], args: Value) -> Result<Value> {
+        let client = clients.first().ok_or_else(|| anyhow::anyhow!("No clients provided"))?;
+        self.run(client, args).await
+    }
 }
 
 pub struct ToolRegistry {
@@ -86,6 +94,24 @@ impl McpeTool for ToolWrapper {
     async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
         self.tool.run(client, args).await
     }
+
+    async fn run_multi(&self, clients: &[Arc<Aria2Client>], args: Value) -> Result<Value> {
+        // If this is a global tool (like manage_all_instances), it will override run_multi in its implementation.
+        // But since we are wrapping it, we need to decide whether to route or let it handle all.
+        
+        // Strategy: 
+        // 1. If 'instance' is provided, route to specific client.
+        // 2. If 'instance' is NOT provided, call the underlying tool's run_multi.
+        
+        if let Some(instance_idx) = args.get("instance").and_then(|v| v.as_u64()) {
+            let client = clients.get(instance_idx as usize).ok_or_else(|| {
+                anyhow::anyhow!("Invalid instance index: {}", instance_idx)
+            })?;
+            self.tool.run(client, args).await
+        } else {
+            self.tool.run_multi(clients, args).await
+        }
+    }
 }
 
 impl Default for ToolRegistry {
@@ -109,6 +135,7 @@ impl ToolRegistry {
         registry.register(Arc::new(SearchDownloadsTool));
         registry.register(Arc::new(BulkManageDownloadsTool));
         registry.register(Arc::new(CheckHealthTool));
+        registry.register(Arc::new(ManageAllInstancesTool));
         registry.register(Arc::new(ManageTorrentTool));
         registry.register(Arc::new(OrganizeCompletedTool));
         registry.register(Arc::new(ScheduleLimitsTool));

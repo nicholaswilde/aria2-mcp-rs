@@ -726,6 +726,96 @@ impl Aria2Client {
 
         Ok(res["result"].clone())
     }
+
+    pub async fn pause_all(&self) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
+        let mut params = Vec::new();
+        if let Some(secret) = &rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.pauseAll",
+            "params": params,
+        });
+
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
+
+    pub async fn unpause_all(&self) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
+        let mut params = Vec::new();
+        if let Some(secret) = &rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.unpauseAll",
+            "params": params,
+        });
+
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
+
+    pub async fn purge_download_result(&self) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
+        let mut params = Vec::new();
+        if let Some(secret) = &rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.purgeDownloadResult",
+            "params": params,
+        });
+
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]

@@ -2,6 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::path::Path;
+use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
 use crate::tools::registry::McpeTool;
@@ -42,6 +43,23 @@ impl McpeTool for CheckHealthTool {
 
         let report = self.analyze_health(stats, active, stopped, disk_info, download_dir);
         Ok(report)
+    }
+
+    async fn run_multi(&self, clients: &[Arc<Aria2Client>], _args: Value) -> Result<Value> {
+        let mut results = Vec::new();
+
+        for client in clients {
+            let res = self.run(client, json!({})).await;
+            results.push(json!({
+                "instance": client.name,
+                "status": if res.is_ok() { "ok" } else { "error" },
+                "report": res.unwrap_or_else(|e| json!({"error": e.to_string()}))
+            }));
+        }
+
+        Ok(json!({
+            "results": results
+        }))
     }
 }
 
