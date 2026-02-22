@@ -2,7 +2,7 @@
 
 ## Phase 1: WebSocket Client Integration
 - [x] Task: Add `tokio-tungstenite` or similar crate for WebSocket support. 73b847a
-- [ ] Task: Update `Aria2Client` to establish and maintain a WebSocket connection.
+- [x] Task: Update `Aria2Client` to establish and maintain a WebSocket connection. fa90f06
 - [ ] Task: Implement a background task to read from the WebSocket stream.
 
 ## Phase 2: Event Mapping & Dispatch
