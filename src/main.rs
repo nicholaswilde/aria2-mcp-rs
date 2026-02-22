@@ -11,52 +11,43 @@ struct Args {
         env = "ARIA2_MCP_RPC_URL",
         default_value = "http://localhost:6800/jsonrpc"
     )]
-    rpc_url: Option<String>,
+    rpc_url: String,
     #[arg(short = 's', long, env = "ARIA2_MCP_RPC_SECRET")]
     rpc_secret: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_TRANSPORT", default_value = "stdio")]
-    transport: Option<String>,
+    transport: String,
     #[arg(long, env = "ARIA2_MCP_HTTP_PORT", default_value = "3000")]
-    http_port: Option<u16>,
+    http_port: u16,
     #[arg(long, env = "ARIA2_MCP_HTTP_AUTH_TOKEN")]
     http_auth_token: Option<String>,
-    #[arg(short = 'L', long, env = "ARIA2_MCP_LOG_LEVEL")]
-    log_level: Option<String>,
-    #[arg(short, long, env = "ARIA2_MCP_LAZY", default_value = "false")]
+    #[arg(short = 'L', long, env = "ARIA2_MCP_LOG_LEVEL", default_value = "info")]
+    log_level: String,
+    #[arg(short, long, env = "ARIA2_MCP_LAZY")]
     lazy: bool,
-    #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL", default_value = "true")]
+    #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL")]
     no_verify_ssl: bool,
-    #[arg(long, env = "ARIA2_MCP_VERIFY_SSL", default_value = "false")]
+    #[arg(long, env = "ARIA2_MCP_VERIFY_SSL")]
     verify_ssl: bool,
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     let args = Args::parse();
     let mut config = Config::load()?;
 
     // Override config with CLI arguments if provided
-    if let Some(url) = args.rpc_url {
-        config.rpc_url = url;
-    }
+    config.rpc_url = args.rpc_url;
     if let Some(secret) = args.rpc_secret {
         config.rpc_secret = Some(secret);
     }
-    if let Some(transport) = args.transport {
-        config.transport = match transport.to_lowercase().as_str() {
-            "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
-            _ => aria2_mcp_rs::TransportType::Stdio,
-        };
-    }
-    if let Some(port) = args.http_port {
-        config.http_port = port;
-    }
+    config.transport = match args.transport.to_lowercase().as_str() {
+        "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
+        _ => aria2_mcp_rs::TransportType::Stdio,
+    };
+    config.http_port = args.http_port;
     if let Some(token) = args.http_auth_token {
         config.http_auth_token = Some(token);
     }
-    if let Some(level) = args.log_level {
-        config.log_level = level;
-    }
+    config.log_level = args.log_level;
     if args.lazy {
         config.lazy_mode = true;
     }
@@ -68,7 +59,8 @@ async fn main() -> Result<()> {
 
     init_logger(&config.log_level);
 
-    run_app(config).await
+    let rt = tokio::runtime::Runtime::new()?;
+    rt.block_on(run_app(config))
 }
 
 fn init_logger(level: &str) {
@@ -141,22 +133,19 @@ mod tests {
     #[test]
     fn test_args_parse_transport_invalid() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--transport", "unknown"]).unwrap();
-        assert_eq!(args.transport, Some("unknown".to_string()));
+        assert_eq!(args.transport, "unknown".to_string());
     }
 
     #[test]
     fn test_args_parse_no_args() {
         let args = Args::try_parse_from(["aria2-mcp-rs"]).unwrap();
-        assert_eq!(
-            args.rpc_url,
-            Some("http://localhost:6800/jsonrpc".to_string())
-        );
+        assert_eq!(args.rpc_url, "http://localhost:6800/jsonrpc".to_string());
     }
 
     #[test]
     fn test_args_parse() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "-u", "http://test"]).unwrap();
-        assert_eq!(args.rpc_url, Some("http://test".to_string()));
+        assert_eq!(args.rpc_url, "http://test".to_string());
     }
 
     #[test]
@@ -168,13 +157,13 @@ mod tests {
     #[test]
     fn test_args_parse_transport_sse() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--transport", "sse"]).unwrap();
-        assert_eq!(args.transport, Some("sse".to_string()));
+        assert_eq!(args.transport, "sse".to_string());
     }
 
     #[test]
     fn test_args_parse_port() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--http-port", "4000"]).unwrap();
-        assert_eq!(args.http_port, Some(4000));
+        assert_eq!(args.http_port, 4000);
     }
 
     #[test]
@@ -187,7 +176,7 @@ mod tests {
     #[test]
     fn test_args_parse_log_level() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--log-level", "debug"]).unwrap();
-        assert_eq!(args.log_level, Some("debug".to_string()));
+        assert_eq!(args.log_level, "debug".to_string());
     }
 
     #[test]
@@ -206,20 +195,25 @@ mod tests {
             "test-token",
         ])
         .unwrap();
-        assert_eq!(args.rpc_url, Some("http://test".to_string()));
+        assert_eq!(args.rpc_url, "http://test".to_string());
         assert_eq!(args.rpc_secret, Some("secret".to_string()));
-        assert_eq!(args.transport, Some("sse".to_string()));
-        assert_eq!(args.http_port, Some(5000));
+        assert_eq!(args.transport, "sse".to_string());
+        assert_eq!(args.http_port, 5000);
         assert_eq!(args.http_auth_token, Some("test-token".to_string()));
     }
 
     #[test]
     fn test_args_default() {
         let args = Args::try_parse_from(["aria2-mcp-rs"]).unwrap();
-        assert_eq!(
-            args.rpc_url,
-            Some("http://localhost:6800/jsonrpc".to_string())
-        );
-        assert_eq!(args.transport, Some("stdio".to_string()));
+        assert_eq!(args.rpc_url, "http://localhost:6800/jsonrpc".to_string());
+        assert_eq!(args.transport, "stdio".to_string());
+    }
+
+    #[test]
+    fn test_args_version() {
+        let result = Args::try_parse_from(["aria2-mcp-rs", "--version"]);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert_eq!(err.kind(), clap::error::ErrorKind::DisplayVersion);
     }
 }
