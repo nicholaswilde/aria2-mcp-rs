@@ -20,6 +20,8 @@ struct Args {
     http_port: Option<u16>,
     #[arg(long, env = "ARIA2_MCP_HTTP_AUTH_TOKEN")]
     http_auth_token: Option<String>,
+    #[arg(short = 'L', long, env = "ARIA2_MCP_LOG_LEVEL")]
+    log_level: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_LAZY", default_value = "false")]
     lazy: bool,
     #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL", default_value = "true")]
@@ -30,12 +32,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init();
     let args = Args::parse();
-    run_app(args).await
-}
-
-async fn run_app(args: Args) -> Result<()> {
     let mut config = Config::load()?;
 
     // Override config with CLI arguments if provided
@@ -57,6 +54,9 @@ async fn run_app(args: Args) -> Result<()> {
     if let Some(token) = args.http_auth_token {
         config.http_auth_token = Some(token);
     }
+    if let Some(level) = args.log_level {
+        config.log_level = level;
+    }
     if args.lazy {
         config.lazy_mode = true;
     }
@@ -66,6 +66,38 @@ async fn run_app(args: Args) -> Result<()> {
         config.no_verify_ssl = true;
     }
 
+    init_logger(&config.log_level);
+
+    run_app(config).await
+}
+
+fn init_logger(level: &str) {
+    let effective_level = parse_log_level(level);
+    let is_invalid = effective_level == "info" && level.to_lowercase() != "info";
+
+    let env = env_logger::Env::default().default_filter_or(effective_level);
+    env_logger::Builder::from_env(env).init();
+
+    if is_invalid {
+        log::warn!(
+            "Invalid log level '{}' provided, defaulting to 'info'",
+            level
+        );
+    }
+}
+
+fn parse_log_level(level: &str) -> &str {
+    match level.to_lowercase().as_str() {
+        "error" => "error",
+        "warn" => "warn",
+        "info" => "info",
+        "debug" => "debug",
+        "trace" => "trace",
+        _ => "info",
+    }
+}
+
+async fn run_app(config: Config) -> Result<()> {
     log::info!("Starting aria2-mcp-rs with RPC URL: {}...", config.rpc_url);
 
     let client = Aria2Client::new(config.clone());
@@ -80,6 +112,14 @@ async fn run_app(args: Args) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_parse_log_level() {
+        assert_eq!(parse_log_level("debug"), "debug");
+        assert_eq!(parse_log_level("INFO"), "info");
+        assert_eq!(parse_log_level("trace"), "trace");
+        assert_eq!(parse_log_level("invalid"), "info");
+    }
 
     #[tokio::test]
     async fn test_run_app_invalid_url() {
@@ -130,6 +170,12 @@ mod tests {
         let args =
             Args::try_parse_from(["aria2-mcp-rs", "--http-auth-token", "test-token"]).unwrap();
         assert_eq!(args.http_auth_token, Some("test-token".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_log_level() {
+        let args = Args::try_parse_from(["aria2-mcp-rs", "--log-level", "debug"]).unwrap();
+        assert_eq!(args.log_level, Some("debug".to_string()));
     }
 
     #[test]
