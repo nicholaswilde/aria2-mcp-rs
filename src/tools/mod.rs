@@ -8,6 +8,7 @@ pub mod manage_torrent;
 pub mod monitor_queue;
 pub mod organize_completed;
 pub mod registry;
+pub mod sandbox;
 pub mod schedule_limits;
 pub mod search_downloads;
 
