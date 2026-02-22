@@ -11,6 +11,6 @@
 - [x] Task: Update `McpServer` to broadcast notifications to active transport channels. ba651f2
 
 ## Phase 3: Robustness & Testing
-- [ ] Task: Implement exponential backoff for reconnection logic.
+- [x] Task: Implement exponential backoff for reconnection logic. 109b9a2
 - [ ] Task: Add integration tests simulating aria2 events and verifying MCP output.
 - [ ] Task: Verify behavior with multiple aria2 instances.
