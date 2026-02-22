@@ -1,7 +1,7 @@
 # Implementation Plan - Implement Sandboxed Filesystem Tools
 
 ## Phase 1: Sandbox Logic & Tool Definition
-- [ ] Task: Implement `PathSandbox` struct/module to handle safe path resolution.
+- [x] Task: Implement `PathSandbox` struct/module to handle safe path resolution. 81cddeb
     - Check canonical paths to prevent symlink bypass.
     - Ensure resolved path starts with the base directory.
 - [ ] Task: Define schema for `list_download_files` tool.
