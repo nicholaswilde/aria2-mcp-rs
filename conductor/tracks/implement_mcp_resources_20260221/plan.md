@@ -4,7 +4,7 @@
 - [x] Task: Define `Resource` trait or struct in `src/resources/mod.rs`. bb487c3
 - [x] Task: Implement `ResourceRegistry` to manage resources. c466ecd
 - [x] Task: Update `McpServer` to initialize and use `ResourceRegistry`. af88fd0
-- [ ] Task: Implement `resources/list` handler in `McpHandler`.
+- [x] Task: Implement `resources/list` handler in `McpHandler`. cae3a2e
 - [ ] Task: Implement `resources/read` handler in `McpHandler`.
 
 ## Phase 2: Implement Specific Resources
