@@ -26,6 +26,7 @@ libc = "0.2"
 regex = "1.10"
 schemars = "1.2.1"
 chrono = "0.4"
+tokio-tungstenite = { version = "0.28.0", features = ["rustls-tls-webpki-roots"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
