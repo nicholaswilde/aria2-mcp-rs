@@ -13,6 +13,6 @@
 - [x] Task: Implement `RecentLogsResource` (`aria2://logs/recent`) with a ring buffer or file reader. 9be0d89
 
 ## Phase 3: Integration & Testing
-- [ ] Task: Add unit tests for resource registry and handlers.
+- [x] Task: Add unit tests for resource registry and handlers. 91957b3
 - [ ] Task: Add integration tests verifying `resources/list` and `resources/read` via MCP protocol.
 - [ ] Task: Update documentation to list available resources.
