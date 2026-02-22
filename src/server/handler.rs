@@ -8,16 +8,26 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use crate::aria2::Aria2Client;
+use crate::resources::ResourceRegistry;
 use crate::tools::registry::ToolRegistry;
 
 pub struct McpHandler {
     registry: Arc<RwLock<ToolRegistry>>,
+    resource_registry: Arc<RwLock<ResourceRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
 }
 
 impl McpHandler {
-    pub fn new(registry: Arc<RwLock<ToolRegistry>>, clients: Vec<Arc<Aria2Client>>) -> Self {
-        Self { registry, clients }
+    pub fn new(
+        registry: Arc<RwLock<ToolRegistry>>,
+        resource_registry: Arc<RwLock<ResourceRegistry>>,
+        clients: Vec<Arc<Aria2Client>>,
+    ) -> Self {
+        Self {
+            registry,
+            resource_registry,
+            clients,
+        }
     }
 
     async fn handle_manage_tools(
@@ -113,6 +123,7 @@ impl ServerHandler for McpHandler {
     ) -> Result<ServerCapabilities, Error> {
         Ok(ServerCapabilities {
             tools: Some(serde_json::json!({})),
+            resources: Some(serde_json::json!({})),
             ..Default::default()
         })
     }
@@ -127,6 +138,11 @@ impl ServerHandler for McpHandler {
         params: Option<serde_json::Value>,
     ) -> Result<serde_json::Value, Error> {
         match method {
+            "resources/list" => {
+                let registry = self.resource_registry.read().await;
+                let resources = registry.list_resources();
+                Ok(serde_json::json!({ "resources": resources }))
+            }
             "tools/list" => {
                 let registry = self.registry.read().await;
                 let tools = registry.list_tools();
@@ -226,13 +242,15 @@ mod tests {
     use super::*;
     use crate::aria2::Aria2Client;
     use crate::config::Config;
+    use crate::resources::ResourceRegistry;
     use crate::tools::registry::ToolRegistry;
 
     #[tokio::test]
     async fn test_handler_tools_list() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let client = Arc::new(Aria2Client::new(Config::default()));
-        let handler = McpHandler::new(registry, vec![client]);
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
 
         let result = handler.handle_method("tools/list", None).await.unwrap();
         let tools = result["tools"].as_array().unwrap();
@@ -242,8 +260,9 @@ mod tests {
     #[tokio::test]
     async fn test_handler_unknown_method() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let client = Arc::new(Aria2Client::new(Config::default()));
-        let handler = McpHandler::new(registry, vec![client]);
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
 
         let result = handler.handle_method("unknown", None).await;
         assert!(result.is_err());
@@ -252,8 +271,9 @@ mod tests {
     #[tokio::test]
     async fn test_handler_tools_call_missing_params() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let client = Arc::new(Aria2Client::new(Config::default()));
-        let handler = McpHandler::new(registry, vec![client]);
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
 
         let result = handler.handle_method("tools/call", None).await;
         assert!(result.is_err());
@@ -262,8 +282,9 @@ mod tests {
     #[tokio::test]
     async fn test_handler_tools_call_missing_name() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let client = Arc::new(Aria2Client::new(Config::default()));
-        let handler = McpHandler::new(registry, vec![client]);
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
 
         let params = serde_json::json!({ "arguments": {} });
         let result = handler.handle_method("tools/call", Some(params)).await;
@@ -273,8 +294,9 @@ mod tests {
     #[tokio::test]
     async fn test_handler_tools_call_not_found() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let client = Arc::new(Aria2Client::new(Config::default()));
-        let handler = McpHandler::new(registry, vec![client]);
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
 
         let params = serde_json::json!({ "name": "unknown", "arguments": {} });
         let result = handler.handle_method("tools/call", Some(params)).await;
@@ -288,8 +310,9 @@ mod tests {
             ..Default::default()
         };
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let client = Arc::new(Aria2Client::new(config.clone()));
-        let handler = McpHandler::new(registry, vec![client]);
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
 
         // Missing action
         let params = serde_json::json!({ "name": "manage_tools", "arguments": {} });
