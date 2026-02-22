@@ -33,6 +33,14 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
 - **`manage_tools`**: (Lazy Mode only) Enable or disable individual tools to optimize token usage.
 
+## Implemented Resources
+
+In addition to tools, the server exposes several read-only resources for direct context:
+
+- **`aria2://status/global`**: Real-time global statistics (speeds, counts) across one or all instances.
+- **`aria2://downloads/active`**: List of currently active downloads with their GIDs and progress.
+- **`aria2://logs/recent`**: The last N lines of the application log (configurable path and length).
+
 ## Technical Stack & Components
 
 - **Tool Registry:** A modular system for registering and executing tools with strictly typed inputs.
