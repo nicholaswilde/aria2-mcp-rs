@@ -5,6 +5,9 @@ use std::sync::Arc;
 
 use crate::aria2::Aria2Client;
 
+pub mod registry;
+pub use registry::ResourceRegistry;
+
 #[async_trait]
 pub trait McpResource: Send + Sync {
     /// The URI template for this resource (e.g., "aria2://status/global")
