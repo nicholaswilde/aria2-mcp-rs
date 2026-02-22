@@ -1,0 +1,8 @@
+{
+  "track_id": "http_config_refinement_20260221",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-21T10:00:00Z",
+  "updated_at": "2026-02-21T10:00:00Z",
+  "description": "for the http mode, add an http_port parameter with a default value of 3000 and implement Bearer token authentication"
+}
