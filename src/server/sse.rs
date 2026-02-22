@@ -18,13 +18,13 @@ pub async fn run_server(
     http_port: u16,
     http_auth_token: Option<String>,
     registry: Arc<RwLock<ToolRegistry>>,
-    client: Arc<Aria2Client>,
+    clients: Vec<Arc<Aria2Client>>,
 ) -> Result<()> {
     let mut app = Router::new()
         .route("/tools", get(list_tools))
         .route("/tools/execute", post(execute_tool))
         .layer(Extension(registry))
-        .layer(Extension(client));
+        .layer(Extension(clients));
 
     if let Some(token) = http_auth_token {
         app = app.layer(middleware::from_fn(move |req, next| {
@@ -111,11 +111,25 @@ async fn list_tools(
 
 async fn execute_tool(
     Extension(registry): Extension<Arc<RwLock<ToolRegistry>>>,
-    Extension(client): Extension<Arc<Aria2Client>>,
+    Extension(clients): Extension<Vec<Arc<Aria2Client>>>,
     Json(req): Json<serde_json::Value>,
 ) -> Json<serde_json::Value> {
     let name = req["name"].as_str().unwrap_or_default();
     let args = req["arguments"].clone();
+
+    let instance_idx = args.get("instance").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+    let client = match clients.get(instance_idx) {
+        Some(c) => c,
+        None => {
+            return Json(serde_json::json!({
+                "isError": true,
+                "content": [{
+                    "type": "text",
+                    "text": format!("Invalid instance index: {}", instance_idx)
+                }]
+            }));
+        }
+    };
 
     if name == "manage_tools" {
         let registry_guard = registry.read().await;
@@ -192,7 +206,7 @@ async fn execute_tool(
             );
         }
         drop(registry);
-        match tool.run(&client, args).await {
+        match tool.run(client, args).await {
             Ok(result) => Json(
                 serde_json::json!({ "content": [{ "type": "text", "text": result.to_string() }] }),
             ),
@@ -231,7 +245,7 @@ mod tests {
         });
         let result = execute_tool(
             axum::extract::Extension(registry),
-            axum::extract::Extension(client),
+            axum::extract::Extension(vec![client]),
             Json(req),
         )
         .await;
@@ -276,7 +290,7 @@ mod tests {
         });
         let result = execute_tool(
             axum::extract::Extension(registry),
-            axum::extract::Extension(client),
+            axum::extract::Extension(vec![client]),
             Json(req),
         )
         .await;

@@ -41,13 +41,9 @@ impl McpServer {
             });
         }
 
-        let first_client = self.clients.first().ok_or_else(|| {
-            anyhow::anyhow!("No clients configured")
-        })?;
-
         match self.config.transport {
             TransportType::Stdio => {
-                stdio::run_server(Arc::clone(&self.registry), Arc::clone(first_client)).await
+                stdio::run_server(Arc::clone(&self.registry), self.clients.clone()).await
             }
             TransportType::Sse => {
                 if !check_port_available(self.config.http_port).await {
@@ -60,7 +56,7 @@ impl McpServer {
                     self.config.http_port,
                     self.config.http_auth_token.clone(),
                     Arc::clone(&self.registry),
-                    Arc::clone(first_client),
+                    self.clients.clone(),
                 )
                 .await
             }

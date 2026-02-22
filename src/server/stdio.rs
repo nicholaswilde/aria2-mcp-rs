@@ -10,10 +10,10 @@ use crate::tools::ToolRegistry;
 
 pub async fn run_server(
     registry: Arc<RwLock<ToolRegistry>>,
-    client: Arc<Aria2Client>,
+    clients: Vec<Arc<Aria2Client>>,
 ) -> Result<()> {
     let (transport, _sender) = StdioTransport::new();
-    let handler = Arc::new(McpHandler::new(registry, client));
+    let handler = Arc::new(McpHandler::new(registry, clients));
     let server = Server::new(Arc::new(transport), handler);
 
     server
