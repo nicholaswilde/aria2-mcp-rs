@@ -235,7 +235,7 @@ mod tests {
     #[tokio::test]
     async fn test_check_port_available() {
         // Find a free port
-        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let listener = std::net::TcpListener::bind("0.0.0.0:0").unwrap();
         let port = listener.local_addr().unwrap().port();
 
         // Port is occupied by 'listener', so check_port_available should return false
