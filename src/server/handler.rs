@@ -342,6 +342,19 @@ mod tests {
     use crate::tools::registry::ToolRegistry;
 
     #[tokio::test]
+    async fn test_handler_prompts_get_not_found() {
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let prompt_registry = Arc::new(RwLock::new(PromptRegistry::default()));
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        let params = serde_json::json!({ "name": "unknown" });
+        let result = handler.handle_method("prompts/get", Some(params)).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
     async fn test_handler_prompts_get() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));

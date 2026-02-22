@@ -26,6 +26,15 @@ fn test_prompt_registry_list() {
 }
 
 #[test]
+fn test_prompt_registry_get_prompt() {
+    let mut registry = PromptRegistry::new();
+    registry.register(Arc::new(MockPrompt));
+
+    assert!(registry.get_prompt("test-prompt").is_some());
+    assert!(registry.get_prompt("unknown").is_none());
+}
+
+#[test]
 fn test_prompt_registration() {
     let mut registry = PromptRegistry::new();
     registry.register(Arc::new(MockPrompt));
