@@ -61,6 +61,16 @@ export ARIA2_MCP__INSTANCES__1__RPC_URL="http://192.168.1.10:6800/jsonrpc"
 export ARIA2_MCP__INSTANCES__1__RPC_SECRET="your-secret"
 ```
 
+## :package: Installation
+
+### Homebrew (macOS/Linux)
+
+You can install the server using [Homebrew](https://brew.sh/) via the [nicholaswilde/tap](https://github.com/nicholaswilde/homebrew-tap):
+
+```bash
+brew install nicholaswilde/tap/aria2-mcp-rs
+```
+
 ## :hammer_and_wrench: Build & Development
 
 ### Task-Based Workflow
