@@ -27,7 +27,10 @@ async fn test_mcp_handler_resources_list() -> Result<()> {
         .expect("Result should have resources array");
 
     assert!(!resources.is_empty());
-    let uris: Vec<&str> = resources.iter().map(|r| r["uri"].as_str().unwrap()).collect();
+    let uris: Vec<&str> = resources
+        .iter()
+        .map(|r| r["uri"].as_str().unwrap())
+        .collect();
     assert!(uris.contains(&"aria2://status/global"));
     assert!(uris.contains(&"aria2://downloads/active"));
     assert!(uris.contains(&"aria2://logs/recent"));
@@ -50,7 +53,9 @@ async fn test_mcp_handler_resources_read_global_status() -> Result<()> {
         "uri": "aria2://status/global"
     });
 
-    let result = handler.handle_method("resources/read", Some(params)).await?;
+    let result = handler
+        .handle_method("resources/read", Some(params))
+        .await?;
     let contents = result["contents"]
         .as_array()
         .expect("Result should have contents array");
@@ -77,13 +82,17 @@ async fn test_mcp_handler_resources_read_active_downloads() -> Result<()> {
     let handler = McpHandler::new(registry, resource_registry, vec![Arc::new(client.clone())]);
 
     // Add a download to make it active
-    client.add_uri(vec!["https://p3terx.com".to_string()], None).await?;
+    client
+        .add_uri(vec!["https://p3terx.com".to_string()], None)
+        .await?;
 
     let params = serde_json::json!({
         "uri": "aria2://downloads/active"
     });
 
-    let result = handler.handle_method("resources/read", Some(params)).await?;
+    let result = handler
+        .handle_method("resources/read", Some(params))
+        .await?;
     let contents = result["contents"]
         .as_array()
         .expect("Result should have contents array");
@@ -93,7 +102,7 @@ async fn test_mcp_handler_resources_read_active_downloads() -> Result<()> {
 
     let active: serde_json::Value = serde_json::from_str(text)?;
     assert!(active[0].get("data").is_some());
-    assert!(active[0]["data"].as_array().unwrap().len() > 0);
+    assert!(!active[0]["data"].as_array().unwrap().is_empty());
 
     Ok(())
 }

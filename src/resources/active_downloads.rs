@@ -60,8 +60,10 @@ mod tests {
             .mount(&server)
             .await;
 
-        let mut config = Config::default();
-        config.rpc_url = format!("http://{}", server.address());
+        let config = Config {
+            rpc_url: format!("http://{}", server.address()),
+            ..Config::default()
+        };
         let client = Aria2Client::new(config);
 
         let resource = ActiveDownloadsResource;
@@ -89,8 +91,10 @@ mod tests {
             .mount(&server)
             .await;
 
-        let mut config = Config::default();
-        config.rpc_url = format!("http://{}", server.address());
+        let config = Config {
+            rpc_url: format!("http://{}", server.address()),
+            ..Config::default()
+        };
         let client = Aria2Client::new(config);
 
         let resource = ActiveDownloadsResource;

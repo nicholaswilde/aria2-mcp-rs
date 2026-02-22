@@ -83,8 +83,10 @@ mod tests {
             .mount(&server)
             .await;
 
-        let mut config = Config::default();
-        config.rpc_url = format!("http://{}", server.address());
+        let config = Config {
+            rpc_url: format!("http://{}", server.address()),
+            ..Config::default()
+        };
         let client = Aria2Client::new(config);
 
         let resource = GlobalStatusResource;
@@ -115,12 +117,16 @@ mod tests {
             .mount(&server2)
             .await;
 
-        let mut config1 = Config::default();
-        config1.rpc_url = format!("http://{}", server1.address());
+        let config1 = Config {
+            rpc_url: format!("http://{}", server1.address()),
+            ..Config::default()
+        };
         let client1 = Arc::new(Aria2Client::new(config1));
 
-        let mut config2 = Config::default();
-        config2.rpc_url = format!("http://{}", server2.address());
+        let config2 = Config {
+            rpc_url: format!("http://{}", server2.address()),
+            ..Config::default()
+        };
         let mut client2 = Aria2Client::new(config2);
         client2.name = "box2".to_string();
         let client2 = Arc::new(client2);
