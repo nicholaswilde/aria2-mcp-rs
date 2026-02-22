@@ -18,6 +18,7 @@ A rust implementation of a aria2 MCP server.
 - **Automatic File Organization**: A tool to automatically move completed downloads to specific directories based on user-defined rules (e.g., file extensions, filename patterns).
 - **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly, with support for secure network access via Bearer Token authentication and configurable application log levels.
 - **Bandwidth Scheduling**: A tool to define bandwidth speed profiles and automatically activate them on a daily or weekly schedule (e.g., "Day Mode", "Night Mode").
+- **Filesystem Sandbox**: Securely inspect the contents of the download directory to verify files and structures, with strict path validation to prevent unauthorized access.
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
 - **Lazy Mode**: A token-optimized mode that initially exposes a minimal toolset and allows for on-demand tool activation via a `manage_tools` meta-tool.
 - **Multi-Instance Management**: Support for managing multiple `aria2` instances simultaneously from a single MCP server, with tools for targeting specific instances or performing bulk operations across all of them.
