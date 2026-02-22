@@ -34,6 +34,10 @@ pub struct PromptResource {
     pub uri: String,
 }
 
+pub mod diagnose_download;
+
+pub use diagnose_download::DiagnoseDownloadPrompt;
+
 pub trait McpPrompt: Send + Sync {
     fn name(&self) -> String;
     fn description(&self) -> Option<String>;
@@ -53,9 +57,13 @@ impl Default for PromptRegistry {
 
 impl PromptRegistry {
     pub fn new() -> Self {
-        Self {
+        let mut registry = Self {
             prompts: Vec::new(),
-        }
+        };
+
+        registry.register(Arc::new(DiagnoseDownloadPrompt));
+
+        registry
     }
 
     pub fn register(&mut self, prompt: Arc<dyn McpPrompt>) {

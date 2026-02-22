@@ -21,7 +21,9 @@ impl McpPrompt for MockPrompt {
 fn test_prompt_registry_list() {
     let registry = PromptRegistry::new();
     let prompts = registry.list_prompts();
-    assert!(prompts.is_empty());
+    // Should have 1 default prompt (diagnose-download)
+    assert_eq!(prompts.len(), 1);
+    assert_eq!(prompts[0].name, "diagnose-download");
 }
 
 #[test]
@@ -30,6 +32,29 @@ fn test_prompt_registration() {
     registry.register(Arc::new(MockPrompt));
 
     let prompts = registry.list_prompts();
-    assert_eq!(prompts.len(), 1);
-    assert_eq!(prompts[0].name, "test-prompt");
+    // 1 default (diagnose-download) + 1 mock
+    assert_eq!(prompts.len(), 2);
+    assert!(prompts.iter().any(|p| p.name == "test-prompt"));
+    assert!(prompts.iter().any(|p| p.name == "diagnose-download"));
+}
+
+#[test]
+fn test_diagnose_download_prompt_messages() {
+    let prompt = aria2_mcp_rs::prompts::DiagnoseDownloadPrompt;
+    let args = serde_json::json!({ "gid": "123" });
+    let messages = prompt.get_messages(args).unwrap();
+
+    assert_eq!(messages.len(), 3);
+    match &messages[0].content {
+        aria2_mcp_rs::prompts::PromptContent::Text { text } => {
+            assert!(text.contains("123"));
+        }
+        _ => panic!("Expected text content"),
+    }
+    match &messages[2].content {
+        aria2_mcp_rs::prompts::PromptContent::Resource { resource } => {
+            assert_eq!(resource.uri, "aria2://logs/recent");
+        }
+        _ => panic!("Expected resource content"),
+    }
 }
