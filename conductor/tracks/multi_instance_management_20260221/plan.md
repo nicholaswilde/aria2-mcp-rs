@@ -5,9 +5,9 @@ This plan outlines the steps to implement multi-instance support in `aria2-mcp-r
 ## Phase 1: Configuration & Client Management
 - [x] Task: Write failing tests for multi-instance configuration parsing (TOML & Env vars). ffeb5a3
 - [x] Task: Update `Config` struct and loading logic to support `instances` list and `ARIA2_INSTANCES__<N>__<FIELD>` environment variables. ffeb5a3
-- [ ] Task: Write failing tests for multi-client initialization in `McpServer`.
-- [ ] Task: Update `McpServer` to initialize and store a list of `Aria2Client` instances.
-- [ ] Task: Conductor - User Manual Verification 'Configuration & Client Management' (Protocol in workflow.md)
+- [x] Task: Write failing tests for multi-client initialization in `McpServer`. ceca578
+- [x] Task: Update `McpServer` to initialize and store a list of `Aria2Client` instances. ceca578
+- [~] Task: Conductor - User Manual Verification 'Configuration & Client Management' (Protocol in workflow.md)
 
 ## Phase 2: Tool Argument & Routing
 - [ ] Task: Write failing tests for `instance` argument parsing and routing in `McpHandler`.
