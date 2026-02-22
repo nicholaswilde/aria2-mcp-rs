@@ -143,6 +143,52 @@ impl ServerHandler for McpHandler {
                 let resources = registry.list_resources();
                 Ok(serde_json::json!({ "resources": resources }))
             }
+            "resources/read" => {
+                let params = params.ok_or_else(|| {
+                    Error::protocol(
+                        ErrorCode::InvalidParams,
+                        "Missing parameters for resources/read",
+                    )
+                })?;
+
+                let uri = params.get("uri").and_then(|v| v.as_str()).ok_or_else(|| {
+                    Error::protocol(ErrorCode::InvalidParams, "Missing 'uri' in resources/read")
+                })?;
+
+                let registry = self.resource_registry.read().await;
+                let resource = registry.get_resource(uri).ok_or_else(|| {
+                    Error::protocol(
+                        ErrorCode::MethodNotFound,
+                        format!("Resource not found: {}", uri),
+                    )
+                })?;
+                drop(registry);
+
+                let result = resource
+                    .read_multi(&self.clients)
+                    .await
+                    .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
+
+                // MCP spec for resources/read returns "contents": [{ "uri": "...", "mimeType": "...", "text": "..." }]
+                let mut content_item = serde_json::json!({
+                    "uri": uri,
+                });
+
+                if let Some(mime) = resource.mime_type() {
+                    content_item["mimeType"] = serde_json::json!(mime);
+                }
+
+                // If result is a string, use it directly. If it's structured JSON, serialize it to string.
+                if let Some(s) = result.as_str() {
+                    content_item["text"] = serde_json::json!(s);
+                } else {
+                    content_item["text"] = serde_json::json!(result.to_string());
+                }
+
+                Ok(serde_json::json!({
+                    "contents": [content_item]
+                }))
+            }
             "tools/list" => {
                 let registry = self.registry.read().await;
                 let tools = registry.list_tools();
@@ -300,6 +346,18 @@ mod tests {
 
         let params = serde_json::json!({ "name": "unknown", "arguments": {} });
         let result = handler.handle_method("tools/call", Some(params)).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_handler_resources_read_not_found() {
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, resource_registry, vec![client]);
+
+        let params = serde_json::json!({ "uri": "unknown://uri" });
+        let result = handler.handle_method("resources/read", Some(params)).await;
         assert!(result.is_err());
     }
 
