@@ -11,6 +11,6 @@
 - [x] Task: Implement `OptimizeSchedulePrompt` logic. 81e5ad5
 
 ## Phase 3: Integration & Testing
-- [ ] Task: Add unit tests for prompt registry and handlers.
+- [x] Task: Add unit tests for prompt registry and handlers. 43be131
 - [ ] Task: Add integration tests verifying `prompts/list` and `prompts/get` via MCP protocol.
 - [ ] Task: Update documentation to list available prompts.
