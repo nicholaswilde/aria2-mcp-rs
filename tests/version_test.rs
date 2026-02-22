@@ -10,7 +10,7 @@ fn test_version_flag_long() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("aria2-mcp-rs 0.1.0"));
+    assert!(stdout.contains(&format!("aria2-mcp-rs {}", env!("CARGO_PKG_VERSION"))));
 }
 
 #[test]
@@ -23,5 +23,5 @@ fn test_version_flag_short() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("aria2-mcp-rs 0.1.0"));
+    assert!(stdout.contains(&format!("aria2-mcp-rs {}", env!("CARGO_PKG_VERSION"))));
 }
