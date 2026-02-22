@@ -148,6 +148,46 @@ impl ServerHandler for McpHandler {
                 let prompts = registry.list_prompts();
                 Ok(serde_json::json!({ "prompts": prompts }))
             }
+            "prompts/get" => {
+                let params = params.ok_or_else(|| {
+                    Error::protocol(
+                        ErrorCode::InvalidParams,
+                        "Missing parameters for prompts/get",
+                    )
+                })?;
+
+                let name = params.get("name").and_then(|v| v.as_str()).ok_or_else(|| {
+                    Error::protocol(ErrorCode::InvalidParams, "Missing 'name' in prompts/get")
+                })?;
+
+                let arguments = params
+                    .get("arguments")
+                    .cloned()
+                    .unwrap_or(serde_json::json!({}));
+
+                let registry = self.prompt_registry.read().await;
+                let prompt = registry.get_prompt(name).ok_or_else(|| {
+                    Error::protocol(
+                        ErrorCode::MethodNotFound,
+                        format!("Prompt not found: {}", name),
+                    )
+                })?;
+                drop(registry);
+
+                let messages = prompt
+                    .get_messages(arguments)
+                    .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
+
+                let mut res = serde_json::json!({
+                    "messages": messages,
+                });
+
+                if let Some(desc) = prompt.description() {
+                    res["description"] = serde_json::json!(desc);
+                }
+
+                Ok(res)
+            }
             "resources/list" => {
                 let registry = self.resource_registry.read().await;
                 let resources = registry.list_resources();
@@ -302,15 +342,78 @@ mod tests {
     use crate::tools::registry::ToolRegistry;
 
     #[tokio::test]
+    async fn test_handler_prompts_get() {
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let mut prompt_registry = PromptRegistry::default();
+
+        struct MockPrompt;
+        impl crate::prompts::McpPrompt for MockPrompt {
+            fn name(&self) -> String {
+                "test-prompt".to_string()
+            }
+            fn description(&self) -> Option<String> {
+                Some("desc".to_string())
+            }
+            fn arguments(&self) -> Vec<crate::prompts::PromptArgument> {
+                vec![]
+            }
+            fn get_messages(
+                &self,
+                _arguments: serde_json::Value,
+            ) -> anyhow::Result<Vec<crate::prompts::PromptMessage>> {
+                Ok(vec![crate::prompts::PromptMessage {
+                    role: "user".to_string(),
+                    content: crate::prompts::PromptContent::Text {
+                        text: "hello".to_string(),
+                    },
+                }])
+            }
+        }
+
+        prompt_registry.register(Arc::new(MockPrompt));
+        let prompt_registry = Arc::new(RwLock::new(prompt_registry));
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        let params = serde_json::json!({ "name": "test-prompt" });
+        let result = handler
+            .handle_method("prompts/get", Some(params))
+            .await
+            .unwrap();
+        assert_eq!(result["description"], "desc");
+        let messages = result["messages"].as_array().unwrap();
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0]["role"], "user");
+        assert_eq!(messages[0]["content"]["text"], "hello");
+    }
+
+    #[tokio::test]
     async fn test_handler_prompts_list() {
         let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
         let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
         let mut prompt_registry = PromptRegistry::default();
-        prompt_registry.register(crate::prompts::Prompt {
-            name: "test-prompt".to_string(),
-            description: Some("desc".to_string()),
-            arguments: vec![],
-        });
+
+        struct MockPrompt;
+        impl crate::prompts::McpPrompt for MockPrompt {
+            fn name(&self) -> String {
+                "test-prompt".to_string()
+            }
+            fn description(&self) -> Option<String> {
+                Some("desc".to_string())
+            }
+            fn arguments(&self) -> Vec<crate::prompts::PromptArgument> {
+                vec![]
+            }
+            fn get_messages(
+                &self,
+                _arguments: serde_json::Value,
+            ) -> anyhow::Result<Vec<crate::prompts::PromptMessage>> {
+                Ok(vec![])
+            }
+        }
+
+        prompt_registry.register(Arc::new(MockPrompt));
         let prompt_registry = Arc::new(RwLock::new(prompt_registry));
         let client = Arc::new(Aria2Client::new(Config::default()));
         let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);

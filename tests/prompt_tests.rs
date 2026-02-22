@@ -1,4 +1,21 @@
-use aria2_mcp_rs::prompts::{Prompt, PromptRegistry};
+use aria2_mcp_rs::prompts::{McpPrompt, PromptArgument, PromptMessage, PromptRegistry};
+use std::sync::Arc;
+
+struct MockPrompt;
+impl McpPrompt for MockPrompt {
+    fn name(&self) -> String {
+        "test-prompt".to_string()
+    }
+    fn description(&self) -> Option<String> {
+        Some("Test Description".to_string())
+    }
+    fn arguments(&self) -> Vec<PromptArgument> {
+        vec![]
+    }
+    fn get_messages(&self, _arguments: serde_json::Value) -> anyhow::Result<Vec<PromptMessage>> {
+        Ok(vec![])
+    }
+}
 
 #[test]
 fn test_prompt_registry_list() {
@@ -10,12 +27,7 @@ fn test_prompt_registry_list() {
 #[test]
 fn test_prompt_registration() {
     let mut registry = PromptRegistry::new();
-    let prompt = Prompt {
-        name: "test-prompt".to_string(),
-        description: Some("Test Description".to_string()),
-        arguments: vec![],
-    };
-    registry.register(prompt);
+    registry.register(Arc::new(MockPrompt));
 
     let prompts = registry.list_prompts();
     assert_eq!(prompts.len(), 1);

@@ -14,8 +14,35 @@ pub struct PromptArgument {
     pub required: bool,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PromptMessage {
+    pub role: String, // "user" or "assistant"
+    pub content: PromptContent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum PromptContent {
+    #[serde(rename = "text")]
+    Text { text: String },
+    #[serde(rename = "resource")]
+    Resource { resource: PromptResource },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PromptResource {
+    pub uri: String,
+}
+
+pub trait McpPrompt: Send + Sync {
+    fn name(&self) -> String;
+    fn description(&self) -> Option<String>;
+    fn arguments(&self) -> Vec<PromptArgument>;
+    fn get_messages(&self, arguments: serde_json::Value) -> anyhow::Result<Vec<PromptMessage>>;
+}
+
 pub struct PromptRegistry {
-    prompts: Vec<Prompt>,
+    prompts: Vec<Arc<dyn McpPrompt>>,
 }
 
 impl Default for PromptRegistry {
@@ -31,15 +58,24 @@ impl PromptRegistry {
         }
     }
 
-    pub fn register(&mut self, prompt: Prompt) {
+    pub fn register(&mut self, prompt: Arc<dyn McpPrompt>) {
         self.prompts.push(prompt);
     }
 
     pub fn list_prompts(&self) -> Vec<Prompt> {
-        self.prompts.clone()
+        self.prompts
+            .iter()
+            .map(|p| Prompt {
+                name: p.name(),
+                description: p.description(),
+                arguments: p.arguments(),
+            })
+            .collect()
     }
 
-    pub fn get_prompt(&self, name: &str) -> Option<Prompt> {
-        self.prompts.iter().find(|p| p.name == name).cloned()
+    pub fn get_prompt(&self, name: &str) -> Option<Arc<dyn McpPrompt>> {
+        self.prompts.iter().find(|p| p.name() == name).cloned()
     }
 }
+
+use std::sync::Arc;
