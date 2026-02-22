@@ -15,7 +15,6 @@ use crate::tools::registry::ToolRegistry;
 pub struct McpHandler {
     registry: Arc<RwLock<ToolRegistry>>,
     resource_registry: Arc<RwLock<ResourceRegistry>>,
-    #[allow(dead_code)]
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
 }
@@ -129,6 +128,7 @@ impl ServerHandler for McpHandler {
         Ok(ServerCapabilities {
             tools: Some(serde_json::json!({})),
             resources: Some(serde_json::json!({})),
+            prompts: Some(serde_json::json!({})),
             ..Default::default()
         })
     }
@@ -143,6 +143,11 @@ impl ServerHandler for McpHandler {
         params: Option<serde_json::Value>,
     ) -> Result<serde_json::Value, Error> {
         match method {
+            "prompts/list" => {
+                let registry = self.prompt_registry.read().await;
+                let prompts = registry.list_prompts();
+                Ok(serde_json::json!({ "prompts": prompts }))
+            }
             "resources/list" => {
                 let registry = self.resource_registry.read().await;
                 let resources = registry.list_resources();
@@ -295,6 +300,26 @@ mod tests {
     use crate::config::Config;
     use crate::resources::ResourceRegistry;
     use crate::tools::registry::ToolRegistry;
+
+    #[tokio::test]
+    async fn test_handler_prompts_list() {
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let mut prompt_registry = PromptRegistry::default();
+        prompt_registry.register(crate::prompts::Prompt {
+            name: "test-prompt".to_string(),
+            description: Some("desc".to_string()),
+            arguments: vec![],
+        });
+        let prompt_registry = Arc::new(RwLock::new(prompt_registry));
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        let result = handler.handle_method("prompts/list", None).await.unwrap();
+        let prompts = result["prompts"].as_array().unwrap();
+        assert_eq!(prompts.len(), 1);
+        assert_eq!(prompts[0]["name"], "test-prompt");
+    }
 
     #[tokio::test]
     async fn test_handler_tools_list() {
