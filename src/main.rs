@@ -1,5 +1,5 @@
 use anyhow::Result;
-use aria2_mcp_rs::{Aria2Client, Config, McpServer, ToolRegistry};
+use aria2_mcp_rs::{Aria2Client, Config, McpServer, ResourceRegistry, ToolRegistry};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -110,8 +110,9 @@ async fn run_app(config: Config) -> Result<()> {
         .collect();
 
     let registry = ToolRegistry::new(&config);
+    let resource_registry = ResourceRegistry::default();
 
-    let server = McpServer::new(config, registry, clients);
+    let server = McpServer::new(config, registry, resource_registry, clients);
     server.run().await?;
 
     Ok(())

@@ -8,6 +8,7 @@ pub mod tools;
 pub use aria2::Aria2Client;
 pub use config::{Config, TransportType};
 pub use error::{Error, Result};
+pub use resources::ResourceRegistry;
 pub use server::McpServer;
 pub use tools::{
     BulkManageDownloadsTool, CheckHealthTool, ConfigureAria2Tool, InspectDownloadTool,

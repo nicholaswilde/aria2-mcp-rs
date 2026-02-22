@@ -10,19 +10,27 @@ use tokio::time::{self, Duration};
 
 use crate::aria2::Aria2Client;
 use crate::config::{Config, TransportType};
+use crate::resources::ResourceRegistry;
 use crate::tools::ToolRegistry;
 
 pub struct McpServer {
     config: Config,
     registry: Arc<RwLock<ToolRegistry>>,
+    resource_registry: Arc<RwLock<ResourceRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
 }
 
 impl McpServer {
-    pub fn new(config: Config, registry: ToolRegistry, clients: Vec<Aria2Client>) -> Self {
+    pub fn new(
+        config: Config,
+        registry: ToolRegistry,
+        resource_registry: ResourceRegistry,
+        clients: Vec<Aria2Client>,
+    ) -> Self {
         Self {
             config,
             registry: Arc::new(RwLock::new(registry)),
+            resource_registry: Arc::new(RwLock::new(resource_registry)),
             clients: clients.into_iter().map(Arc::new).collect(),
         }
     }
@@ -43,7 +51,12 @@ impl McpServer {
 
         match self.config.transport {
             TransportType::Stdio => {
-                stdio::run_server(Arc::clone(&self.registry), self.clients.clone()).await
+                stdio::run_server(
+                    Arc::clone(&self.registry),
+                    Arc::clone(&self.resource_registry),
+                    self.clients.clone(),
+                )
+                .await
             }
             TransportType::Sse => {
                 if !check_port_available(self.config.http_port).await {
@@ -56,6 +69,7 @@ impl McpServer {
                     self.config.http_port,
                     self.config.http_auth_token.clone(),
                     Arc::clone(&self.registry),
+                    Arc::clone(&self.resource_registry),
                     self.clients.clone(),
                 )
                 .await
@@ -193,8 +207,9 @@ mod tests {
     fn test_new_server() {
         let config = Config::default();
         let registry = ToolRegistry::new(&config);
+        let resource_registry = ResourceRegistry::default();
         let client = Aria2Client::new(config.clone());
-        let _server = McpServer::new(config, registry, vec![client]);
+        let _server = McpServer::new(config, registry, resource_registry, vec![client]);
     }
 
     #[tokio::test]
@@ -205,8 +220,9 @@ mod tests {
             ..Default::default()
         };
         let registry = ToolRegistry::new(&config);
+        let resource_registry = ResourceRegistry::default();
         let client = Aria2Client::new(config.clone());
-        let server = McpServer::new(config, registry, vec![client]);
+        let server = McpServer::new(config, registry, resource_registry, vec![client]);
         let result = server.run().await;
         assert!(result.is_err());
     }
