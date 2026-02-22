@@ -17,6 +17,36 @@ pub struct Config {
     pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
     #[serde(default)]
     pub bandwidth_schedules: Vec<BandwidthSchedule>,
+    #[serde(default, deserialize_with = "deserialize_instances")]
+    pub instances: Vec<Aria2Instance>,
+}
+
+fn deserialize_instances<'de, D>(deserializer: D) -> Result<Vec<Aria2Instance>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Instances {
+        Vec(Vec<Aria2Instance>),
+        Map(HashMap<String, Aria2Instance>),
+    }
+
+    match Instances::deserialize(deserializer)? {
+        Instances::Vec(v) => Ok(v),
+        Instances::Map(m) => {
+            let mut v: Vec<_> = m.into_iter().collect();
+            v.sort_by_key(|(k, _)| k.parse::<usize>().unwrap_or(0));
+            Ok(v.into_iter().map(|(_, v)| v).collect())
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Aria2Instance {
+    pub name: String,
+    pub rpc_url: String,
+    pub rpc_secret: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -43,9 +73,11 @@ pub enum TransportType {
 
 impl Default for Config {
     fn default() -> Self {
+        let rpc_url = "http://localhost:6800/jsonrpc".to_string();
+        let rpc_secret = None;
         Self {
-            rpc_url: "http://localhost:6800/jsonrpc".to_string(),
-            rpc_secret: None,
+            rpc_url: rpc_url.clone(),
+            rpc_secret: rpc_secret.clone(),
             transport: TransportType::Stdio,
             http_port: 3000,
             http_auth_token: None,
@@ -54,6 +86,11 @@ impl Default for Config {
             no_verify_ssl: true,
             bandwidth_profiles: HashMap::new(),
             bandwidth_schedules: Vec::new(),
+            instances: vec![Aria2Instance {
+                name: "default".to_string(),
+                rpc_url,
+                rpc_secret,
+            }],
         }
     }
 }
@@ -75,13 +112,31 @@ impl Config {
             .add_source(Environment::with_prefix("ARIA2_MCP").separator("__"))
             .build()?;
 
-        s.try_deserialize()
+        let mut config: Self = s.try_deserialize()?;
+        config.normalize();
+        Ok(config)
+    }
+
+    pub fn normalize(&mut self) {
+        // If instances is empty, populate from legacy fields
+        if self.instances.is_empty() {
+            self.instances.push(Aria2Instance {
+                name: "default".to_string(),
+                rpc_url: self.rpc_url.clone(),
+                rpc_secret: self.rpc_secret.clone(),
+            });
+        }
     }
 
     pub fn new(rpc_url: String, rpc_secret: Option<String>) -> Self {
         Self {
-            rpc_url,
-            rpc_secret,
+            rpc_url: rpc_url.clone(),
+            rpc_secret: rpc_secret.clone(),
+            instances: vec![Aria2Instance {
+                name: "default".to_string(),
+                rpc_url,
+                rpc_secret,
+            }],
             ..Default::default()
         }
     }
