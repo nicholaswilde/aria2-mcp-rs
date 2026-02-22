@@ -10,7 +10,7 @@
 ## Phase 2: Implement Specific Resources
 - [x] Task: Implement `GlobalStatusResource` (`aria2://status/global`). 8dec05f
 - [x] Task: Implement `ActiveDownloadsResource` (`aria2://downloads/active`). fc30a05
-- [~] Task: Implement `RecentLogsResource` (`aria2://logs/recent`) with a ring buffer or file reader.
+- [x] Task: Implement `RecentLogsResource` (`aria2://logs/recent`) with a ring buffer or file reader. 9be0d89
 
 ## Phase 3: Integration & Testing
 - [ ] Task: Add unit tests for resource registry and handlers.
