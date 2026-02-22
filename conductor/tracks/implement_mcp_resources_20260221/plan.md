@@ -14,5 +14,5 @@
 
 ## Phase 3: Integration & Testing
 - [x] Task: Add unit tests for resource registry and handlers. 91957b3
-- [ ] Task: Add integration tests verifying `resources/list` and `resources/read` via MCP protocol.
+- [x] Task: Add integration tests verifying `resources/list` and `resources/read` via MCP protocol. 848c161
 - [ ] Task: Update documentation to list available resources.
