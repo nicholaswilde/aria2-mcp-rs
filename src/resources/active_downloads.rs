@@ -29,3 +29,76 @@ impl McpResource for ActiveDownloadsResource {
         client.tell_active(None).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Config;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    #[tokio::test]
+    async fn test_active_downloads_resource_read() -> Result<()> {
+        let server = MockServer::start().await;
+
+        let mock_response = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "result": [
+                {
+                    "gid": "123",
+                    "status": "active",
+                    "totalLength": "100",
+                    "completedLength": "50"
+                }
+            ]
+        });
+
+        Mock::given(method("POST"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(mock_response))
+            .mount(&server)
+            .await;
+
+        let mut config = Config::default();
+        config.rpc_url = format!("http://{}", server.address());
+        let client = Aria2Client::new(config);
+
+        let resource = ActiveDownloadsResource;
+        let result = resource.read(&client).await?;
+
+        assert!(result.is_array());
+        assert_eq!(result.as_array().unwrap().len(), 1);
+        assert_eq!(result[0]["gid"], "123");
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_active_downloads_resource_read_empty() -> Result<()> {
+        let server = MockServer::start().await;
+
+        let mock_response = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "result": []
+        });
+
+        Mock::given(method("POST"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(mock_response))
+            .mount(&server)
+            .await;
+
+        let mut config = Config::default();
+        config.rpc_url = format!("http://{}", server.address());
+        let client = Aria2Client::new(config);
+
+        let resource = ActiveDownloadsResource;
+        let result = resource.read(&client).await?;
+
+        assert!(result.is_array());
+        assert_eq!(result.as_array().unwrap().len(), 0);
+
+        Ok(())
+    }
+}
