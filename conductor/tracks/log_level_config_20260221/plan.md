@@ -13,7 +13,7 @@ This plan outlines the steps to make the application's log level configurable fr
 - [x] Task: Implement invalid log level string handling (warning + default to `info`).
 - [x] Task: Conductor - User Manual Verification 'Logic Refinement & Validation' (Protocol in workflow.md)
 
-## Phase 3: Documentation & Verification
+## Phase 3: Documentation & Verification [checkpoint: d84da92]
 - [x] Task: Update `config.toml.example` and `README.md` to document the new `log_level` parameter. [b6d26bc]
-- [~] Task: Perform final project-wide verification and quality gate checks.
-- [ ] Task: Conductor - User Manual Verification 'Documentation & Verification' (Protocol in workflow.md)
+- [x] Task: Perform final project-wide verification and quality gate checks. [b6d26bc]
+- [x] Task: Conductor - User Manual Verification 'Documentation & Verification' (Protocol in workflow.md)
