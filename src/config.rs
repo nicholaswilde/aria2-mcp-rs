@@ -10,6 +10,7 @@ pub struct Config {
     #[serde(alias = "port")]
     pub http_port: u16,
     pub http_auth_token: Option<String>,
+    pub log_level: String,
     pub lazy_mode: bool,
     pub no_verify_ssl: bool,
     #[serde(default)]
@@ -48,6 +49,7 @@ impl Default for Config {
             transport: TransportType::Stdio,
             http_port: 3000,
             http_auth_token: None,
+            log_level: "info".to_string(),
             lazy_mode: false,
             no_verify_ssl: true,
             bandwidth_profiles: HashMap::new(),
@@ -63,6 +65,7 @@ impl Config {
             .set_default("rpc_url", "http://localhost:6800/jsonrpc")?
             .set_default("transport", "stdio")?
             .set_default("http_port", 3000)?
+            .set_default("log_level", "info")?
             .set_default("lazy_mode", false)?
             .set_default("no_verify_ssl", true)?
             // Add configuration from files
