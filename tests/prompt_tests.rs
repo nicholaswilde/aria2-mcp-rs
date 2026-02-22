@@ -21,9 +21,8 @@ impl McpPrompt for MockPrompt {
 fn test_prompt_registry_list() {
     let registry = PromptRegistry::new();
     let prompts = registry.list_prompts();
-    // Should have 1 default prompt (diagnose-download)
-    assert_eq!(prompts.len(), 1);
-    assert_eq!(prompts[0].name, "diagnose-download");
+    // Should have 2 default prompts (diagnose-download, optimize-schedule)
+    assert_eq!(prompts.len(), 2);
 }
 
 #[test]
@@ -32,10 +31,20 @@ fn test_prompt_registration() {
     registry.register(Arc::new(MockPrompt));
 
     let prompts = registry.list_prompts();
-    // 1 default (diagnose-download) + 1 mock
-    assert_eq!(prompts.len(), 2);
+    // 2 defaults (diagnose-download, optimize-schedule) + 1 mock
+    assert_eq!(prompts.len(), 3);
     assert!(prompts.iter().any(|p| p.name == "test-prompt"));
     assert!(prompts.iter().any(|p| p.name == "diagnose-download"));
+    assert!(prompts.iter().any(|p| p.name == "optimize-schedule"));
+}
+
+#[test]
+fn test_optimize_schedule_prompt_messages() {
+    let prompt = aria2_mcp_rs::prompts::OptimizeSchedulePrompt;
+    let messages = prompt.get_messages(serde_json::Value::Null).unwrap();
+
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0].role, "user");
 }
 
 #[test]

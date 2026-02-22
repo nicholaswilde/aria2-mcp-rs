@@ -35,8 +35,10 @@ pub struct PromptResource {
 }
 
 pub mod diagnose_download;
+pub mod optimize_schedule;
 
 pub use diagnose_download::DiagnoseDownloadPrompt;
+pub use optimize_schedule::OptimizeSchedulePrompt;
 
 pub trait McpPrompt: Send + Sync {
     fn name(&self) -> String;
@@ -62,6 +64,7 @@ impl PromptRegistry {
         };
 
         registry.register(Arc::new(DiagnoseDownloadPrompt));
+        registry.register(Arc::new(OptimizeSchedulePrompt));
 
         registry
     }

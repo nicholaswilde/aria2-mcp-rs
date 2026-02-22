@@ -420,10 +420,11 @@ mod tests {
 
         let result = handler.handle_method("prompts/list", None).await.unwrap();
         let prompts = result["prompts"].as_array().unwrap();
-        // 1 default (diagnose-download) + 1 mock
-        assert_eq!(prompts.len(), 2);
+        // 2 defaults (diagnose-download, optimize-schedule) + 1 mock
+        assert_eq!(prompts.len(), 3);
         assert!(prompts.iter().any(|p| p["name"] == "test-prompt"));
         assert!(prompts.iter().any(|p| p["name"] == "diagnose-download"));
+        assert!(prompts.iter().any(|p| p["name"] == "optimize-schedule"));
     }
 
     #[tokio::test]
