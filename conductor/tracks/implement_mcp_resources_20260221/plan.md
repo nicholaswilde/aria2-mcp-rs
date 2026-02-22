@@ -5,7 +5,7 @@
 - [x] Task: Implement `ResourceRegistry` to manage resources. c466ecd
 - [x] Task: Update `McpServer` to initialize and use `ResourceRegistry`. af88fd0
 - [x] Task: Implement `resources/list` handler in `McpHandler`. cae3a2e
-- [ ] Task: Implement `resources/read` handler in `McpHandler`.
+- [x] Task: Implement `resources/read` handler in `McpHandler`. 8dec05f
 
 ## Phase 2: Implement Specific Resources
 - [ ] Task: Implement `GlobalStatusResource` (`aria2://status/global`).
