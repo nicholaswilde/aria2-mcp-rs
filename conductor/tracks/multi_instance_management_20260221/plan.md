@@ -10,10 +10,10 @@ This plan outlines the steps to implement multi-instance support in `aria2-mcp-r
 - [x] Task: Conductor - User Manual Verification 'Configuration & Client Management' (Protocol in workflow.md)
 
 ## Phase 2: Tool Argument & Routing
-- [~] Task: Write failing tests for `instance` argument parsing and routing in `McpHandler`.
-- [ ] Task: Update `ToolRegistry` to include optional `instance` (integer) parameter in all tool schemas.
-- [ ] Task: Refactor `McpHandler` to route tool calls to the correct `Aria2Client` based on the `instance` argument (defaulting to index 0).
-- [ ] Task: Conductor - User Manual Verification 'Tool Argument & Routing' (Protocol in workflow.md)
+- [x] Task: Write failing tests for `instance` argument parsing and routing in `McpHandler`. f1d2d0c
+- [x] Task: Update `ToolRegistry` to include optional `instance` (integer) parameter in all tool schemas. 6d90a58
+- [x] Task: Refactor `McpHandler` to route tool calls to the correct `Aria2Client` based on the `instance` argument (defaulting to index 0). f1d2d0c
+- [~] Task: Conductor - User Manual Verification 'Tool Argument & Routing' (Protocol in workflow.md)
 
 ## Phase 3: Global Commands & Health Monitoring
 - [ ] Task: Write failing tests for `manage_all_instances` tool.
