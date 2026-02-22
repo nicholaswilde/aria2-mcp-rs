@@ -16,8 +16,10 @@ struct Args {
     rpc_secret: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_TRANSPORT", default_value = "stdio")]
     transport: Option<String>,
-    #[arg(short, long, env = "ARIA2_MCP_PORT", default_value = "3000")]
-    port: Option<u16>,
+    #[arg(long, env = "ARIA2_MCP_HTTP_PORT", default_value = "3000")]
+    http_port: Option<u16>,
+    #[arg(long, env = "ARIA2_MCP_HTTP_AUTH_TOKEN")]
+    http_auth_token: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_LAZY", default_value = "false")]
     lazy: bool,
     #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL", default_value = "true")]
@@ -49,8 +51,11 @@ async fn run_app(args: Args) -> Result<()> {
             _ => aria2_mcp_rs::TransportType::Stdio,
         };
     }
-    if let Some(port) = args.port {
-        config.port = port;
+    if let Some(port) = args.http_port {
+        config.http_port = port;
+    }
+    if let Some(token) = args.http_auth_token {
+        config.http_auth_token = Some(token);
     }
     if args.lazy {
         config.lazy_mode = true;
@@ -116,8 +121,14 @@ mod tests {
 
     #[test]
     fn test_args_parse_port() {
-        let args = Args::try_parse_from(["aria2-mcp-rs", "--port", "4000"]).unwrap();
-        assert_eq!(args.port, Some(4000));
+        let args = Args::try_parse_from(["aria2-mcp-rs", "--http-port", "4000"]).unwrap();
+        assert_eq!(args.http_port, Some(4000));
+    }
+
+    #[test]
+    fn test_args_parse_auth_token() {
+        let args = Args::try_parse_from(["aria2-mcp-rs", "--http-auth-token", "test-token"]).unwrap();
+        assert_eq!(args.http_auth_token, Some("test-token".to_string()));
     }
 
     #[test]
@@ -130,14 +141,17 @@ mod tests {
             "secret",
             "--transport",
             "sse",
-            "--port",
+            "--http-port",
             "5000",
+            "--http-auth-token",
+            "test-token",
         ])
         .unwrap();
         assert_eq!(args.rpc_url, Some("http://test".to_string()));
         assert_eq!(args.rpc_secret, Some("secret".to_string()));
         assert_eq!(args.transport, Some("sse".to_string()));
-        assert_eq!(args.port, Some(5000));
+        assert_eq!(args.http_port, Some(5000));
+        assert_eq!(args.http_auth_token, Some("test-token".to_string()));
     }
 
     #[test]

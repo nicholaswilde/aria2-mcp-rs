@@ -1,6 +1,8 @@
 use anyhow::Result;
 use axum::{
-    extract::Json,
+    extract::{Json, Request},
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{get, post},
     Extension, Router,
 };
@@ -13,17 +15,24 @@ use crate::aria2::Aria2Client;
 use crate::tools::ToolRegistry;
 
 pub async fn run_server(
-    port: u16,
+    http_port: u16,
+    http_auth_token: Option<String>,
     registry: Arc<RwLock<ToolRegistry>>,
     client: Arc<Aria2Client>,
 ) -> Result<()> {
-    let app = Router::new()
+    let mut app = Router::new()
         .route("/tools", get(list_tools))
         .route("/tools/execute", post(execute_tool))
         .layer(Extension(registry))
         .layer(Extension(client));
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    if let Some(token) = http_auth_token {
+        app = app.layer(middleware::from_fn(move |req, next| {
+            auth_middleware(req, next, token.clone())
+        }));
+    }
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], http_port));
     let listener = TcpListener::bind(addr).await?;
 
     println!("SSE Server starting on {}", addr);
@@ -31,6 +40,31 @@ pub async fn run_server(
     axum::serve(listener, app).await?;
 
     Ok(())
+}
+
+async fn auth_middleware(
+    req: Request,
+    next: Next,
+    required_token: String,
+) -> Result<Response, Response> {
+    let auth_header = req
+        .headers()
+        .get(axum::http::header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok());
+
+    let expected_auth = format!("Bearer {}", required_token);
+
+    if let Some(auth) = auth_header {
+        if auth == expected_auth {
+            return Ok(next.run(req).await);
+        }
+    }
+
+    Err((
+        axum::http::StatusCode::UNAUTHORIZED,
+        "Unauthorized: Invalid or missing Bearer token",
+    )
+        .into_response())
 }
 
 async fn list_tools(

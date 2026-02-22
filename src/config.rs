@@ -7,7 +7,9 @@ pub struct Config {
     pub rpc_url: String,
     pub rpc_secret: Option<String>,
     pub transport: TransportType,
-    pub port: u16,
+    #[serde(alias = "port")]
+    pub http_port: u16,
+    pub http_auth_token: Option<String>,
     pub lazy_mode: bool,
     pub no_verify_ssl: bool,
     #[serde(default)]
@@ -44,7 +46,8 @@ impl Default for Config {
             rpc_url: "http://localhost:6800/jsonrpc".to_string(),
             rpc_secret: None,
             transport: TransportType::Stdio,
-            port: 3000,
+            http_port: 3000,
+            http_auth_token: None,
             lazy_mode: false,
             no_verify_ssl: true,
             bandwidth_profiles: HashMap::new(),
@@ -59,7 +62,7 @@ impl Config {
             // Start with default values
             .set_default("rpc_url", "http://localhost:6800/jsonrpc")?
             .set_default("transport", "stdio")?
-            .set_default("port", 3000)?
+            .set_default("http_port", 3000)?
             .set_default("lazy_mode", false)?
             .set_default("no_verify_ssl", true)?
             // Add configuration from files
@@ -90,7 +93,7 @@ mod tests {
         let config = Config::default();
         assert_eq!(config.rpc_url, "http://localhost:6800/jsonrpc");
         assert_eq!(config.transport, TransportType::Stdio);
-        assert_eq!(config.port, 3000);
+        assert_eq!(config.http_port, 3000);
     }
 
     #[test]

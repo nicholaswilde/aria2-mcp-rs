@@ -41,7 +41,8 @@ impl McpServer {
             }
             TransportType::Sse => {
                 sse::run_server(
-                    self.config.port,
+                    self.config.http_port,
+                    self.config.http_auth_token.clone(),
                     Arc::clone(&self.registry),
                     Arc::clone(&self.client),
                 )
@@ -183,7 +184,7 @@ mod tests {
     async fn test_server_run_sse_error() {
         let config = Config {
             transport: TransportType::Sse,
-            port: 1, // Likely to fail on most systems
+            http_port: 1, // Likely to fail on most systems
             ..Default::default()
         };
         let registry = ToolRegistry::new(&config);
