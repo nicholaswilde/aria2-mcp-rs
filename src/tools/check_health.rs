@@ -182,9 +182,10 @@ fn get_disk_info<P: AsRef<Path>>(path: P) -> Result<DiskInfo> {
         let mut stats: libc::statvfs = mem::zeroed();
         let path_str = std::ffi::CString::new(path.as_ref().to_string_lossy().as_bytes())?;
         if libc::statvfs(path_str.as_ptr(), &mut stats) == 0 {
+            #[allow(clippy::useless_conversion)]
             Ok(DiskInfo {
-                available: stats.f_bsize as u64 * stats.f_bavail as u64,
-                _total: stats.f_bsize as u64 * stats.f_blocks as u64,
+                available: u64::from(stats.f_bsize) * u64::from(stats.f_bavail),
+                _total: u64::from(stats.f_bsize) * u64::from(stats.f_blocks),
             })
         } else {
             Err(anyhow::anyhow!("Failed to get disk stats"))
