@@ -1,0 +1,8 @@
+{
+  "track_id": "multi_instance_management_20260221",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-21T12:00:00Z",
+  "updated_at": "2026-02-21T12:00:00Z",
+  "description": "Multi-Instance Management: The server can connect to and target multiple aria2 instances simultaneously from a single MCP interface using an optional 'instance' argument in every tool. Includes global commands and health monitoring across all instances."
+}
