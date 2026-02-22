@@ -10,7 +10,7 @@
 - [x] Task: Implement mapping logic from aria2 events to MCP notification format. 8a5db6c
 - [x] Task: Update `McpServer` to broadcast notifications to active transport channels. ba651f2
 
-## Phase 3: Robustness & Testing
+## Phase 3: Robustness & Testing [checkpoint: 9a219f0]
 - [x] Task: Implement exponential backoff for reconnection logic. 109b9a2
 - [x] Task: Add integration tests simulating aria2 events and verifying MCP output. 1294c9d
 - [x] Task: Verify behavior with multiple aria2 instances. 044db61
