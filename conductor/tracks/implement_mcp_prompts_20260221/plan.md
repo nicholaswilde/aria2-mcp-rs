@@ -1,7 +1,7 @@
 # Implementation Plan - Implement MCP Prompts
 
 ## Phase 1: Prompt Registry & Core Logic
-- [ ] Task: Define `Prompt` struct and `PromptRegistry` in `src/prompts/mod.rs`.
+- [x] Task: Define `Prompt` struct and `PromptRegistry` in `src/prompts/mod.rs`. bf74e8f
 - [ ] Task: Update `McpServer` to initialize and use `PromptRegistry`.
 - [ ] Task: Implement `prompts/list` handler in `McpHandler`.
 - [ ] Task: Implement `prompts/get` handler in `McpHandler`.
