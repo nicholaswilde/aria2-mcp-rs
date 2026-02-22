@@ -13,6 +13,6 @@ This plan outlines the steps to refine the `http_port` configuration and impleme
 - [x] Task: Conductor - User Manual Verification 'Port Availability Check' (Protocol in workflow.md)
 
 ## Phase 3: Documentation & Final Integration
-- [ ] Task: Update `config.toml.example` and `README.md` to document the new parameters.
-- [ ] Task: Perform final project-wide verification and quality gate checks.
+- [x] Task: Update `config.toml.example` and `README.md` to document the new parameters. [822cc41]
+- [x] Task: Perform final project-wide verification and quality gate checks. [822cc41]
 - [ ] Task: Conductor - User Manual Verification 'Documentation & Final Integration' (Protocol in workflow.md)
