@@ -1,5 +1,6 @@
 use crate::Config;
 use anyhow::Result;
+use futures_util::StreamExt;
 use reqwest::Client;
 use std::sync::{Arc, RwLock};
 use tokio::net::TcpStream;
@@ -18,6 +19,45 @@ impl Aria2Client {
         let url = self.ws_url()?;
         let (ws_stream, _) = connect_async(url).await?;
         Ok(ws_stream)
+    }
+
+    pub async fn start_notifications(
+        &self,
+        tx: tokio::sync::mpsc::Sender<serde_json::Value>,
+    ) -> Result<()> {
+        let client = self.clone();
+        tokio::spawn(async move {
+            loop {
+                match client.connect_notifications().await {
+                    Ok(mut ws_stream) => {
+                        log::info!("Connected to aria2 WebSocket for instance: {}", client.name);
+                        while let Some(msg) = ws_stream.next().await {
+                            match msg {
+                                Ok(tokio_tungstenite::tungstenite::Message::Text(text)) => {
+                                    if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
+                                        if tx.send(json).await.is_err() {
+                                            log::error!("Notification channel closed");
+                                            return;
+                                        }
+                                    }
+                                }
+                                Ok(tokio_tungstenite::tungstenite::Message::Close(_)) => break,
+                                Err(e) => {
+                                    log::error!("WebSocket error: {}", e);
+                                    break;
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Failed to connect to aria2 WebSocket: {}", e);
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+            }
+        });
+        Ok(())
     }
 
     pub fn new(config: Config) -> Self {
