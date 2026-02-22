@@ -5,7 +5,7 @@
 [![ci](https://img.shields.io/github/actions/workflow/status/nicholaswilde/aria2-mcp-rs/ci.yml?label=ci&style=for-the-badge&branch=main&logo=github-actions)](https://github.com/nicholaswilde/aria2-mcp-rs/actions/workflows/ci.yml)
 
 > [!WARNING]
-> This project is currently in active development (v0.1.6) and is **not production-ready**. Features may change, and breaking changes may occur without notice. **Use this MCP server at your own risk.**
+> This project is currently in active development (v0.1.7) and is **not production-ready**. Features may change, and breaking changes may occur without notice. **Use this MCP server at your own risk.**
 
 This project is a high-performance Model Context Protocol (MCP) server for [aria2](https://aria2.github.io/), built with Rust. It provides a comprehensive interface for LLMs to monitor and manage downloads.
 
