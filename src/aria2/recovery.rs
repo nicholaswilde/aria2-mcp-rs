@@ -165,6 +165,11 @@ impl RecoveryManager {
         counts.remove(gid);
     }
 
+    pub async fn perform_retry_cleanup_for_test(&self, gid: &str) {
+        let mut pending = self.pending_retries.write().await;
+        pending.remove(gid);
+    }
+
     pub async fn inject_trackers(
         &self,
         client: &Aria2Client,
