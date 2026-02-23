@@ -230,29 +230,35 @@ async fn test_recovery_manager_retry_limit() -> anyhow::Result<()> {
         initial_backoff_secs: 1,
         ..Default::default()
     });
-    
+
     let status = serde_json::json!({
         "status": "error",
         "errorCode": "2",
         "gid": "test-gid"
     });
-    
+
     // First retry
-    let backoff1 = manager.analyze_and_get_retry_backoff("test-gid", &status).await;
+    let backoff1 = manager
+        .analyze_and_get_retry_backoff("test-gid", &status)
+        .await;
     assert_eq!(backoff1, Some(1));
-    
+
     // Clear pending for test (normally perform_retry would do this)
     manager.perform_retry_cleanup_for_test("test-gid").await;
-    
+
     // Second retry
-    let backoff2 = manager.analyze_and_get_retry_backoff("test-gid", &status).await;
+    let backoff2 = manager
+        .analyze_and_get_retry_backoff("test-gid", &status)
+        .await;
     assert_eq!(backoff2, Some(2));
-    
+
     manager.perform_retry_cleanup_for_test("test-gid").await;
-    
+
     // Third retry - should be None (limit reached)
-    let backoff3 = manager.analyze_and_get_retry_backoff("test-gid", &status).await;
+    let backoff3 = manager
+        .analyze_and_get_retry_backoff("test-gid", &status)
+        .await;
     assert_eq!(backoff3, None);
-    
+
     Ok(())
 }

@@ -12,5 +12,5 @@
 
 ## Phase 3: Integration & Testing
 - [x] Task: Add unit tests for error analysis and retry logic. bbf6fbb
-- [ ] Task: Add integration tests simulating failures and verifying recovery.
+- [~] Task: Add integration tests simulating failures and verifying recovery.
 - [ ] Task: Update documentation.
