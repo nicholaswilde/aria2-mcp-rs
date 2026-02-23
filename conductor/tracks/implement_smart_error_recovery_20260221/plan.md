@@ -10,7 +10,7 @@
 - [x] Task: Implement logic to identify stalled torrents and inject trackers. b76895d
 - [x] Task: Add a configuration flag to enable/disable tracker injection. 37bb5a4
 
-## Phase 3: Integration & Testing
+## Phase 3: Integration & Testing [checkpoint: 9de7e6f]
 - [x] Task: Add unit tests for error analysis and retry logic. bbf6fbb
-- [~] Task: Add integration tests simulating failures and verifying recovery.
-- [ ] Task: Update documentation.
+- [x] Task: Add integration tests simulating failures and verifying recovery. 9de7e6f
+- [x] Task: Update documentation. 9de7e6f
