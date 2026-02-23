@@ -6,7 +6,7 @@
 - [x] Task: Implement retry logic for transient errors. 8a4da57
 
 ## Phase 2: Advanced Recovery (Tracker Injection)
-- [ ] Task: Implement `TrackerScraper` or fetch a public tracker list.
+- [x] Task: Implement `TrackerScraper` or fetch a public tracker list. 2676073
 - [ ] Task: Implement logic to identify stalled torrents and inject trackers.
 - [ ] Task: Add a configuration flag to enable/disable tracker injection.
 
