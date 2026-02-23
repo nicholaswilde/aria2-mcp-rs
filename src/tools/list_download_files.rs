@@ -106,7 +106,7 @@ impl ListDownloadFilesTool {
                 .strip_prefix(sandbox.base_dir())
                 .unwrap_or(&path)
                 .to_string_lossy()
-                .to_string();
+                .replace('\\', "/");
 
             entries.push(json!({
                 "path": rel_path,
