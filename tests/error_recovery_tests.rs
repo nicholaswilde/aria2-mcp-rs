@@ -1,4 +1,4 @@
-use aria2_mcp_rs::aria2::recovery::{ErrorAnalyzer, RecoveryManager, RetryConfig};
+use aria2_mcp_rs::aria2::recovery::{ErrorAnalyzer, RecoveryManager, RetryConfig, TrackerScraper};
 use aria2_mcp_rs::aria2::Aria2Client;
 use aria2_mcp_rs::config::Config;
 use wiremock::matchers::{method, path};
@@ -162,6 +162,27 @@ async fn test_recovery_manager_perform_retry() -> anyhow::Result<()> {
 
     let result = manager.perform_retry(&client, "old-gid").await?;
     assert_eq!(result, "new-gid");
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_tracker_scraper_fetch() -> anyhow::Result<()> {
+    let mock_server = MockServer::start().await;
+    let tracker_list = "udp://tracker.example.com:80/announce\n\nhttp://tracker2.example.com:80/announce";
+
+    Mock::given(method("GET"))
+        .and(path("/trackers.txt"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(tracker_list))
+        .mount(&mock_server)
+        .await;
+
+    let scraper = TrackerScraper::new(format!("{}/trackers.txt", mock_server.uri()));
+    let trackers = scraper.fetch_trackers().await?;
+
+    assert_eq!(trackers.len(), 2);
+    assert!(trackers.contains(&"udp://tracker.example.com:80/announce".to_string()));
+    assert!(trackers.contains(&"http://tracker2.example.com:80/announce".to_string()));
 
     Ok(())
 }

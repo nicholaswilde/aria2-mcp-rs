@@ -161,3 +161,23 @@ impl RecoveryManager {
         counts.remove(gid);
     }
 }
+
+pub struct TrackerScraper {
+    url: String,
+}
+
+impl TrackerScraper {
+    pub fn new(url: String) -> Self {
+        Self { url }
+    }
+
+    pub async fn fetch_trackers(&self) -> anyhow::Result<Vec<String>> {
+        let resp = reqwest::get(&self.url).await?.text().await?;
+        let trackers: Vec<String> = resp
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty())
+            .collect();
+        Ok(trackers)
+    }
+}
