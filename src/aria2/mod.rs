@@ -7,6 +7,7 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
 
 pub mod notifications;
+pub mod recovery;
 
 pub use notifications::{Aria2Event, Aria2Notification};
 
