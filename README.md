@@ -14,6 +14,7 @@ This project is a high-performance Model Context Protocol (MCP) server for [aria
 - **Dual Transport Implementation:** Supports both **Stdio** for local integration (e.g., Claude Desktop) and **HTTP/SSE** for remote, network-accessible clients.
 - **Functional Tool Grouping:** Consolidates granular API actions into logical management tools (e.g., `manage_downloads`, `monitor_queue`) to minimize token usage and optimize the AI context window.
 - **Multi-Instance Support:** Enables a single MCP server to monitor and manage multiple aria2 instances simultaneously.
+- **Strict Filesystem Sandboxing:** Provides secure access to the download directory with path traversal prevention.
 - **Automated Schema Validation:** Tools use a robust registry system with automated JSON schema-based input validation.
 
 ## Implemented Tools
@@ -30,6 +31,7 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`schedule_limits`**: Define bandwidth speed profiles and automatically activate them on a schedule.
 - **`organize_completed`**: Automatically move completed downloads to target directories based on rules (extension or pattern).
 - **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
+- **`list_download_files`**: List files and directories within the download directory (strictly sandboxed).
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
 - **`manage_tools`**: (Lazy Mode only) Enable or disable individual tools to optimize token usage.
 
