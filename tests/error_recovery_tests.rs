@@ -186,3 +186,30 @@ async fn test_tracker_scraper_fetch() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn test_recovery_manager_inject_trackers() -> anyhow::Result<()> {
+    let mock_server = MockServer::start().await;
+    
+    // Mock changeOption response
+    let response = serde_json::json!({
+        "id": "aria2-mcp",
+        "jsonrpc": "2.0",
+        "result": "OK"
+    });
+
+    Mock::given(method("POST"))
+        .and(path("/"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(response))
+        .mount(&mock_server)
+        .await;
+
+    let config = Config::new(mock_server.uri(), None);
+    let client = Aria2Client::new(config);
+    let manager = RecoveryManager::new(RetryConfig::default());
+    
+    let trackers = vec!["udp://tracker1.com".to_string(), "http://tracker2.com".to_string()];
+    manager.inject_trackers(&client, "torrent-gid", trackers).await?;
+
+    Ok(())
+}

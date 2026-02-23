@@ -160,6 +160,21 @@ impl RecoveryManager {
         let mut counts = self.retry_counts.write().await;
         counts.remove(gid);
     }
+
+    pub async fn inject_trackers(
+        &self,
+        client: &Aria2Client,
+        gid: &str,
+        trackers: Vec<String>,
+    ) -> anyhow::Result<()> {
+        log::info!("Injecting {} trackers into download {}...", trackers.len(), gid);
+        let trackers_str = trackers.join(",");
+        let options = serde_json::json!({
+            "bt-tracker": trackers_str
+        });
+        client.change_option(gid, options).await?;
+        Ok(())
+    }
 }
 
 pub struct TrackerScraper {
