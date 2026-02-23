@@ -54,6 +54,7 @@ fn test_retry_config_defaults() {
     let config = RetryConfig::default();
     assert_eq!(config.max_retries, 3);
     assert_eq!(config.initial_backoff_secs, 5);
+    assert!(!config.tracker_injection_enabled);
 }
 
 #[tokio::test]

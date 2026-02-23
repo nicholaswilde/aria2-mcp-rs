@@ -7,6 +7,8 @@ use tokio::sync::RwLock;
 pub struct RetryConfig {
     pub max_retries: u32,
     pub initial_backoff_secs: u64,
+    pub tracker_injection_enabled: bool,
+    pub tracker_list_url: Option<String>,
 }
 
 impl Default for RetryConfig {
@@ -14,6 +16,8 @@ impl Default for RetryConfig {
         Self {
             max_retries: 3,
             initial_backoff_secs: 5,
+            tracker_injection_enabled: false,
+            tracker_list_url: None,
         }
     }
 }
