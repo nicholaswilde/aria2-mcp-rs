@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use crate::aria2::Aria2Client;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RetryConfig {
@@ -50,6 +51,7 @@ pub struct RecoveryManager {
     config: RetryConfig,
     analyzer: ErrorAnalyzer,
     retry_counts: Arc<RwLock<HashMap<String, u32>>>,
+    pending_retries: Arc<RwLock<HashSet<String>>>,
 }
 
 impl RecoveryManager {
@@ -58,12 +60,21 @@ impl RecoveryManager {
             config,
             analyzer: ErrorAnalyzer::new(),
             retry_counts: Arc::new(RwLock::new(HashMap::new())),
+            pending_retries: Arc::new(RwLock::new(HashSet::new())),
         }
     }
 
     pub async fn analyze_and_get_retry_backoff(&self, gid: &str, status: &serde_json::Value) -> Option<u64> {
         if !self.analyzer.should_retry(status) {
             return None;
+        }
+
+        // Check if already pending
+        {
+            let pending = self.pending_retries.read().await;
+            if pending.contains(gid) {
+                return None;
+            }
         }
 
         let mut counts = self.retry_counts.write().await;
@@ -75,7 +86,69 @@ impl RecoveryManager {
 
         *count += 1;
         let backoff = self.config.initial_backoff_secs * (2u64.pow(*count - 1));
+        
+        // Mark as pending
+        {
+            let mut pending = self.pending_retries.write().await;
+            pending.insert(gid.to_string());
+        }
+
         Some(backoff)
+    }
+
+    pub async fn perform_retry(&self, client: &Aria2Client, gid: &str) -> anyhow::Result<String> {
+        log::info!("Attempting retry for download {}...", gid);
+        
+        // 1. Get URIs and options from old download
+        let status = client.tell_status(gid).await?;
+        let uris: Vec<String> = status.get("files")
+            .and_then(|f| f.as_array())
+            .and_then(|files| files.first())
+            .and_then(|file| file.get("uris"))
+            .and_then(|u| u.as_array())
+            .map(|uris| {
+                uris.iter()
+                    .filter_map(|u| u.get("uri").and_then(|v| v.as_str().map(|s| s.to_string())))
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        if uris.is_empty() {
+            let res = Err(anyhow::anyhow!("No URIs found for download {}", gid));
+            let mut pending = self.pending_retries.write().await;
+            pending.remove(gid);
+            return res;
+        }
+
+        // 2. Add new download
+        let new_gid = match client.add_uri(uris, None).await {
+            Ok(ng) => ng,
+            Err(e) => {
+                let mut pending = self.pending_retries.write().await;
+                pending.remove(gid);
+                return Err(e);
+            }
+        };
+        
+        log::info!("Retry successful. New GID: {}", new_gid);
+
+        // 3. Cleanup old download result (optional but recommended)
+        // If we don't remove it, it stays in the stopped list.
+        // Let's try to remove it.
+        let _ = client.remove(gid).await;
+
+        // 4. Transfer retry count to new GID and cleanup
+        {
+            let mut counts = self.retry_counts.write().await;
+            if let Some(count) = counts.remove(gid) {
+                counts.insert(new_gid.clone(), count);
+            }
+            
+            let mut pending = self.pending_retries.write().await;
+            pending.remove(gid);
+        }
+
+        Ok(new_gid)
     }
 
     pub async fn clear_retry_count(&self, gid: &str) {

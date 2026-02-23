@@ -142,7 +142,17 @@ async fn start_recovery_task(
                             client.name,
                             backoff
                         );
-                        // TODO: Implement actual retry in Task 3
+                        
+                        let client_retry = Arc::clone(&client);
+                        let recovery_manager_retry = Arc::clone(&recovery_manager);
+                        let gid_retry = gid.to_string();
+                        
+                        tokio::spawn(async move {
+                            tokio::time::sleep(Duration::from_secs(backoff)).await;
+                            if let Err(e) = recovery_manager_retry.perform_retry(&client_retry, &gid_retry).await {
+                                log::error!("Retry failed for download {}: {}", gid_retry, e);
+                            }
+                        });
                     }
                 }
             }
