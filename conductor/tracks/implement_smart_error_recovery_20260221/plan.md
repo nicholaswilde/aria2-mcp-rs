@@ -1,6 +1,6 @@
 # Implementation Plan - Implement Smart Error Recovery
 
-## Phase 1: Error Analysis & Auto-Retry
+## Phase 1: Error Analysis & Auto-Retry [checkpoint: 4b919be]
 - [x] Task: Define `RetryConfig` and `ErrorAnalyzer`. 21a0990
 - [x] Task: Integrate error analysis into the main loop or `monitor_queue` logic. ca92875
 - [x] Task: Implement retry logic for transient errors. 8a4da57
