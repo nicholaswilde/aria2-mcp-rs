@@ -73,7 +73,7 @@ impl McpeTool for MonitorQueueTool {
                 let offset = args.offset.unwrap_or(0);
                 let num = args.num.unwrap_or(100);
                 let mut results = client.tell_stopped(offset, num, args.keys).await?;
-                
+
                 // Integrate error analysis
                 if let Some(items) = results.as_array_mut() {
                     let analyzer = crate::aria2::recovery::ErrorAnalyzer::new();

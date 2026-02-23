@@ -135,21 +135,27 @@ async fn start_recovery_task(
         if let Some(items) = stopped.as_array() {
             for item in items {
                 if let Some(gid) = item.get("gid").and_then(|v| v.as_str()) {
-                    if let Some(backoff) = recovery_manager.analyze_and_get_retry_backoff(gid, item).await {
+                    if let Some(backoff) = recovery_manager
+                        .analyze_and_get_retry_backoff(gid, item)
+                        .await
+                    {
                         log::info!(
                             "Recovery needed for download {} (instance {}). Retrying in {} seconds.",
                             gid,
                             client.name,
                             backoff
                         );
-                        
+
                         let client_retry = Arc::clone(&client);
                         let recovery_manager_retry = Arc::clone(&recovery_manager);
                         let gid_retry = gid.to_string();
-                        
+
                         tokio::spawn(async move {
                             tokio::time::sleep(Duration::from_secs(backoff)).await;
-                            if let Err(e) = recovery_manager_retry.perform_retry(&client_retry, &gid_retry).await {
+                            if let Err(e) = recovery_manager_retry
+                                .perform_retry(&client_retry, &gid_retry)
+                                .await
+                            {
                                 log::error!("Retry failed for download {}: {}", gid_retry, e);
                             }
                         });

@@ -1,7 +1,7 @@
+use crate::aria2::Aria2Client;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use crate::aria2::Aria2Client;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RetryConfig {
@@ -64,7 +64,11 @@ impl RecoveryManager {
         }
     }
 
-    pub async fn analyze_and_get_retry_backoff(&self, gid: &str, status: &serde_json::Value) -> Option<u64> {
+    pub async fn analyze_and_get_retry_backoff(
+        &self,
+        gid: &str,
+        status: &serde_json::Value,
+    ) -> Option<u64> {
         if !self.analyzer.should_retry(status) {
             return None;
         }
@@ -79,14 +83,14 @@ impl RecoveryManager {
 
         let mut counts = self.retry_counts.write().await;
         let count = counts.entry(gid.to_string()).or_insert(0);
-        
+
         if *count >= self.config.max_retries {
             return None;
         }
 
         *count += 1;
         let backoff = self.config.initial_backoff_secs * (2u64.pow(*count - 1));
-        
+
         // Mark as pending
         {
             let mut pending = self.pending_retries.write().await;
@@ -98,10 +102,11 @@ impl RecoveryManager {
 
     pub async fn perform_retry(&self, client: &Aria2Client, gid: &str) -> anyhow::Result<String> {
         log::info!("Attempting retry for download {}...", gid);
-        
+
         // 1. Get URIs and options from old download
         let status = client.tell_status(gid).await?;
-        let uris: Vec<String> = status.get("files")
+        let uris: Vec<String> = status
+            .get("files")
             .and_then(|f| f.as_array())
             .and_then(|files| files.first())
             .and_then(|file| file.get("uris"))
@@ -129,7 +134,7 @@ impl RecoveryManager {
                 return Err(e);
             }
         };
-        
+
         log::info!("Retry successful. New GID: {}", new_gid);
 
         // 3. Cleanup old download result (optional but recommended)
@@ -143,7 +148,7 @@ impl RecoveryManager {
             if let Some(count) = counts.remove(gid) {
                 counts.insert(new_gid.clone(), count);
             }
-            
+
             let mut pending = self.pending_retries.write().await;
             pending.remove(gid);
         }
