@@ -9,6 +9,7 @@ use tokio::sync::RwLock;
 use tokio::time::{self, Duration};
 
 use crate::aria2::notifications::Aria2Notification;
+use crate::aria2::recovery::RecoveryManager;
 use crate::aria2::Aria2Client;
 use crate::config::{Config, TransportType};
 use crate::prompts::PromptRegistry;
@@ -21,6 +22,7 @@ pub struct McpServer {
     resource_registry: Arc<RwLock<ResourceRegistry>>,
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
+    recovery_manager: Arc<RecoveryManager>,
 }
 
 impl McpServer {
@@ -31,12 +33,14 @@ impl McpServer {
         prompt_registry: PromptRegistry,
         clients: Vec<Aria2Client>,
     ) -> Self {
+        let recovery_manager = Arc::new(RecoveryManager::new(config.retry_config.clone()));
         Self {
             config,
             registry: Arc::new(RwLock::new(registry)),
             resource_registry: Arc::new(RwLock::new(resource_registry)),
             prompt_registry: Arc::new(RwLock::new(prompt_registry)),
             clients: clients.into_iter().map(Arc::new).collect(),
+            recovery_manager,
         }
     }
 
@@ -65,6 +69,14 @@ impl McpServer {
             tokio::spawn(async move {
                 if let Err(e) = start_scheduler(client_clone).await {
                     log::error!("Scheduler error: {}", e);
+                }
+            });
+
+            let client_clone = Arc::clone(client);
+            let recovery_manager_clone = Arc::clone(&self.recovery_manager);
+            tokio::spawn(async move {
+                if let Err(e) = start_recovery_task(client_clone, recovery_manager_clone).await {
+                    log::error!("Recovery task error: {}", e);
                 }
             });
         }
@@ -97,6 +109,42 @@ impl McpServer {
                     notification_rx,
                 )
                 .await
+            }
+        }
+    }
+}
+
+async fn start_recovery_task(
+    client: Arc<Aria2Client>,
+    recovery_manager: Arc<RecoveryManager>,
+) -> Result<()> {
+    let mut interval = time::interval(Duration::from_secs(30));
+
+    loop {
+        interval.tick().await;
+
+        // Check for stopped downloads with errors
+        let stopped = match client.tell_stopped(0, 100, None).await {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Failed to fetch stopped downloads for recovery: {}", e);
+                continue;
+            }
+        };
+
+        if let Some(items) = stopped.as_array() {
+            for item in items {
+                if let Some(gid) = item.get("gid").and_then(|v| v.as_str()) {
+                    if let Some(backoff) = recovery_manager.analyze_and_get_retry_backoff(gid, item).await {
+                        log::info!(
+                            "Recovery needed for download {} (instance {}). Retrying in {} seconds.",
+                            gid,
+                            client.name,
+                            backoff
+                        );
+                        // TODO: Implement actual retry in Task 3
+                    }
+                }
             }
         }
     }

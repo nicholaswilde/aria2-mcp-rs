@@ -17,6 +17,8 @@ pub struct Config {
     pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
     #[serde(default)]
     pub bandwidth_schedules: Vec<BandwidthSchedule>,
+    #[serde(default)]
+    pub retry_config: crate::aria2::recovery::RetryConfig,
     #[serde(default, deserialize_with = "deserialize_instances")]
     pub instances: Vec<Aria2Instance>,
 }
@@ -86,6 +88,7 @@ impl Default for Config {
             no_verify_ssl: true,
             bandwidth_profiles: HashMap::new(),
             bandwidth_schedules: Vec::new(),
+            retry_config: crate::aria2::recovery::RetryConfig::default(),
             instances: vec![Aria2Instance {
                 name: "default".to_string(),
                 rpc_url,

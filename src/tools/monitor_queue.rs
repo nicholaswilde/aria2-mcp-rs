@@ -72,7 +72,20 @@ impl McpeTool for MonitorQueueTool {
             "stopped" => {
                 let offset = args.offset.unwrap_or(0);
                 let num = args.num.unwrap_or(100);
-                client.tell_stopped(offset, num, args.keys).await
+                let mut results = client.tell_stopped(offset, num, args.keys).await?;
+                
+                // Integrate error analysis
+                if let Some(items) = results.as_array_mut() {
+                    let analyzer = crate::aria2::recovery::ErrorAnalyzer::new();
+                    for item in items {
+                        if analyzer.should_retry(item) {
+                            if let Some(obj) = item.as_object_mut() {
+                                obj.insert("retryable".to_string(), json!(true));
+                            }
+                        }
+                    }
+                }
+                Ok(results)
             }
             "stats" => client.get_global_stat().await,
             _ => Err(anyhow::anyhow!("Unknown action: {}", args.action)),
