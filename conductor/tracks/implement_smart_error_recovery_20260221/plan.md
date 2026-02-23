@@ -11,6 +11,6 @@
 - [x] Task: Add a configuration flag to enable/disable tracker injection. 37bb5a4
 
 ## Phase 3: Integration & Testing
-- [ ] Task: Add unit tests for error analysis and retry logic.
+- [x] Task: Add unit tests for error analysis and retry logic. bbf6fbb
 - [ ] Task: Add integration tests simulating failures and verifying recovery.
 - [ ] Task: Update documentation.
