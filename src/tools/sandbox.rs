@@ -89,7 +89,10 @@ mod tests {
         let result = sandbox.resolve(&abs_path);
 
         assert!(result.is_err());
-        assert_eq!(result.unwrap_err().to_string(), "Absolute paths are not allowed");
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Absolute paths are not allowed"
+        );
 
         Ok(())
     }
@@ -106,10 +109,10 @@ mod tests {
         // In this test environment, .. likely resolves to /tmp which exists.
         // If it resolves, it should be caught by the starts_with check.
         // If it doesn't resolve (file not found), that's also fine but less specific.
-        
+
         // Let's rely on the fact that if it resolves, it must be outside.
         if let Ok(path) = result {
-             panic!("Should have failed, but resolved to: {:?}", path);
+            panic!("Should have failed, but resolved to: {:?}", path);
         }
 
         Ok(())
@@ -134,14 +137,17 @@ mod tests {
         symlink(&outside_file, &link_path)?;
 
         let result = sandbox.resolve("link_to_secret");
-        
+
         // Should fail because canonical path is outside base_dir
         assert!(result.is_err());
-        assert_eq!(result.unwrap_err().to_string(), "Path is outside the sandbox");
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Path is outside the sandbox"
+        );
 
         Ok(())
     }
-    
+
     #[test]
     fn test_unicode_paths() -> Result<()> {
         let temp_dir = TempDir::new()?;

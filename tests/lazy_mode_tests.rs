@@ -62,8 +62,11 @@ async fn test_lazy_mode_manage_tools_list() -> Result<()> {
         .expect("Should have text content");
     let available: serde_json::Value = serde_json::from_str(content)?;
 
+    let expected_count = ToolRegistry::new(&Config::default())
+        .list_available_tools()
+        .len();
     assert!(available.is_array());
-    assert_eq!(available.as_array().unwrap().len(), 11);
+    assert_eq!(available.as_array().unwrap().len(), expected_count);
 
     Ok(())
 }
@@ -162,8 +165,9 @@ async fn test_non_lazy_mode_no_manage_tools() -> Result<()> {
     let tools = result["tools"].as_array().unwrap();
     let names: Vec<&str> = tools.iter().map(|t| t["name"].as_str().unwrap()).collect();
 
+    let expected_count = ToolRegistry::new(&Config::default()).list_tools().len();
     assert!(!names.contains(&"manage_tools"));
-    assert_eq!(tools.len(), 11);
+    assert_eq!(tools.len(), expected_count);
 
     Ok(())
 }

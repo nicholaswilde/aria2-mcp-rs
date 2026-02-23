@@ -224,7 +224,7 @@ mod tests {
     fn test_registry_new() {
         let registry = ToolRegistry::new(&Config::default());
         let tools = registry.list_tools();
-        assert_eq!(tools.len(), 11);
+        assert_eq!(tools.len(), 12);
     }
 
     #[test]
@@ -270,7 +270,7 @@ mod tests {
         let config = Config::default();
         let registry = ToolRegistry::new(&config);
         let available = registry.list_available_tools();
-        assert_eq!(available.len(), 11);
+        assert_eq!(available.len(), 12);
         for tool in available {
             assert!(tool["enabled"].as_bool().unwrap());
         }

@@ -44,12 +44,14 @@ fn test_list_download_files_run_with_dir_success() -> Result<()> {
         max_depth: None,
     };
     let result = tool.run_with_dir(base_dir, args)?;
-    
+
     let entries = result["entries"].as_array().unwrap();
     assert!(entries.len() >= 2); // file1.txt and dir1
-    
+
     // Check for file1.txt
-    let file1 = entries.iter().find(|e| e["path"].as_str() == Some("file1.txt"));
+    let file1 = entries
+        .iter()
+        .find(|e| e["path"].as_str() == Some("file1.txt"));
     assert!(file1.is_some());
     assert!(!file1.unwrap()["isDir"].as_bool().unwrap());
 
@@ -65,8 +67,10 @@ fn test_list_download_files_run_with_dir_success() -> Result<()> {
     };
     let result_subdir = tool.run_with_dir(base_dir, args_subdir)?;
     let entries_subdir = result_subdir["entries"].as_array().unwrap();
-    
-    assert!(entries_subdir.iter().any(|e| e["path"].as_str() == Some("dir1/file2.txt")));
+
+    assert!(entries_subdir
+        .iter()
+        .any(|e| e["path"].as_str() == Some("dir1/file2.txt")));
 
     Ok(())
 }

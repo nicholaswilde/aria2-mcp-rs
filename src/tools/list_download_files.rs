@@ -61,7 +61,11 @@ impl McpeTool for ListDownloadFilesTool {
 }
 
 impl ListDownloadFilesTool {
-    pub fn run_with_dir(&self, base_dir: &std::path::Path, args: ListDownloadFilesArgs) -> Result<Value> {
+    pub fn run_with_dir(
+        &self,
+        base_dir: &std::path::Path,
+        args: ListDownloadFilesArgs,
+    ) -> Result<Value> {
         let max_depth = args.max_depth.unwrap_or(1);
         let sandbox = crate::tools::sandbox::PathSandbox::new(base_dir.to_path_buf());
         let resolved_path = sandbox.resolve(&args.path)?;
@@ -96,9 +100,10 @@ impl ListDownloadFilesTool {
             let path = entry.path();
             let metadata = entry.metadata()?;
             let is_dir = metadata.is_dir();
-            
+
             // Get relative path for output
-            let rel_path = path.strip_prefix(sandbox.base_dir())
+            let rel_path = path
+                .strip_prefix(sandbox.base_dir())
                 .unwrap_or(&path)
                 .to_string_lossy()
                 .to_string();
