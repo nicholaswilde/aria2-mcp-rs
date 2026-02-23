@@ -2,7 +2,7 @@
 
 ## Phase 1: Error Analysis & Auto-Retry
 - [x] Task: Define `RetryConfig` and `ErrorAnalyzer`. 21a0990
-- [ ] Task: Integrate error analysis into the main loop or `monitor_queue` logic.
+- [x] Task: Integrate error analysis into the main loop or `monitor_queue` logic. ca92875
 - [ ] Task: Implement retry logic for transient errors.
 
 ## Phase 2: Advanced Recovery (Tracker Injection)
