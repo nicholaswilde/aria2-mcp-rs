@@ -7,7 +7,7 @@
 
 ## Phase 2: Advanced Recovery (Tracker Injection)
 - [x] Task: Implement `TrackerScraper` or fetch a public tracker list. 2676073
-- [ ] Task: Implement logic to identify stalled torrents and inject trackers.
+- [x] Task: Implement logic to identify stalled torrents and inject trackers. b76895d
 - [ ] Task: Add a configuration flag to enable/disable tracker injection.
 
 ## Phase 3: Integration & Testing
