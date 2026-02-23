@@ -6,7 +6,7 @@ You are an expert technical writer specializing in software release notes. Gener
 **Input Range**: !{ range="{{args}}"; if [ -z "$range" ]; then TAGS=$(git tag --sort=-v:refname | head -n 2); LATEST=$(echo "$TAGS" | sed -n '1p'); PREVIOUS=$(echo "$TAGS" | sed -n '2p'); if [ -z "$PREVIOUS" ]; then range="HEAD"; else range="$PREVIOUS..$LATEST"; fi; fi; echo "$range" }
 
 **Git Log Entries**:
-!{ range="{{args}}"; if [ -z "$range" ]; then TAGS=$(git tag --sort=-v:refname | head -n 2); LATEST=$(echo "$TAGS" | sed -n '1p'); PREVIOUS=$(echo "$TAGS" | sed -n '2p'); if [ -z "$PREVIOUS" ]; then range="HEAD"; else range="$PREVIOUS..$LATEST"; fi; fi; git log --pretty=format:"- %s" "$range" }
+!{ range="{{args}}"; if [ -z "$range" ]; then TAGS=$(git tag --sort=-v:refname | head -n 2); LATEST=$(echo "$TAGS" | sed -n '1p'); PREVIOUS=$(echo "$TAGS" | sed -n '2p'); if [ -z "$PREVIOUS" ]; then range="HEAD"; else range="$PREVIOUS..$LATEST"; fi; fi; git log --pretty=format:"- %s" "$range" | grep -vE "conductor|chore: Bump version" }
 
 **Your Task**:
 1.  **Categorize** the above commits into these sections (using `###` for headers):
