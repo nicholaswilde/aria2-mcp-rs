@@ -171,7 +171,11 @@ impl RecoveryManager {
         gid: &str,
         trackers: Vec<String>,
     ) -> anyhow::Result<()> {
-        log::info!("Injecting {} trackers into download {}...", trackers.len(), gid);
+        log::info!(
+            "Injecting {} trackers into download {}...",
+            trackers.len(),
+            gid
+        );
         let trackers_str = trackers.join(",");
         let options = serde_json::json!({
             "bt-tracker": trackers_str
