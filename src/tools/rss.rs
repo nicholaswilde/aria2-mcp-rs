@@ -69,6 +69,7 @@ impl McpeTool for AddRssFeedTool {
             url: url.clone(),
             name: name.clone(),
             filters,
+            download_history: std::collections::HashSet::new(),
         };
 
         let config = client.config();

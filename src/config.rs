@@ -1,6 +1,6 @@
 use config::{Config as ConfigLoader, ConfigError, Environment, File};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -37,6 +37,18 @@ pub struct RSSFeed {
     pub name: String,
     #[serde(default)]
     pub filters: Vec<RSSFilter>,
+    #[serde(default)]
+    pub download_history: HashSet<String>,
+}
+
+impl RSSFeed {
+    pub fn has_downloaded(&self, id: &str) -> bool {
+        self.download_history.contains(id)
+    }
+
+    pub fn mark_downloaded(&mut self, id: String) {
+        self.download_history.insert(id);
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -192,5 +204,20 @@ mod tests {
     fn test_load_config() {
         let config = Config::load();
         assert!(config.is_ok());
+    }
+
+    #[test]
+    fn test_rss_feed_history() {
+        let mut feed = RSSFeed {
+            url: "http://test".to_string(),
+            name: "test".to_string(),
+            filters: vec![],
+            download_history: HashSet::new(),
+        };
+
+        assert!(!feed.has_downloaded("item1"));
+        feed.mark_downloaded("item1".to_string());
+        assert!(feed.has_downloaded("item1"));
+        assert!(!feed.has_downloaded("item2"));
     }
 }
