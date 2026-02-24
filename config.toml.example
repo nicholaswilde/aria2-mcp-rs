@@ -79,6 +79,14 @@ log_level = "info"
 # end_time = "17:00"
 # profile_name = "work_mode"
 
+# --- Automated Error Recovery ---
+
+# [retry_config]
+# max_retries = 3
+# initial_backoff_secs = 5
+# tracker_injection_enabled = true
+# tracker_list_url = "https://trackerslist.com/all.txt"
+
 # --- RSS Feed Monitoring ---
 
 # [[rss_config.feeds]]

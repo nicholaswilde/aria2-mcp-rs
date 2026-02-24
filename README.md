@@ -117,6 +117,23 @@ end_time = "06:00"
 profile_name = "night"
 ```
 
+## :shield: Automated Error Recovery
+
+The server includes built-in resiliency features to handle transient download failures:
+
+- **Smart Retries**: Automatically retries downloads that fail due to transient errors (e.g., network timeouts, connection refused) using exponential backoff.
+- **Tracker Injection**: For BitTorrent downloads that are stalled with 0 peers, the server can automatically fetch and inject additional trackers from a public list to help find peers.
+
+You can configure these features in `config.toml`:
+
+```toml
+[retry_config]
+max_retries = 3
+initial_backoff_secs = 5
+tracker_injection_enabled = true
+tracker_list_url = "https://trackerslist.com/all.txt"
+```
+
 ## :rss: RSS Feed Monitoring
 
 The server can automatically monitor RSS feeds and add new items to the download queue based on filters. You can manage feeds via MCP tools or define them in `config.toml`:
