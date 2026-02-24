@@ -5,8 +5,8 @@
 - [x] Task: Define a data model for custom rules (schedules, organization). 83d7f0a
 
 ## Phase 2: Tool Integration
-- [ ] Task: Implement tools to `add_rule`, `remove_rule`, and `list_rules`.
-- [ ] Task: Integrate persistent state loading on server startup.
+- [x] Task: Implement tools to `add_rule`, `remove_rule`, and `list_rules`. ef2f2f7
+- [x] Task: Integrate persistent state loading on server startup. ef2f2f7
 
 ## Phase 3: Testing & Documentation
 - [ ] Task: Add unit tests for state persistence and rule lifecycle.
