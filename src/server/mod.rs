@@ -86,6 +86,13 @@ impl McpServer {
                     log::error!("RSS monitoring error: {}", e);
                 }
             });
+
+            let client_clone = Arc::clone(client);
+            tokio::spawn(async move {
+                if let Err(e) = start_purge_task(client_clone).await {
+                    log::error!("Purge task error: {}", e);
+                }
+            });
         }
 
         match self.config.transport {
@@ -119,6 +126,66 @@ impl McpServer {
             }
         }
     }
+}
+
+async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
+    let mut interval = time::interval(Duration::from_secs(60));
+
+    loop {
+        interval.tick().await;
+
+        let config = client.config();
+        let purge_config = {
+            let config_guard = config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            config_guard.purge_config.clone()
+        };
+
+        if !purge_config.enabled {
+            continue;
+        }
+
+        // Adjust interval if needed
+        if interval.period().as_secs() != purge_config.interval_secs {
+            interval = time::interval(Duration::from_secs(purge_config.interval_secs));
+            interval.tick().await;
+        }
+
+        let stopped = match client.tell_stopped(0, 1000, None).await {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Failed to fetch stopped downloads for purge: {}", e);
+                continue;
+            }
+        };
+
+        if let Some(items) = stopped.as_array() {
+            for item in items {
+                if let Some(gid) = item.get("gid").and_then(|v| v.as_str()) {
+                    if purge_config.excluded_gids.contains(gid) {
+                        continue;
+                    }
+
+                    if is_purgeable(item) {
+                        log::info!("Purging download {} (instance {})...", gid, client.name);
+                        if let Err(e) = client.remove_download_result(gid).await {
+                            log::error!("Failed to purge download {}: {}", gid, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn is_purgeable(item: &serde_json::Value) -> bool {
+    if let Some(status) = item.get("status").and_then(|v| v.as_str()) {
+        // For now, we purge anything that is complete or error.
+        // We could add more complex logic here later if aria2 provides timestamps.
+        return status == "complete" || status == "error";
+    }
+    false
 }
 
 async fn start_recovery_task(
@@ -354,5 +421,18 @@ mod tests {
 
         // Port is now free
         assert!(super::check_port_available(port).await);
+    }
+
+    #[test]
+    fn test_is_purgeable() {
+        let item_complete = serde_json::json!({ "status": "complete" });
+        let item_error = serde_json::json!({ "status": "error" });
+        let item_active = serde_json::json!({ "status": "active" });
+        let item_removed = serde_json::json!({ "status": "removed" });
+
+        assert!(is_purgeable(&item_complete));
+        assert!(is_purgeable(&item_error));
+        assert!(!is_purgeable(&item_active));
+        assert!(!is_purgeable(&item_removed));
     }
 }

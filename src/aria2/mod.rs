@@ -901,6 +901,37 @@ impl Aria2Client {
 
         Ok(())
     }
+
+    pub async fn remove_download_result(&self, gid: &str) -> Result<()> {
+        let (rpc_url, rpc_secret) = {
+            let config = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            (config.rpc_url.clone(), config.rpc_secret.clone())
+        };
+        let mut params = Vec::new();
+        if let Some(secret) = &rpc_secret {
+            params.push(serde_json::json!(format!("token:{}", secret)));
+        }
+        params.push(serde_json::json!(gid));
+
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": "aria2-mcp",
+            "method": "aria2.removeDownloadResult",
+            "params": params,
+        });
+
+        let resp = self.client.post(&rpc_url).json(&body).send().await?;
+        let res: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = res.get("error") {
+            return Err(anyhow::anyhow!("aria2 error: {}", err));
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -1114,6 +1145,14 @@ mod tests {
         let config = Config::default();
         let client = Aria2Client::new(config);
         let result = client.move_position("dummy", 0, "POS_SET").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_remove_download_result_error() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let result = client.remove_download_result("dummy").await;
         assert!(result.is_err());
     }
 }
