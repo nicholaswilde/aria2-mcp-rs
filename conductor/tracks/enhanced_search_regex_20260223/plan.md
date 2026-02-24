@@ -9,5 +9,5 @@
 - [x] Task: Implement filtering logic across all metadata fields. [dca7550]
 
 ## Phase 3: Testing & Documentation
-- [ ] Task: Add unit tests for regex filtering and multi-metadata search.
+- [x] Task: Add unit tests for regex filtering and multi-metadata search. [dca7550]
 - [ ] Task: Document advanced search capabilities for users.
