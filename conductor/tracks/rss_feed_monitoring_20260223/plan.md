@@ -5,7 +5,7 @@
 - [x] Task: Implement `RSSConfig` struct for managing feed URLs and filters. d366873
 - [x] Task: Implement logic to store and retrieve feed items' history. c532514
 
-## Phase 2: Monitoring Service
+## Phase 2: Monitoring Service [checkpoint: 87c31a7]
 - [x] Task: Create a background loop in the MCP server to poll RSS feeds at configurable intervals. 779ee56
 - [x] Task: Implement item filtering logic (regex/keywords). 779ee56
 - [x] Task: Integrate item addition with the `Aria2Client`. 779ee56
