@@ -10,4 +10,4 @@
 
 ## Phase 3: Testing & Documentation
 - [x] Task: Add unit tests for regex filtering and multi-metadata search. [dca7550]
-- [ ] Task: Document advanced search capabilities for users.
+- [x] Task: Document advanced search capabilities for users. [1d1fbb3]
