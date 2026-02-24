@@ -10,7 +10,7 @@
 - [x] Task: Implement item filtering logic (regex/keywords). 779ee56
 - [x] Task: Integrate item addition with the `Aria2Client`. 779ee56
 
-## Phase 3: Integration & Testing
+## Phase 3: Integration & Testing [checkpoint: ab4df02]
 - [x] Task: Add unit tests for RSS feed parsing and filtering. df6daf5
 - [x] Task: Add integration tests with mocked RSS feeds. 27a1669
 - [x] Task: Update project documentation to include RSS monitoring details. 3070a6e
