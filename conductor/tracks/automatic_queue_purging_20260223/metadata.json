@@ -1,0 +1,8 @@
+{
+  "track_id": "automatic_queue_purging_20260223",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-23T20:00:00Z",
+  "updated_at": "2026-02-23T20:00:00Z",
+  "description": "Implement automated queue purging for stopped and errored downloads."
+}
