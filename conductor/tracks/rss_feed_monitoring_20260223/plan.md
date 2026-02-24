@@ -6,9 +6,9 @@
 - [x] Task: Implement logic to store and retrieve feed items' history. c532514
 
 ## Phase 2: Monitoring Service
-- [ ] Task: Create a background loop in the MCP server to poll RSS feeds at configurable intervals.
-- [ ] Task: Implement item filtering logic (regex/keywords).
-- [ ] Task: Integrate item addition with the `Aria2Client`.
+- [x] Task: Create a background loop in the MCP server to poll RSS feeds at configurable intervals. 779ee56
+- [x] Task: Implement item filtering logic (regex/keywords). 779ee56
+- [x] Task: Integrate item addition with the `Aria2Client`. 779ee56
 
 ## Phase 3: Integration & Testing
 - [ ] Task: Add unit tests for RSS feed parsing and filtering.
