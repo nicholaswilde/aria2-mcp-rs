@@ -23,12 +23,34 @@ pub struct Config {
     pub instances: Vec<Aria2Instance>,
     #[serde(default)]
     pub rss_config: RSSConfig,
+    #[serde(default)]
+    pub purge_config: PurgeConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct RSSConfig {
     #[serde(default)]
     pub feeds: Vec<RSSFeed>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PurgeConfig {
+    pub enabled: bool,
+    pub interval_secs: u64,
+    pub min_age_secs: u64,
+    #[serde(default)]
+    pub excluded_gids: HashSet<String>,
+}
+
+impl Default for PurgeConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            interval_secs: 3600,  // 1 hour
+            min_age_secs: 86400,  // 1 day
+            excluded_gids: HashSet::new(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -130,6 +152,7 @@ impl Default for Config {
                 rpc_secret,
             }],
             rss_config: RSSConfig::default(),
+            purge_config: PurgeConfig::default(),
         }
     }
 }
@@ -219,5 +242,14 @@ mod tests {
         feed.mark_downloaded("item1".to_string());
         assert!(feed.has_downloaded("item1"));
         assert!(!feed.has_downloaded("item2"));
+    }
+
+    #[test]
+    fn test_purge_config_defaults() {
+        let config = Config::default();
+        assert!(!config.purge_config.enabled);
+        assert_eq!(config.purge_config.interval_secs, 3600);
+        assert_eq!(config.purge_config.min_age_secs, 86400);
+        assert!(config.purge_config.excluded_gids.is_empty());
     }
 }
