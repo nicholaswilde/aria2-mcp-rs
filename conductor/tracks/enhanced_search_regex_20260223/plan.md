@@ -5,7 +5,7 @@
 - [x] Task: Add a new regex option to the search tool schema. [182c94d]
 
 ## Phase 2: Implementation & Refinement
-- [ ] Task: Integrate regex library for pattern matching.
+- [x] Task: Integrate regex library for pattern matching. [182c94d]
 - [ ] Task: Implement filtering logic across all metadata fields.
 
 ## Phase 3: Testing & Documentation
