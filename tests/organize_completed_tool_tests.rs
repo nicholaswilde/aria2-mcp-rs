@@ -13,6 +13,49 @@ async fn test_organize_completed_name() -> Result<()> {
 }
 
 #[tokio::test]
+async fn test_organize_completed_rule_lifecycle() -> Result<()> {
+    if !common::should_run_docker_tests() {
+        return Ok(());
+    }
+    let container = Aria2Container::new().await?;
+    let client = container.client();
+    let tool = OrganizeCompletedTool;
+
+    // List rules (should be empty)
+    let list_res = tool.run(&client, json!({ "action": "list_rules" })).await?;
+    assert!(list_res["rules"].as_array().unwrap().is_empty());
+
+    // Add a rule
+    let add_res = tool.run(&client, json!({
+        "action": "add_rule",
+        "rules": [{
+            "name": "Test Rule",
+            "extensions": ["txt"],
+            "targetDir": "/tmp/test"
+        }]
+    })).await?;
+    assert_eq!(add_res["status"], "success");
+
+    // List rules (should have one)
+    let list_res = tool.run(&client, json!({ "action": "list_rules" })).await?;
+    assert_eq!(list_res["rules"].as_array().unwrap().len(), 1);
+    assert_eq!(list_res["rules"][0]["name"], "Test Rule");
+
+    // Remove the rule
+    let remove_res = tool.run(&client, json!({
+        "action": "remove_rule",
+        "ruleName": "Test Rule"
+    })).await?;
+    assert_eq!(remove_res["status"], "success");
+
+    // List rules (should be empty again)
+    let list_res = tool.run(&client, json!({ "action": "list_rules" })).await?;
+    assert!(list_res["rules"].as_array().unwrap().is_empty());
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_organize_completed_schema() -> Result<()> {
     let tool = OrganizeCompletedTool;
     let schema = tool.schema()?;
