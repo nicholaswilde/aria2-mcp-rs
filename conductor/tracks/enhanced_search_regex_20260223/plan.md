@@ -1,7 +1,7 @@
 # Implementation Plan - Enhanced Search with Regex Support
 
 ## Phase 1: Tool Enhancement
-- [ ] Task: Update the `search_downloads` tool to support regex filtering.
+- [x] Task: Update the `search_downloads` tool to support regex filtering. [182c94d]
 - [ ] Task: Add a new regex option to the search tool schema.
 
 ## Phase 2: Implementation & Refinement
