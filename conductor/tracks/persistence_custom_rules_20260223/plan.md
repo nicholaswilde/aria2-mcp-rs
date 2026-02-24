@@ -4,7 +4,7 @@
 - [x] Task: Select and implement a local state storage mechanism (e.g., SQLite, JSON). a95d3aa
 - [x] Task: Define a data model for custom rules (schedules, organization). 83d7f0a
 
-## Phase 2: Tool Integration
+## Phase 2: Tool Integration [checkpoint: 478e287]
 - [x] Task: Implement tools to `add_rule`, `remove_rule`, and `list_rules`. ef2f2f7
 - [x] Task: Integrate persistent state loading on server startup. ef2f2f7
 
