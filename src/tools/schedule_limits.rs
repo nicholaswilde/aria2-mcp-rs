@@ -100,12 +100,15 @@ impl McpeTool for ScheduleLimitsTool {
                 };
 
                 let config = client.config();
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
-                config_guard
-                    .bandwidth_profiles
-                    .insert(name.to_string(), profile);
+                {
+                    let mut config_guard = config
+                        .write()
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                    config_guard
+                        .bandwidth_profiles
+                        .insert(name.to_string(), profile);
+                }
+                let _ = client.save_state().await;
 
                 Ok(json!({ "status": "success", "message": format!("Profile '{}' added", name) }))
             }
@@ -116,10 +119,13 @@ impl McpeTool for ScheduleLimitsTool {
                     .context("Missing 'profile_name'")?;
 
                 let config = client.config();
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
-                config_guard.bandwidth_profiles.remove(name);
+                {
+                    let mut config_guard = config
+                        .write()
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                    config_guard.bandwidth_profiles.remove(name);
+                }
+                let _ = client.save_state().await;
 
                 Ok(json!({ "status": "success", "message": format!("Profile '{}' removed", name) }))
             }
@@ -158,16 +164,19 @@ impl McpeTool for ScheduleLimitsTool {
                 };
 
                 let config = client.config();
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                {
+                    let mut config_guard = config
+                        .write()
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
 
-                // Validate profile exists
-                if !config_guard.bandwidth_profiles.contains_key(profile_name) {
-                    return Err(anyhow::anyhow!("Profile '{}' does not exist", profile_name));
+                    // Validate profile exists
+                    if !config_guard.bandwidth_profiles.contains_key(profile_name) {
+                        return Err(anyhow::anyhow!("Profile '{}' does not exist", profile_name));
+                    }
+
+                    config_guard.bandwidth_schedules.push(schedule);
                 }
-
-                config_guard.bandwidth_schedules.push(schedule);
+                let _ = client.save_state().await;
 
                 Ok(json!({ "status": "success", "message": "Schedule added" }))
             }
@@ -178,15 +187,18 @@ impl McpeTool for ScheduleLimitsTool {
                     .context("Missing or invalid 'index'")? as usize;
 
                 let config = client.config();
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                {
+                    let mut config_guard = config
+                        .write()
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
 
-                if index >= config_guard.bandwidth_schedules.len() {
-                    return Err(anyhow::anyhow!("Schedule index out of bounds"));
+                    if index >= config_guard.bandwidth_schedules.len() {
+                        return Err(anyhow::anyhow!("Schedule index out of bounds"));
+                    }
+
+                    config_guard.bandwidth_schedules.remove(index);
                 }
-
-                config_guard.bandwidth_schedules.remove(index);
+                let _ = client.save_state().await;
 
                 Ok(json!({ "status": "success", "message": "Schedule removed" }))
             }

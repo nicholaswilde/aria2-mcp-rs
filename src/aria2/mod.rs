@@ -17,6 +17,7 @@ pub struct Aria2Client {
     config: Arc<RwLock<Config>>,
     client: Client,
     pub name: String,
+    pub state_manager: Arc<crate::state::StateManager>,
 }
 
 impl Aria2Client {
@@ -89,6 +90,9 @@ impl Aria2Client {
             config: Arc::new(RwLock::new(config)),
             client,
             name: "default".to_string(),
+            state_manager: Arc::new(crate::state::StateManager::new(std::path::PathBuf::from(
+                "aria2_mcp_state.json",
+            ))),
         }
     }
 
@@ -107,11 +111,38 @@ impl Aria2Client {
             config: Arc::new(RwLock::new(config)),
             client,
             name,
+            state_manager: Arc::new(crate::state::StateManager::new(std::path::PathBuf::from(
+                "aria2_mcp_state.json",
+            ))),
         }
     }
 
     pub fn config(&self) -> Arc<RwLock<Config>> {
         Arc::clone(&self.config)
+    }
+
+    pub fn state_manager(&self) -> Arc<crate::state::StateManager> {
+        Arc::clone(&self.state_manager)
+    }
+
+    pub async fn save_state(&self) -> Result<()> {
+        let state_data = {
+            let config_guard = self
+                .config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            crate::state::StateData {
+                bandwidth_profiles: config_guard.bandwidth_profiles.clone(),
+                bandwidth_schedules: config_guard.bandwidth_schedules.clone(),
+                organize_rules: config_guard.organize_rules.clone(),
+                rules: std::collections::HashMap::new(),
+            }
+        };
+        self.state_manager
+            .save(&state_data)
+            .await
+            .map_err(|e| anyhow::anyhow!("Failed to save state: {}", e))?;
+        Ok(())
     }
 
     pub fn ws_url(&self) -> Result<String> {

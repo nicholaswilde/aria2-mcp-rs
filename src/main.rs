@@ -60,7 +60,31 @@ fn main() -> Result<()> {
     init_logger(&config.log_level);
 
     let rt = tokio::runtime::Runtime::new()?;
-    rt.block_on(run_app(config))
+    rt.block_on(async {
+        // Load persistent state and merge into config
+        let state_manager = aria2_mcp_rs::state::StateManager::new(std::path::PathBuf::from(
+            "aria2_mcp_state.json",
+        ));
+        if let Ok(state) = state_manager.load().await {
+            for (k, v) in state.bandwidth_profiles {
+                config.bandwidth_profiles.insert(k, v);
+            }
+            // Add schedules if not already present
+            for schedule in state.bandwidth_schedules {
+                if !config.bandwidth_schedules.contains(&schedule) {
+                    config.bandwidth_schedules.push(schedule);
+                }
+            }
+            // Add organize rules if not already present
+            for rule in state.organize_rules {
+                if !config.organize_rules.iter().any(|r| r.name == rule.name) {
+                    config.organize_rules.push(rule);
+                }
+            }
+        }
+
+        run_app(config).await
+    })
 }
 
 fn init_logger(level: &str) {

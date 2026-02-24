@@ -65,6 +65,15 @@ impl McpeTool for OrganizeCompletedTool {
         Ok(json!({
             "type": "object",
             "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": ["run", "list_rules", "add_rule", "remove_rule"],
+                    "description": "The action to perform (defaults to 'run')"
+                },
+                "ruleName": {
+                    "type": "string",
+                    "description": "The name of the rule to remove (used with 'remove_rule')"
+                },
                 "gid": {
                     "type": "string",
                     "description": "GID of the download to organize"
@@ -84,59 +93,133 @@ impl McpeTool for OrganizeCompletedTool {
                         },
                         "required": ["name", "targetDir"]
                     },
-                    "description": "Rules for organizing"
+                    "description": "Rules for organizing or adding"
                 }
             }
         }))
     }
 
     async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
-        let args: OrganizeCompletedArgs = serde_json::from_value(args)?;
-        let rules = if let Some(r) = args.rules {
-            r
-        } else {
-            let config = client.config();
-            let config_guard = config
-                .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
-            config_guard.organize_rules.clone()
-        };
+        let action = args.get("action").and_then(|v| v.as_str()).unwrap_or("run");
 
-        if rules.is_empty() {
-            return Ok(
-                json!({ "status": "no_rules", "message": "No rules provided for organization" }),
-            );
-        }
-
-        let mut organized_count = 0;
-
-        if let Some(gid) = args.gid {
-            let status = client.tell_status(&gid).await?;
-            if status["status"] == "complete" {
-                if self.organize_download(&status, &rules).await? {
-                    organized_count += 1;
-                }
-            } else {
-                return Err(anyhow::anyhow!(
-                    "Download {} is not complete (status: {})",
-                    gid,
-                    status["status"]
-                ));
+        match action {
+            "list_rules" => {
+                let config = client.config();
+                let config_guard = config
+                    .read()
+                    .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                let rules = config_guard.organize_rules.clone();
+                Ok(json!({ "rules": rules }))
             }
-        } else {
-            let stopped = client.tell_stopped(0, 1000, None).await?;
-            if let Some(stopped_list) = stopped.as_array() {
-                for status in stopped_list {
-                    if status["status"] == "complete"
-                        && self.organize_download(status, &rules).await?
+            "add_rule" => {
+                let rules_arg = args
+                    .get("rules")
+                    .and_then(|v| v.as_array())
+                    .ok_or_else(|| anyhow::anyhow!("Missing 'rules' array"))?;
+                if rules_arg.is_empty() {
+                    return Err(anyhow::anyhow!("'rules' array is empty"));
+                }
+                let new_rule: Rule = serde_json::from_value(rules_arg[0].clone())?;
+
+                let config = client.config();
+                {
+                    let mut config_guard = config
+                        .write()
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+
+                    if config_guard
+                        .organize_rules
+                        .iter()
+                        .any(|r| r.name == new_rule.name)
                     {
-                        organized_count += 1;
+                        return Err(anyhow::anyhow!(
+                            "Rule with name '{}' already exists",
+                            new_rule.name
+                        ));
+                    }
+
+                    config_guard.organize_rules.push(new_rule.clone());
+                }
+                let _ = client.save_state().await;
+
+                Ok(
+                    json!({ "status": "success", "message": format!("Rule '{}' added", new_rule.name) }),
+                )
+            }
+            "remove_rule" => {
+                let rule_name = args
+                    .get("ruleName")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| anyhow::anyhow!("Missing 'ruleName'"))?;
+
+                let config = client.config();
+                {
+                    let mut config_guard = config
+                        .write()
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+
+                    let initial_len = config_guard.organize_rules.len();
+                    config_guard.organize_rules.retain(|r| r.name != rule_name);
+
+                    if config_guard.organize_rules.len() == initial_len {
+                        return Err(anyhow::anyhow!("Rule '{}' not found", rule_name));
                     }
                 }
+                let _ = client.save_state().await;
+
+                Ok(
+                    json!({ "status": "success", "message": format!("Rule '{}' removed", rule_name) }),
+                )
+            }
+            _ => {
+                let args_parsed: OrganizeCompletedArgs = serde_json::from_value(args)?;
+                let rules = if let Some(r) = args_parsed.rules {
+                    r
+                } else {
+                    let config = client.config();
+                    let config_guard = config
+                        .read()
+                        .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                    config_guard.organize_rules.clone()
+                };
+
+                if rules.is_empty() {
+                    return Ok(
+                        json!({ "status": "no_rules", "message": "No rules provided for organization" }),
+                    );
+                }
+
+                let mut organized_count = 0;
+
+                if let Some(gid) = args_parsed.gid {
+                    let status = client.tell_status(&gid).await?;
+                    if status["status"] == "complete" {
+                        if self.organize_download(&status, &rules).await? {
+                            organized_count += 1;
+                        }
+                    } else {
+                        return Err(anyhow::anyhow!(
+                            "Download {} is not complete (status: {})",
+                            gid,
+                            status["status"]
+                        ));
+                    }
+                } else {
+                    let stopped = client.tell_stopped(0, 1000, None).await?;
+                    if let Some(stopped_list) = stopped.as_array() {
+                        for status in stopped_list {
+                            if status["status"] == "complete"
+                                && self.organize_download(status, &rules).await?
+                            {
+                                organized_count += 1;
+                            }
+                        }
+                    }
+                }
+
+                Ok(json!({ "status": "success", "organizedCount": organized_count }))
             }
         }
-
-        Ok(json!({ "status": "success", "organizedCount": organized_count }))
     }
 }
 
