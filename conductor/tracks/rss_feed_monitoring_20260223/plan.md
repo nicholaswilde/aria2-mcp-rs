@@ -1,6 +1,6 @@
 # Implementation Plan - RSS Feed Monitoring
 
-## Phase 1: Feed Management & Tools
+## Phase 1: Feed Management & Tools [checkpoint: fa6948e]
 - [x] Task: Implement `add_rss_feed` and `list_rss_feeds` tools. 9ddc08c
 - [x] Task: Implement `RSSConfig` struct for managing feed URLs and filters. d366873
 - [x] Task: Implement logic to store and retrieve feed items' history. c532514
