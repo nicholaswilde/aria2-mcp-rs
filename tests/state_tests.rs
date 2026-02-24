@@ -1,4 +1,6 @@
+use aria2_mcp_rs::config::{BandwidthProfile, BandwidthSchedule};
 use aria2_mcp_rs::state::{StateData, StateManager};
+use aria2_mcp_rs::tools::organize_completed::Rule;
 use std::path::PathBuf;
 use tempfile::NamedTempFile;
 
@@ -12,9 +14,25 @@ async fn test_state_manager_save_and_load() {
 
     // Initialize data
     let mut initial_data = StateData::default();
-    initial_data
-        .rules
-        .insert("test_rule".to_string(), "active".to_string());
+    initial_data.bandwidth_profiles.insert(
+        "test_profile".to_string(),
+        BandwidthProfile {
+            max_download: "1M".to_string(),
+            max_upload: "500K".to_string(),
+        },
+    );
+    initial_data.bandwidth_schedules.push(BandwidthSchedule {
+        day: "daily".to_string(),
+        start_time: "08:00".to_string(),
+        end_time: "18:00".to_string(),
+        profile_name: "test_profile".to_string(),
+    });
+    initial_data.organize_rules.push(Rule {
+        name: "Test Rule".to_string(),
+        pattern: None,
+        extensions: Some(vec!["txt".to_string()]),
+        target_dir: "/tmp/test".to_string(),
+    });
 
     // Save state
     manager
@@ -27,9 +45,18 @@ async fn test_state_manager_save_and_load() {
     let loaded_data: StateData = new_manager.load().await.expect("Failed to load state");
 
     assert_eq!(
-        loaded_data.rules.get("test_rule"),
-        Some(&"active".to_string())
+        loaded_data
+            .bandwidth_profiles
+            .get("test_profile")
+            .unwrap()
+            .max_download,
+        "1M"
     );
+    assert_eq!(
+        loaded_data.bandwidth_schedules[0].profile_name,
+        "test_profile"
+    );
+    assert_eq!(loaded_data.organize_rules[0].name, "Test Rule");
 }
 
 #[tokio::test]
@@ -39,5 +66,7 @@ async fn test_state_manager_load_non_existent_file() {
 
     let result = manager.load().await;
     let data: StateData = result.expect("Should return default on non-existent file");
-    assert!(data.rules.is_empty());
+    assert!(data.bandwidth_profiles.is_empty());
+    assert!(data.bandwidth_schedules.is_empty());
+    assert!(data.organize_rules.is_empty());
 }

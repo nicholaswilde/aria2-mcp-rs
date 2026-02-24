@@ -3,12 +3,19 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use tokio::fs;
 
+use crate::config::{BandwidthProfile, BandwidthSchedule};
 use crate::error::{Error, Result};
+use crate::tools::organize_completed::Rule;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct StateData {
-    pub rules: HashMap<String, String>,
-    // we can expand this with more complex structures later
+    pub rules: HashMap<String, String>, // Kept for generic usage if needed
+    #[serde(default)]
+    pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
+    #[serde(default)]
+    pub bandwidth_schedules: Vec<BandwidthSchedule>,
+    #[serde(default)]
+    pub organize_rules: Vec<Rule>,
 }
 
 #[derive(Debug, Clone)]
