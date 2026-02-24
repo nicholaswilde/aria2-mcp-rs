@@ -94,10 +94,7 @@ pub fn matches_filters(title: &str, filters: &[RSSFilter]) -> bool {
                 }
             }
             RSSFilter::Regex(r) => {
-                if let Ok(re) = regex::RegexBuilder::new(r)
-                    .case_insensitive(true)
-                    .build()
-                {
+                if let Ok(re) = regex::RegexBuilder::new(r).case_insensitive(true).build() {
                     if re.is_match(title) {
                         return true;
                     }
