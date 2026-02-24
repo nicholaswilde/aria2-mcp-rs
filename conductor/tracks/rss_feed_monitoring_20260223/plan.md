@@ -2,7 +2,7 @@
 
 ## Phase 1: Feed Management & Tools
 - [x] Task: Implement `add_rss_feed` and `list_rss_feeds` tools. 9ddc08c
-- [ ] Task: Implement `RSSConfig` struct for managing feed URLs and filters.
+- [x] Task: Implement `RSSConfig` struct for managing feed URLs and filters. d366873
 - [ ] Task: Implement logic to store and retrieve feed items' history.
 
 ## Phase 2: Monitoring Service
