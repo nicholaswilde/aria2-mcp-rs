@@ -32,6 +32,10 @@
 - **Reasoning**: Required for robust filename pattern matching in the automatic file organization tool.
 - **Library**: `regex`.
 
+## Local State Storage: JSON via tokio::fs & serde_json
+- **Reasoning**: Provides a simple, dependency-free (beyond existing crates), and human-readable mechanism for persisting user-defined rules and schedules across server restarts.
+- **Library**: `serde_json`, `tokio::fs`.
+
 ## Package Management: Cargo
 - **Reasoning**: The standard build system and package manager for Rust.
 
