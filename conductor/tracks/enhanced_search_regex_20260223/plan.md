@@ -2,7 +2,7 @@
 
 ## Phase 1: Tool Enhancement
 - [x] Task: Update the `search_downloads` tool to support regex filtering. [182c94d]
-- [ ] Task: Add a new regex option to the search tool schema.
+- [x] Task: Add a new regex option to the search tool schema. [182c94d]
 
 ## Phase 2: Implementation & Refinement
 - [ ] Task: Integrate regex library for pattern matching.
