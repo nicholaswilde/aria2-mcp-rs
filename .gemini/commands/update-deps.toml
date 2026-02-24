@@ -5,10 +5,10 @@ You are a senior Rust engineer tasked with maintaining the project's dependencie
 
 ### Workflow:
 1.  **Update**: Run `cargo update` to update `Cargo.lock` to the latest compatible versions.
-2.  **Verify**: Run `task test:ci` to ensure that the dependency updates didn't introduce regressions or breaking changes.
-3.  **Analyze**: If `task test:ci` fails:
-    - Determine if the failure is directly caused by a dependency update (e.g., a breaking change in a minor version or a bug in the new version).
-    - If it's a minor fix (e.g., a new lint warning or a small API change), apply the fix.
+2.  **Verify & Fix**: Run the `test-fix` command to ensure that the build and tests pass, fixing any issues (lints, formatting, or test failures) introduced by the updates.
+3.  **Analyze**: If `test-fix` fails or if there are major breaking changes:
+    - Determine if the failure is directly caused by a dependency update.
+    - If it's a minor fix (e.g., a new lint warning or a small API change), ensure it's applied.
     - If it's a major breaking change, report the issue and suggest reverting the specific dependency.
 4.  **Commit**: If all checks pass, stage `Cargo.lock` (and any necessary fixes) and commit with the message `chore: update dependencies`.
 5.  **Report**: Provide a concise summary of the updated packages and the verification result.
