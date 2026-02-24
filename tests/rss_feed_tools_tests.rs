@@ -73,12 +73,12 @@ fn test_matches_filters_internal() {
 
 #[tokio::test]
 async fn test_process_feed_mock() -> Result<()> {
+    use aria2_mcp_rs::config::{Config, RSSFeed, RSSFilter};
     use aria2_mcp_rs::tools::rss::process_feed;
-    use aria2_mcp_rs::config::{RSSFeed, RSSFilter, Config};
     use aria2_mcp_rs::Aria2Client;
+    use std::collections::HashSet;
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
-    use std::collections::HashSet;
 
     let mock_server = MockServer::start().await;
 
@@ -119,10 +119,10 @@ async fn test_process_feed_mock() -> Result<()> {
 
     let client = Aria2Client::new(Config::default());
     let _result = process_feed(&client, &mut feed).await;
-    
+
     // History should have been updated for the matches even if addition failed due to no aria2
     // Wait, process_feed only updates history if add_uri succeeds.
     // Since add_uri will fail, history won't be updated.
-    
+
     Ok(())
 }
