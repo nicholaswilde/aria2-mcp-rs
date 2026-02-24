@@ -20,6 +20,10 @@
 - **Reasoning**: `aria2` uses JSON-RPC for its remote interface, and WebSockets for real-time notification events.
 - **Libraries**: `reqwest` (HTTP), `tokio-tungstenite` (WebSockets).
 
+## Data Parsing: RSS
+- **Reasoning**: Efficiently parse RSS and Atom feeds for automated download monitoring.
+- **Library**: `rss`.
+
 ## Time Management: Chrono
 - **Reasoning**: Required for robust time-of-day and day-of-week logic in the bandwidth scheduler.
 - **Library**: `chrono`.
