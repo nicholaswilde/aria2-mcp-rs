@@ -38,7 +38,7 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`manage_all_instances`**: Perform bulk operations (pause, resume, purge) across all configured instances simultaneously.
 - **`bulk_manage_downloads`**: Perform actions (pause, resume, remove) on multiple downloads simultaneously.
 - **`monitor_queue`**: Get real-time status of active, waiting, and stopped downloads, plus global statistics.
-- **`search_downloads`**: Find specific downloads by filename, URI, or status (optimized for token efficiency).
+- **`search_downloads`**: Find specific downloads by filename, URI, tracker URL, or status using substring or **regular expression** filters.
 - **`check_health`**: Identify stalled downloads and potential queue issues (e.g., low disk space).
 - **`manage_torrent`**: Manage BitTorrent-specific settings like fetching peers, selecting files, and adding/updating trackers.
 - **`schedule_limits`**: Define bandwidth speed profiles and automatically activate them on a schedule.

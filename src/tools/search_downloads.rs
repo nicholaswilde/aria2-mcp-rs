@@ -11,9 +11,9 @@ pub struct SearchDownloadsTool;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchDownloadsArgs {
-    /// Substring to search for in filenames or URIs
+    /// Substring to search for in filenames, URIs, or tracker URLs
     pub query: Option<String>,
-    /// Regular expression to search for in filenames or URIs
+    /// Regular expression to search for in filenames, URIs, or tracker URLs
     pub regex: Option<String>,
     /// Filter by status: active, waiting, paused, error, complete, removed
     pub status: Option<String>,
@@ -28,7 +28,8 @@ impl McpeTool for SearchDownloadsTool {
     }
 
     fn description(&self) -> String {
-        "Search and filter downloads by filename, URI, or status".to_string()
+        "Search and filter downloads by filename, URI, tracker URL, or status using substring or regex filters"
+            .to_string()
     }
 
     fn schema(&self) -> Result<Value> {
@@ -37,11 +38,11 @@ impl McpeTool for SearchDownloadsTool {
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "Substring to search for in filenames or URIs"
+                    "description": "Substring to search for in filenames, URIs, or tracker URLs"
                 },
                 "regex": {
                     "type": "string",
-                    "description": "Regular expression to search for in filenames or URIs"
+                    "description": "Regular expression to search for in filenames, URIs, or tracker URLs"
                 },
                 "status": {
                     "type": "string",
