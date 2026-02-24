@@ -150,6 +150,14 @@ url = "https://example.com/security"
 filters = ["regex:^CVE-2026-.*"] # Matches a regular expression
 ```
 
+## :movie_camera: Sequential Downloading for Media
+
+The server supports sequential piece downloading for BitTorrent tasks. This allows you to start previewing or streaming media files while they are still downloading by ensuring that pieces are downloaded in order.
+
+### Usage
+- **New Downloads**: When adding a torrent via `manage_downloads`, set the `sequential` flag to `true`.
+- **Existing Downloads**: Use the `manage_torrent` tool with the `toggleSequential` action and set `sequential` to `true` or `false`.
+
 ## :package: Installation
 
 ### Homebrew (macOS/Linux)
