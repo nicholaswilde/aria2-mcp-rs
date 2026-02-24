@@ -17,6 +17,8 @@ struct Args {
     http_auth_token: Option<String>,
     #[arg(short = 'L', long, env = "ARIA2_MCP_LOG_LEVEL")]
     log_level: Option<String>,
+    #[arg(short, long)]
+    config: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_LAZY")]
     lazy: bool,
     #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL")]
@@ -273,6 +275,18 @@ mod tests {
     fn test_args_parse_log_level() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--log-level", "debug"]).unwrap();
         assert_eq!(args.log_level, Some("debug".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_config_long() {
+        let args = Args::try_parse_from(["aria2-mcp-rs", "--config", "test.toml"]).unwrap();
+        assert_eq!(args.config, Some("test.toml".to_string()));
+    }
+
+    #[test]
+    fn test_args_parse_config_short() {
+        let args = Args::try_parse_from(["aria2-mcp-rs", "-c", "custom.yaml"]).unwrap();
+        assert_eq!(args.config, Some("custom.yaml".to_string()));
     }
 
     #[test]
