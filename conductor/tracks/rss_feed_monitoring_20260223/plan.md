@@ -13,4 +13,4 @@
 ## Phase 3: Integration & Testing
 - [x] Task: Add unit tests for RSS feed parsing and filtering. df6daf5
 - [x] Task: Add integration tests with mocked RSS feeds. 27a1669
-- [ ] Task: Update project documentation to include RSS monitoring details.
+- [x] Task: Update project documentation to include RSS monitoring details. 3070a6e

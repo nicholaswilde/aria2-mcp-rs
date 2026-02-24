@@ -33,6 +33,8 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
 - **`list_download_files`**: List files and directories within the download directory (strictly sandboxed).
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
+- **`add_rss_feed`**: Add a new RSS feed to monitor with optional keyword or regex filters.
+- **`list_rss_feeds`**: List all currently monitored RSS feeds and their configurations.
 - **`manage_tools`**: (Lazy Mode only) Enable or disable individual tools to optimize token usage.
 
 ## Implemented Resources
@@ -113,6 +115,22 @@ day = "daily"
 start_time = "22:00"
 end_time = "06:00"
 profile_name = "night"
+```
+
+## :rss: RSS Feed Monitoring
+
+The server can automatically monitor RSS feeds and add new items to the download queue based on filters. You can manage feeds via MCP tools or define them in `config.toml`:
+
+```toml
+[[rss_config.feeds]]
+name = "My Linux ISOs"
+url = "https://example.com/rss"
+filters = ["ubuntu", "debian"] # Matches any keyword (case-insensitive)
+
+[[rss_config.feeds]]
+name = "Important Security Updates"
+url = "https://example.com/security"
+filters = ["regex:^CVE-2026-.*"] # Matches a regular expression
 ```
 
 ## :package: Installation

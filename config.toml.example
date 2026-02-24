@@ -78,3 +78,15 @@ log_level = "info"
 # start_time = "09:00"
 # end_time = "17:00"
 # profile_name = "work_mode"
+
+# --- RSS Feed Monitoring ---
+
+# [[rss_config.feeds]]
+# name = "Linux ISOs"
+# url = "https://example.com/rss"
+# filters = ["ubuntu", "debian"] # Matches any keyword (case-insensitive)
+
+# [[rss_config.feeds]]
+# name = "Security Updates"
+# url = "https://example.com/security"
+# filters = ["regex:^CVE-2026-.*"] # Matches a regular expression
