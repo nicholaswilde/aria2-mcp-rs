@@ -105,6 +105,12 @@ export ARIA2_MCP__INSTANCES__1__RPC_URL="http://192.168.1.10:6800/jsonrpc"
 export ARIA2_MCP__INSTANCES__1__RPC_SECRET="your-secret"
 ```
 
+## 💾 Persistent Custom Rules
+
+Changes to custom rules (like bandwidth schedules and file organization rules) made via the MCP tools are automatically persisted to a local state file (`aria2_mcp_state.json`) in the current working directory. 
+
+When the server starts, it automatically loads these persistent rules and merges them with the rules defined in your `config.toml`, ensuring that any rules added by LLMs survive server restarts.
+
 ## :timer_clock: Bandwidth Scheduling
 
 The server can automatically adjust aria2 bandwidth limits based on a schedule. You can define profiles and schedules in `config.toml`:
