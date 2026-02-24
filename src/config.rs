@@ -21,6 +21,29 @@ pub struct Config {
     pub retry_config: crate::aria2::recovery::RetryConfig,
     #[serde(default, deserialize_with = "deserialize_instances")]
     pub instances: Vec<Aria2Instance>,
+    #[serde(default)]
+    pub rss_config: RSSConfig,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+pub struct RSSConfig {
+    #[serde(default)]
+    pub feeds: Vec<RSSFeed>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct RSSFeed {
+    pub url: String,
+    pub name: String,
+    #[serde(default)]
+    pub filters: Vec<RSSFilter>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+pub enum RSSFilter {
+    Keyword(String),
+    Regex(String),
 }
 
 fn deserialize_instances<'de, D>(deserializer: D) -> Result<Vec<Aria2Instance>, D::Error>
@@ -94,6 +117,7 @@ impl Default for Config {
                 rpc_url,
                 rpc_secret,
             }],
+            rss_config: RSSConfig::default(),
         }
     }
 }

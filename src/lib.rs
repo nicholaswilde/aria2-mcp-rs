@@ -13,7 +13,7 @@ pub use prompts::PromptRegistry;
 pub use resources::ResourceRegistry;
 pub use server::McpServer;
 pub use tools::{
-    BulkManageDownloadsTool, CheckHealthTool, ConfigureAria2Tool, InspectDownloadTool,
-    ManageDownloadsTool, ManageTorrentTool, McpeTool, MonitorQueueTool, OrganizeCompletedTool,
-    ScheduleLimitsTool, SearchDownloadsTool, ToolRegistry,
+    AddRssFeedTool, BulkManageDownloadsTool, CheckHealthTool, ConfigureAria2Tool,
+    InspectDownloadTool, ListRssFeedsTool, ManageDownloadsTool, ManageTorrentTool, McpeTool,
+    MonitorQueueTool, OrganizeCompletedTool, ScheduleLimitsTool, SearchDownloadsTool, ToolRegistry,
 };

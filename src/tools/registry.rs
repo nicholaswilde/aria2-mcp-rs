@@ -18,6 +18,7 @@ use super::manage_downloads::ManageDownloadsTool;
 use super::manage_torrent::ManageTorrentTool;
 use super::monitor_queue::MonitorQueueTool;
 use super::organize_completed::OrganizeCompletedTool;
+use super::rss::{AddRssFeedTool, ListRssFeedsTool};
 use super::schedule_limits::ScheduleLimitsTool;
 use super::search_downloads::SearchDownloadsTool;
 
@@ -143,6 +144,8 @@ impl ToolRegistry {
         registry.register(Arc::new(ManageTorrentTool));
         registry.register(Arc::new(OrganizeCompletedTool));
         registry.register(Arc::new(ScheduleLimitsTool));
+        registry.register(Arc::new(AddRssFeedTool));
+        registry.register(Arc::new(ListRssFeedsTool));
 
         // In lazy mode, only enable basic tools by default.
         // register() already enables all tools if !lazy_mode.
@@ -224,7 +227,7 @@ mod tests {
     fn test_registry_new() {
         let registry = ToolRegistry::new(&Config::default());
         let tools = registry.list_tools();
-        assert_eq!(tools.len(), 12);
+        assert_eq!(tools.len(), 14);
     }
 
     #[test]
@@ -270,7 +273,7 @@ mod tests {
         let config = Config::default();
         let registry = ToolRegistry::new(&config);
         let available = registry.list_available_tools();
-        assert_eq!(available.len(), 12);
+        assert_eq!(available.len(), 14);
         for tool in available {
             assert!(tool["enabled"].as_bool().unwrap());
         }
