@@ -4,6 +4,7 @@ pub mod error;
 pub mod prompts;
 pub mod resources;
 pub mod server;
+pub mod state;
 pub mod tools;
 
 pub use aria2::Aria2Client;
