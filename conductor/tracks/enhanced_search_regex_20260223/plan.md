@@ -8,6 +8,6 @@
 - [x] Task: Integrate regex library for pattern matching. [182c94d]
 - [x] Task: Implement filtering logic across all metadata fields. [dca7550]
 
-## Phase 3: Testing & Documentation
+## Phase 3: Testing & Documentation [checkpoint: 040187f]
 - [x] Task: Add unit tests for regex filtering and multi-metadata search. [dca7550]
 - [x] Task: Document advanced search capabilities for users. [1d1fbb3]
