@@ -10,4 +10,4 @@
 
 ## Phase 3: Testing & Documentation
 - [x] Task: Add unit tests for state persistence and rule lifecycle. c14e23d
-- [ ] Task: Document custom rule management for power users.
+- [x] Task: Document custom rule management for power users. f11dccf
