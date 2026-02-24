@@ -9,5 +9,5 @@
 - [x] Task: Integrate persistent state loading on server startup. ef2f2f7
 
 ## Phase 3: Testing & Documentation
-- [ ] Task: Add unit tests for state persistence and rule lifecycle.
+- [x] Task: Add unit tests for state persistence and rule lifecycle. c14e23d
 - [ ] Task: Document custom rule management for power users.
