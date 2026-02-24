@@ -43,8 +43,8 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`manage_torrent`**: Manage BitTorrent-specific settings like fetching peers, selecting files, and adding/updating trackers.
 - **`schedule_limits`**: Define bandwidth speed profiles and automatically activate them on a schedule.
 - **`organize_completed`**: Automatically move completed downloads to target directories based on rules (extension or pattern).
-- **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
-- **`list_download_files`**: List files and directories within the download directory (strictly sandboxed).
+- **`inspect_download`**: Get detailed technical metadata, file lists, or URIs for a specific download.
+- **`list_download_files`**: List files and directories within a specified path relative to the download directory (strictly sandboxed).
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
 - **`purge_policy`**: View or update the automated queue purging policy.
 - **`add_rss_feed`**: Add a new RSS feed to monitor with optional keyword or regex filters.

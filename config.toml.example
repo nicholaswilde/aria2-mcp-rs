@@ -10,6 +10,7 @@ rpc_url = "http://localhost:6800/jsonrpc"
 transport = "stdio"
 
 # The port to listen on when using the "sse" or "http" transport.
+# Alias: "port"
 http_port = 3000
 
 # Bearer token for HTTP security (Recommended for HTTP mode)
@@ -85,14 +86,14 @@ log_level = "info"
 # enabled = false
 # interval_secs = 3600  # Run check every hour
 # min_age_secs = 86400  # Purge downloads older than 24 hours
-# excluded_gids = []    # Optional list of GIDs to never purge
+# excluded_gids = ["gid1", "gid2"] # Optional list of GIDs to never purge
 
 # --- Automated Error Recovery ---
 
 # [retry_config]
 # max_retries = 3
 # initial_backoff_secs = 5
-# tracker_injection_enabled = true
+# tracker_injection_enabled = false
 # tracker_list_url = "https://trackerslist.com/all.txt"
 
 # --- RSS Feed Monitoring ---
@@ -101,6 +102,7 @@ log_level = "info"
 # name = "Linux ISOs"
 # url = "https://example.com/rss"
 # filters = ["ubuntu", "debian"] # Matches any keyword (case-insensitive)
+# download_history = []         # Optional: GIDs or IDs to skip (pre-populated history)
 
 # [[rss_config.feeds]]
 # name = "Security Updates"
