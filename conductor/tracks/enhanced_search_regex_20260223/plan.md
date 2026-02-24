@@ -6,7 +6,7 @@
 
 ## Phase 2: Implementation & Refinement
 - [x] Task: Integrate regex library for pattern matching. [182c94d]
-- [ ] Task: Implement filtering logic across all metadata fields.
+- [x] Task: Implement filtering logic across all metadata fields. [dca7550]
 
 ## Phase 3: Testing & Documentation
 - [ ] Task: Add unit tests for regex filtering and multi-metadata search.
