@@ -128,7 +128,7 @@ impl McpServer {
     }
 }
 
-async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
+pub async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
     let mut interval = time::interval(Duration::from_secs(60));
 
     loop {
@@ -179,7 +179,7 @@ async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
     }
 }
 
-fn is_purgeable(item: &serde_json::Value) -> bool {
+pub fn is_purgeable(item: &serde_json::Value) -> bool {
     if let Some(status) = item.get("status").and_then(|v| v.as_str()) {
         // For now, we purge anything that is complete or error.
         // We could add more complex logic here later if aria2 provides timestamps.
