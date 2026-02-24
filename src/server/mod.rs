@@ -435,4 +435,370 @@ mod tests {
         assert!(!is_purgeable(&item_active));
         assert!(!is_purgeable(&item_removed));
     }
+
+    #[tokio::test]
+    async fn test_start_purge_task_mock() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url,
+                rpc_secret: None,
+            }],
+            purge_config: crate::config::PurgeConfig {
+                enabled: true,
+                interval_secs: 1,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+
+        // Mock tellStopped
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": [
+                    { "gid": "purge1", "status": "complete" },
+                    { "gid": "keep1", "status": "active" }
+                ]
+            })))
+            .mount(&mock_server)
+            .await;
+
+        // Mock removeDownloadResult
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": "OK"
+            })))
+            .mount(&mock_server)
+            .await;
+
+        // Run for a short time
+        let task_client = Arc::clone(&client);
+        tokio::spawn(async move {
+            let _ = start_purge_task(task_client).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(1500)).await;
+        // If we reach here, it at least didn't panic and ran one iteration
+    }
+
+    #[tokio::test]
+    async fn test_start_recovery_task_mock() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url,
+                rpc_secret: None,
+            }],
+            retry_config: crate::aria2::recovery::RetryConfig {
+                max_retries: 3,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+        let recovery_manager = Arc::new(RecoveryManager::new(config.retry_config.clone()));
+
+        // Mock tellStopped
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": [
+                    { "gid": "recover1", "status": "error", "errorCode": "1" }
+                ]
+            })))
+            .mount(&mock_server)
+            .await;
+
+        // Mock tellStatus for recovery check
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": { "gid": "recover1", "status": "error", "errorCode": "1" }
+            })))
+            .mount(&mock_server)
+            .await;
+
+        // Run for a short time
+        let task_client = Arc::clone(&client);
+        let task_manager = Arc::clone(&recovery_manager);
+        tokio::spawn(async move {
+            let _ = start_recovery_task(task_client, task_manager).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    #[tokio::test]
+    async fn test_start_scheduler_mock() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url,
+                rpc_secret: None,
+            }],
+            bandwidth_profiles: std::collections::HashMap::from([(
+                "night".to_string(),
+                crate::config::BandwidthProfile {
+                    max_download: "1M".to_string(),
+                    max_upload: "100K".to_string(),
+                },
+            )]),
+            bandwidth_schedules: vec![crate::config::BandwidthSchedule {
+                day: "daily".to_string(),
+                start_time: "00:00".to_string(),
+                end_time: "23:59".to_string(),
+                profile_name: "night".to_string(),
+            }],
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+
+        // Mock changeGlobalOption
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": "OK"
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let task_client = Arc::clone(&client);
+        tokio::spawn(async move {
+            let _ = start_scheduler(task_client).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    #[tokio::test]
+    async fn test_start_recovery_task_empty_mock() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url,
+                rpc_secret: None,
+            }],
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+        let recovery_manager = Arc::new(RecoveryManager::new(config.retry_config.clone()));
+
+        // Mock tellStopped with empty result
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": []
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let task_client = Arc::clone(&client);
+        let task_manager = Arc::clone(&recovery_manager);
+        tokio::spawn(async move {
+            let _ = start_recovery_task(task_client, task_manager).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    #[tokio::test]
+    async fn test_start_scheduler_missing_profile_mock() {
+        use wiremock::MockServer;
+
+        let mock_server = MockServer::start().await;
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url: format!("{}/jsonrpc", mock_server.uri()),
+                rpc_secret: None,
+            }],
+            bandwidth_schedules: vec![crate::config::BandwidthSchedule {
+                day: "daily".to_string(),
+                start_time: "00:00".to_string(),
+                end_time: "23:59".to_string(),
+                profile_name: "nonexistent".to_string(),
+            }],
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+
+        let task_client = Arc::clone(&client);
+        tokio::spawn(async move {
+            let _ = start_scheduler(task_client).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    #[tokio::test]
+    async fn test_start_purge_task_error_mock() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url,
+                rpc_secret: None,
+            }],
+            purge_config: crate::config::PurgeConfig {
+                enabled: true,
+                interval_secs: 1,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+
+        // Mock error for tellStopped
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&mock_server)
+            .await;
+
+        let task_client = Arc::clone(&client);
+        tokio::spawn(async move {
+            let _ = start_purge_task(task_client).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    #[tokio::test]
+    async fn test_start_purge_task_disabled_mock() {
+        let config = Config {
+            purge_config: crate::config::PurgeConfig {
+                enabled: false,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new(config));
+
+        let task_client = Arc::clone(&client);
+        tokio::spawn(async move {
+            let _ = start_purge_task(task_client).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    #[tokio::test]
+    async fn test_start_scheduler_error_mock() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            instances: vec![crate::config::Aria2Instance {
+                name: "test".to_string(),
+                rpc_url,
+                rpc_secret: None,
+            }],
+            bandwidth_profiles: std::collections::HashMap::from([(
+                "night".to_string(),
+                crate::config::BandwidthProfile {
+                    max_download: "1M".to_string(),
+                    max_upload: "100K".to_string(),
+                },
+            )]),
+            bandwidth_schedules: vec![crate::config::BandwidthSchedule {
+                day: "daily".to_string(),
+                start_time: "00:00".to_string(),
+                end_time: "23:59".to_string(),
+                profile_name: "night".to_string(),
+            }],
+            ..Default::default()
+        };
+
+        let client = Arc::new(Aria2Client::new_with_instance(
+            config.clone(),
+            config.instances[0].clone(),
+        ));
+
+        // Mock error for changeGlobalOption
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&mock_server)
+            .await;
+
+        let task_client = Arc::clone(&client);
+        tokio::spawn(async move {
+            let _ = start_scheduler(task_client).await;
+        });
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
 }

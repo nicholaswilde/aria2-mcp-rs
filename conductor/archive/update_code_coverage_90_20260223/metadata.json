@@ -1,0 +1,7 @@
+{
+  "id": "update_code_coverage_90_20260223",
+  "title": "Update Code Coverage to >90%",
+  "description": "Increase project code coverage back to >90% by addressing gaps in server/ and tools/.",
+  "status": "completed",
+  "created_at": "2026-02-23"
+}

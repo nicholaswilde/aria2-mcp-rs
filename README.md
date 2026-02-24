@@ -9,6 +9,19 @@
 
 This project is a high-performance Model Context Protocol (MCP) server for [aria2](https://aria2.github.io/), built with Rust. It provides a comprehensive interface for LLMs to monitor and manage downloads through **interactive tools**, **read-only resources**, **contextual prompts**, and **real-time notifications**.
 
+## :zap: Quick Start
+
+1. **Prerequisites**: Ensure you have [aria2](https://aria2.github.io/) installed and running with RPC enabled (`aria2c --enable-rpc`).
+2. **Configuration**: Copy the example config and edit it with your aria2 details:
+   ```bash
+   cp config.toml.example config.toml
+   ```
+3. **Run**: Use `cargo` to start the server:
+   ```bash
+   cargo run --release
+   ```
+   *By default, the server runs in **Stdio** mode, perfect for local integration.*
+
 ## Core Architectural Features
 
 - **Dual Transport Implementation:** Supports both **Stdio** for local integration (e.g., Claude Desktop) and **HTTP/SSE** for remote, network-accessible clients.
@@ -33,6 +46,7 @@ The server provides several high-level tools for managing and monitoring aria2:
 - **`inspect_download`**: Get detailed technical metadata and file lists for a specific download.
 - **`list_download_files`**: List files and directories within the download directory (strictly sandboxed).
 - **`configure_aria2`**: Dynamically view and modify global or per-download aria2 settings.
+- **`purge_policy`**: View or update the automated queue purging policy.
 - **`add_rss_feed`**: Add a new RSS feed to monitor with optional keyword or regex filters.
 - **`list_rss_feeds`**: List all currently monitored RSS feeds and their configurations.
 - **`manage_tools`**: (Lazy Mode only) Enable or disable individual tools to optimize token usage.
@@ -117,6 +131,21 @@ end_time = "06:00"
 profile_name = "night"
 ```
 
+## :wastebasket: Automated Queue Purging
+
+The server can automatically remove completed or errored downloads from the aria2 queue after they reach a certain age.
+
+### Configuration
+You can enable and configure the purging behavior in `config.toml`:
+
+```toml
+[purge_config]
+enabled = true
+interval_secs = 3600  # Run check every hour
+min_age_secs = 86400  # Purge downloads older than 24 hours
+excluded_gids = ["gid1", "gid2"] # Optional: GIDs to never purge
+```
+
 ## :shield: Automated Error Recovery
 
 The server includes built-in resiliency features to handle transient download failures:
@@ -149,6 +178,27 @@ name = "Important Security Updates"
 url = "https://example.com/security"
 filters = ["regex:^CVE-2026-.*"] # Matches a regular expression
 ```
+
+## :open_file_folder: Automated File Organization
+
+The server can automatically move completed downloads to target directories based on user-defined rules. Rules can match files by extension or a regular expression pattern.
+
+### Configuration
+Define organization rules in `config.toml`:
+
+```toml
+[[organize_rules]]
+name = "Movies"
+extensions = ["mp4", "mkv", "avi"]
+targetDir = "/mnt/media/movies"
+
+[[organize_rules]]
+name = "Linux ISOs"
+pattern = "ubuntu-.*\\.iso"
+targetDir = "/mnt/storage/isos"
+```
+
+*Note: The `targetDir` will be created automatically if it does not exist.*
 
 ## :movie_camera: Sequential Downloading for Media
 
@@ -186,6 +236,8 @@ task check
 - **Release Optimization:** Link Time Optimization (LTO) and symbol stripping for minimal binary size.
 
 ## :rocket: Usage
+
+The server can be configured via command-line arguments, environment variables, or a `config.toml` file in the current directory.
 
 ### Command Line Interface
 

@@ -92,7 +92,15 @@ impl McpeTool for OrganizeCompletedTool {
 
     async fn run(&self, client: &Aria2Client, args: Value) -> Result<Value> {
         let args: OrganizeCompletedArgs = serde_json::from_value(args)?;
-        let rules = args.rules.unwrap_or_default();
+        let rules = if let Some(r) = args.rules {
+            r
+        } else {
+            let config = client.config();
+            let config_guard = config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            config_guard.organize_rules.clone()
+        };
 
         if rules.is_empty() {
             return Ok(

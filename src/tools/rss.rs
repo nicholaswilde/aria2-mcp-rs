@@ -215,3 +215,140 @@ impl McpeTool for ListRssFeedsTool {
         }))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Config;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    #[tokio::test]
+    async fn test_matches_filters_internal() {
+        let filters = vec![
+            RSSFilter::Keyword("work".to_string()),
+            RSSFilter::Regex("test.*123".to_string()),
+        ];
+
+        assert!(matches_filters("This is WORK", &filters));
+        assert!(matches_filters("testing something 123", &filters));
+        assert!(!matches_filters("other", &filters));
+        assert!(matches_filters("any", &[]));
+
+        // Invalid regex
+        let filters = vec![RSSFilter::Regex("[".to_string())];
+        assert!(!matches_filters("any", &filters));
+    }
+
+    #[tokio::test]
+    async fn test_process_feed_mock() {
+        let mock_server = MockServer::start().await;
+
+        // RSS Feed Mock
+        let rss_content = r#"<?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0">
+            <channel>
+                <title>Test Feed</title>
+                <item>
+                    <title>Test Item 1</title>
+                    <link>http://example.com/item1</link>
+                    <guid>item1</guid>
+                </item>
+                <item>
+                    <title>Other Item</title>
+                    <link>http://example.com/item2</link>
+                    <guid>item2</guid>
+                </item>
+            </channel>
+            </rss>"#;
+
+        Mock::given(method("GET"))
+            .and(path("/rss"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(rss_content))
+            .mount(&mock_server)
+            .await;
+
+        // Aria2 Mock
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": "gid123"
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let mut config = Config::default();
+        config.instances = vec![crate::config::Aria2Instance {
+            name: "test".to_string(),
+            rpc_url: format!("{}/jsonrpc", mock_server.uri()),
+            rpc_secret: None,
+        }];
+        let client = Aria2Client::new_with_instance(config.clone(), config.instances[0].clone());
+
+        let mut feed = RSSFeed {
+            url: format!("{}/rss", mock_server.uri()),
+            name: "test_feed".to_string(),
+            filters: vec![RSSFilter::Keyword("Test".to_string())],
+            download_history: std::collections::HashSet::new(),
+        };
+
+        process_feed(&client, &mut feed).await.unwrap();
+
+        assert!(feed.has_downloaded("item1"));
+        assert!(!feed.has_downloaded("item2"));
+    }
+
+    #[tokio::test]
+    async fn test_process_feed_error() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/rss"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&mock_server)
+            .await;
+
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+
+        let mut feed = RSSFeed {
+            url: format!("{}/rss", mock_server.uri()),
+            name: "test_feed".to_string(),
+            filters: vec![],
+            download_history: std::collections::HashSet::new(),
+        };
+
+        let result = process_feed(&client, &mut feed).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_add_rss_feed_tool() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let tool = AddRssFeedTool;
+        let args = json!({
+            "url": "http://example.com/rss",
+            "name": "test",
+            "filters": ["keyword", "regex:.*"]
+        });
+        let result = tool.run(&client, args).await.unwrap();
+        assert_eq!(result["status"], "success");
+
+        let config = client.config();
+        let config_guard = config.read().unwrap();
+        assert_eq!(config_guard.rss_config.feeds.len(), 1);
+        assert_eq!(config_guard.rss_config.feeds[0].name, "test");
+    }
+
+    #[tokio::test]
+    async fn test_list_rss_feeds_tool_empty() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let tool = ListRssFeedsTool;
+        let result = tool.run(&client, json!({})).await.unwrap();
+        assert_eq!(result["feeds"].as_array().unwrap().len(), 0);
+    }
+}

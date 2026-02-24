@@ -1,10 +1,10 @@
 mod common;
 
 use anyhow::Result;
+use aria2_mcp_rs::server::start_purge_task;
 use common::Aria2Container;
 use std::sync::Arc;
 use tokio::time::{sleep, Duration};
-use aria2_mcp_rs::server::start_purge_task;
 
 #[tokio::test]
 async fn test_background_purge_logic() -> Result<()> {
@@ -30,7 +30,9 @@ async fn test_background_purge_logic() -> Result<()> {
     });
 
     // 3. Add a fast download
-    let uris = vec!["https://raw.githubusercontent.com/nicholaswilde/aria2-mcp-rs/main/LICENSE".to_string()];
+    let uris = vec![
+        "https://raw.githubusercontent.com/nicholaswilde/aria2-mcp-rs/main/LICENSE".to_string(),
+    ];
     let gid = client.add_uri(uris, None).await?;
 
     // 4. Wait for it to be completed

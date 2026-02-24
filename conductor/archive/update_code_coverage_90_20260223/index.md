@@ -1,8 +1,5 @@
-# Track: sequential downloading
+# Track update_code_coverage_90_20260223 Context
 
-## Documentation
 - [Specification](./spec.md)
 - [Implementation Plan](./plan.md)
-
-## Metadata
 - [Metadata](./metadata.json)

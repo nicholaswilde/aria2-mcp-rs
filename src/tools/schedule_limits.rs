@@ -223,3 +223,147 @@ impl McpeTool for ScheduleLimitsTool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Config;
+
+    #[tokio::test]
+    async fn test_schedule_limits_error_cases() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let tool = ScheduleLimitsTool;
+
+        // Missing action
+        let result = tool.run(&client, json!({})).await;
+        assert!(result.is_err());
+
+        // Unknown action
+        let result = tool.run(&client, json!({"action": "unknown"})).await;
+        assert!(result.is_err());
+
+        // Add schedule - missing profile
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "add_schedule",
+                    "profile_name": "nonexistent",
+                    "schedule": { "day": "daily", "start_time": "00:00", "end_time": "01:00" }
+                }),
+            )
+            .await;
+        assert!(result.is_err());
+
+        // Set profile - not found
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "set_profile",
+                    "profile_name": "nonexistent"
+                }),
+            )
+            .await;
+        assert!(result.is_err());
+
+        // Remove schedule - out of bounds
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "remove_schedule",
+                    "index": 999
+                }),
+            )
+            .await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_schedule_limits_success_paths() {
+        let config = Config::default();
+        let client = Aria2Client::new(config);
+        let tool = ScheduleLimitsTool;
+
+        // Add profile
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "add_profile",
+                    "profile_name": "test",
+                    "max_download": "1M",
+                    "max_upload": "1M"
+                }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(result["status"], "success");
+
+        // List profiles
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "list_profiles"
+                }),
+            )
+            .await
+            .unwrap();
+        assert!(result["profiles"]["test"].is_object());
+
+        // Add schedule
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "add_schedule",
+                    "profile_name": "test",
+                    "schedule": { "day": "daily", "start_time": "00:00", "end_time": "01:00" }
+                }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(result["status"], "success");
+
+        // List schedules
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "list_schedules"
+                }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(result["schedules"].as_array().unwrap().len(), 1);
+
+        // Remove schedule
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "remove_schedule",
+                    "index": 0
+                }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(result["status"], "success");
+
+        // Remove profile
+        let result = tool
+            .run(
+                &client,
+                json!({
+                    "action": "remove_profile",
+                    "profile_name": "test"
+                }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(result["status"], "success");
+    }
+}

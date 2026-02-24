@@ -278,4 +278,24 @@ mod tests {
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "low_disk_space");
     }
+
+    #[test]
+    fn test_get_disk_info_real() {
+        let result = get_disk_info(".");
+        assert!(result.is_ok());
+        let info = result.unwrap();
+        assert!(info.available > 0);
+    }
+
+    #[tokio::test]
+    async fn test_check_health_run_multi() {
+        let tool = CheckHealthTool;
+        let config = Config::default();
+        let client = Arc::new(Aria2Client::new(config));
+
+        let result = tool.run_multi(&[client], json!({})).await.unwrap();
+        let results = result["results"].as_array().unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0]["instance"], "default");
+    }
 }

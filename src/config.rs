@@ -25,6 +25,8 @@ pub struct Config {
     pub rss_config: RSSConfig,
     #[serde(default)]
     pub purge_config: PurgeConfig,
+    #[serde(default)]
+    pub organize_rules: Vec<crate::tools::organize_completed::Rule>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
@@ -46,8 +48,8 @@ impl Default for PurgeConfig {
     fn default() -> Self {
         Self {
             enabled: false,
-            interval_secs: 3600,  // 1 hour
-            min_age_secs: 86400,  // 1 day
+            interval_secs: 3600, // 1 hour
+            min_age_secs: 86400, // 1 day
             excluded_gids: HashSet::new(),
         }
     }
@@ -153,6 +155,7 @@ impl Default for Config {
             }],
             rss_config: RSSConfig::default(),
             purge_config: PurgeConfig::default(),
+            organize_rules: Vec::new(),
         }
     }
 }

@@ -79,6 +79,14 @@ log_level = "info"
 # end_time = "17:00"
 # profile_name = "work_mode"
 
+# --- Automated Queue Purging ---
+
+# [purge_config]
+# enabled = false
+# interval_secs = 3600  # Run check every hour
+# min_age_secs = 86400  # Purge downloads older than 24 hours
+# excluded_gids = []    # Optional list of GIDs to never purge
+
 # --- Automated Error Recovery ---
 
 # [retry_config]
@@ -98,3 +106,15 @@ log_level = "info"
 # name = "Security Updates"
 # url = "https://example.com/security"
 # filters = ["regex:^CVE-2026-.*"] # Matches a regular expression
+
+# --- File Organization Rules ---
+
+# [[organize_rules]]
+# name = "Movies"
+# extensions = ["mp4", "mkv", "avi"]
+# targetDir = "/mnt/media/movies"
+
+# [[organize_rules]]
+# name = "Linux ISOs"
+# pattern = "ubuntu-.*\\.iso"
+# targetDir = "/mnt/storage/isos"

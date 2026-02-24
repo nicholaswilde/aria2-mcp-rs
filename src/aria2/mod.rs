@@ -1155,4 +1155,183 @@ mod tests {
         let result = client.remove_download_result("dummy").await;
         assert!(result.is_err());
     }
+
+    #[tokio::test]
+    async fn test_aria2_client_methods_success() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            rpc_url,
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+
+        // Mock getVersion
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "aria2-mcp",
+                "result": { "version": "1.36.0" }
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let version = client.get_version().await.unwrap();
+        assert_eq!(version, "1.36.0");
+
+        // Mock pauseAll
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "aria2-mcp",
+                "result": "OK"
+            })))
+            .mount(&mock_server)
+            .await;
+
+        client.pause_all().await.unwrap();
+        client.unpause_all().await.unwrap();
+        client.purge_download_result().await.unwrap();
+    }
+
+    #[test]
+    fn test_ws_url_error() {
+        let config = Config {
+            rpc_url: "ftp://localhost:6800/jsonrpc".to_string(),
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+        assert!(client.ws_url().is_err());
+    }
+
+    #[tokio::test]
+    async fn test_connect_notifications_error() {
+        let config = Config {
+            rpc_url: "http://localhost:1/jsonrpc".to_string(),
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+        let result = client.connect_notifications().await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_aria2_client_rpc_error() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            rpc_url,
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+
+        // Mock error response
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "aria2-mcp",
+                "error": { "code": 1, "message": "Some error" }
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let result = client.get_version().await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("aria2 error"));
+    }
+
+    #[tokio::test]
+    async fn test_aria2_client_tell_stopped_success() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            rpc_url,
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "aria2-mcp",
+                "result": []
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let result = client.tell_stopped(0, 10, None).await.unwrap();
+        assert!(result.is_array());
+    }
+
+    #[tokio::test]
+    async fn test_aria2_client_tell_active_success() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            rpc_url,
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "aria2-mcp",
+                "result": []
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let result = client.tell_active(None).await.unwrap();
+        assert!(result.is_array());
+    }
+
+    #[tokio::test]
+    async fn test_aria2_client_get_option_success() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let mock_server = MockServer::start().await;
+        let rpc_url = format!("{}/jsonrpc", mock_server.uri());
+
+        let config = Config {
+            rpc_url,
+            ..Config::default()
+        };
+        let client = Aria2Client::new(config);
+
+        Mock::given(method("POST"))
+            .and(path("/jsonrpc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": "aria2-mcp",
+                "result": { "dir": "/tmp" }
+            })))
+            .mount(&mock_server)
+            .await;
+
+        let result = client.get_option("dummy").await.unwrap();
+        assert_eq!(result["dir"], "/tmp");
+    }
 }

@@ -24,8 +24,38 @@ pub async fn run_server(
     resource_registry: Arc<RwLock<ResourceRegistry>>,
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
-    mut notification_rx: tokio::sync::mpsc::Receiver<Aria2Notification>,
+    notification_rx: tokio::sync::mpsc::Receiver<Aria2Notification>,
 ) -> Result<()> {
+    let (_tx, rx) = tokio::sync::oneshot::channel::<()>();
+    run_server_with_shutdown(
+        http_port,
+        http_auth_token,
+        registry,
+        resource_registry,
+        prompt_registry,
+        clients,
+        notification_rx,
+        async {
+            let _ = rx.await;
+        },
+    )
+    .await
+}
+
+#[allow(clippy::too_many_arguments)]
+pub async fn run_server_with_shutdown<F>(
+    http_port: u16,
+    http_auth_token: Option<String>,
+    registry: Arc<RwLock<ToolRegistry>>,
+    resource_registry: Arc<RwLock<ResourceRegistry>>,
+    prompt_registry: Arc<RwLock<PromptRegistry>>,
+    clients: Vec<Arc<Aria2Client>>,
+    mut notification_rx: tokio::sync::mpsc::Receiver<Aria2Notification>,
+    shutdown: F,
+) -> Result<()>
+where
+    F: std::future::Future<Output = ()> + Send + 'static,
+{
     // For now, we'll just drain the notifications or ignore them in SSE
     // until a proper SSE endpoint is implemented.
     tokio::spawn(async move {
@@ -53,7 +83,9 @@ pub async fn run_server(
 
     println!("SSE Server starting on {}", addr);
 
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown)
+        .await?;
 
     Ok(())
 }
@@ -301,5 +333,150 @@ mod tests {
             body["content"][0]["text"].as_str().unwrap(),
             "{\"status\":\"ok\"}"
         );
+    }
+
+    #[tokio::test]
+    async fn test_auth_middleware() {
+        use axum::http::{Request, StatusCode};
+        use axum::middleware::from_fn;
+        use axum::routing::get;
+        use tower::ServiceExt;
+
+        let token = "test-token".to_string();
+        let app = Router::new()
+            .route("/", get(|| async { "ok" }))
+            .layer(from_fn(move |req, next| {
+                auth_middleware(req, next, token.clone())
+            }));
+
+        // Case 1: No auth header
+        let req = Request::builder()
+            .uri("/")
+            .body(axum::body::Body::empty())
+            .unwrap();
+        let response = app.clone().oneshot(req).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+        // Case 2: Wrong token
+        let req = Request::builder()
+            .uri("/")
+            .header("Authorization", "Bearer wrong")
+            .body(axum::body::Body::empty())
+            .unwrap();
+        let response = app.clone().oneshot(req).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+        // Case 3: Correct token
+        let req = Request::builder()
+            .uri("/")
+            .header("Authorization", "Bearer test-token")
+            .body(axum::body::Body::empty())
+            .unwrap();
+        let response = app.clone().oneshot(req).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_execute_tool_manage_tools_list() {
+        let config = Config {
+            lazy_mode: true,
+            ..Default::default()
+        };
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let client = Arc::new(Aria2Client::new(config));
+        let req = serde_json::json!({
+            "name": "manage_tools",
+            "arguments": {
+                "action": "list"
+            }
+        });
+        let result = execute_tool(
+            axum::extract::Extension(registry),
+            axum::extract::Extension(vec![client]),
+            Json(req),
+        )
+        .await;
+        let body = serde_json::to_value(result.0).unwrap();
+        assert!(body["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("manage_downloads"));
+    }
+
+    #[tokio::test]
+    async fn test_execute_tool_manage_tools_enable_disable() {
+        let config = Config {
+            lazy_mode: true,
+            ..Default::default()
+        };
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let client = Arc::new(Aria2Client::new(config));
+
+        // Enable manage_downloads (which is disabled by default in lazy mode)
+        let req = serde_json::json!({
+            "name": "manage_tools",
+            "arguments": {
+                "action": "enable",
+                "tools": ["manage_downloads"]
+            }
+        });
+        let result = execute_tool(
+            axum::extract::Extension(Arc::clone(&registry)),
+            axum::extract::Extension(vec![Arc::clone(&client)]),
+            Json(req),
+        )
+        .await;
+        let body = serde_json::to_value(result.0).unwrap();
+        let text = body["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("Enabled 1 tools"), "Text was: {}", text);
+
+        // Disable it
+        let req = serde_json::json!({
+            "name": "manage_tools",
+            "arguments": {
+                "action": "disable",
+                "tools": ["manage_downloads"]
+            }
+        });
+        let result = execute_tool(
+            axum::extract::Extension(Arc::clone(&registry)),
+            axum::extract::Extension(vec![Arc::clone(&client)]),
+            Json(req),
+        )
+        .await;
+        let body = serde_json::to_value(result.0).unwrap();
+        let text = body["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("Disabled 1 tools"), "Text was: {}", text);
+    }
+
+    #[tokio::test]
+    async fn test_run_server_with_shutdown() {
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let prompt_registry = Arc::new(RwLock::new(PromptRegistry::default()));
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let (_tx, rx) = tokio::sync::mpsc::channel(1);
+        let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+
+        let server_handle = tokio::spawn(async move {
+            run_server_with_shutdown(
+                0, // random port
+                None,
+                registry,
+                resource_registry,
+                prompt_registry,
+                vec![client],
+                rx,
+                async {
+                    let _ = shutdown_rx.await;
+                },
+            )
+            .await
+        });
+
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        shutdown_tx.send(()).unwrap();
+        let result = server_handle.await.unwrap();
+        assert!(result.is_ok());
     }
 }

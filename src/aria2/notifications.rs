@@ -51,3 +51,44 @@ impl Aria2Notification {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_to_mcp_notification_variants() {
+        let events = vec![
+            (Aria2Event::DownloadStart, "download_start"),
+            (Aria2Event::DownloadPause, "download_pause"),
+            (Aria2Event::DownloadStop, "download_stop"),
+            (Aria2Event::DownloadComplete, "download_complete"),
+            (Aria2Event::DownloadError, "download_error"),
+            (Aria2Event::BtDownloadComplete, "bt_download_complete"),
+        ];
+
+        for (event, expected_name) in events {
+            let notification = Aria2Notification {
+                jsonrpc: "2.0".to_string(),
+                method: event,
+                params: vec![Aria2EventParams {
+                    gid: "123".to_string(),
+                }],
+            };
+            let mcp = notification.to_mcp_notification();
+            assert_eq!(mcp["params"]["event"], expected_name);
+            assert_eq!(mcp["params"]["gid"], "123");
+        }
+    }
+
+    #[test]
+    fn test_to_mcp_notification_no_params() {
+        let notification = Aria2Notification {
+            jsonrpc: "2.0".to_string(),
+            method: Aria2Event::DownloadStart,
+            params: vec![],
+        };
+        let mcp = notification.to_mcp_notification();
+        assert_eq!(mcp["params"]["gid"], "");
+    }
+}

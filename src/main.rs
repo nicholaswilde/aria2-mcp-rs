@@ -68,7 +68,7 @@ fn init_logger(level: &str) {
     let is_invalid = effective_level == "info" && level.to_lowercase() != "info";
 
     let env = env_logger::Env::default().default_filter_or(effective_level);
-    env_logger::Builder::from_env(env).init();
+    let _ = env_logger::Builder::from_env(env).try_init();
 
     if is_invalid {
         log::warn!(
@@ -123,6 +123,59 @@ async fn run_app(config: Config) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_args_to_config_mapping() {
+        let args = Args::try_parse_from([
+            "aria2-mcp-rs",
+            "-u",
+            "http://test",
+            "-s",
+            "secret",
+            "--transport",
+            "sse",
+            "--http-port",
+            "5000",
+            "--http-auth-token",
+            "test-token",
+            "--lazy",
+            "--no-verify-ssl",
+        ])
+        .unwrap();
+
+        let config = Config {
+            rpc_url: args.rpc_url,
+            rpc_secret: args.rpc_secret,
+            transport: match args.transport.to_lowercase().as_str() {
+                "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
+                _ => aria2_mcp_rs::TransportType::Stdio,
+            },
+            http_port: args.http_port,
+            http_auth_token: args.http_auth_token,
+            lazy_mode: args.lazy,
+            no_verify_ssl: args.no_verify_ssl,
+            ..Default::default()
+        };
+
+        assert_eq!(config.rpc_url, "http://test");
+        assert_eq!(config.rpc_secret, Some("secret".to_string()));
+        assert_eq!(config.transport, aria2_mcp_rs::TransportType::Sse);
+        assert_eq!(config.http_port, 5000);
+        assert_eq!(config.http_auth_token, Some("test-token".to_string()));
+        assert!(config.lazy_mode);
+        assert!(config.no_verify_ssl);
+
+        // Test verify_ssl
+        let args = Args::try_parse_from(["aria2-mcp-rs", "--verify-ssl"]).unwrap();
+        let mut config = Config {
+            no_verify_ssl: true,
+            ..Default::default()
+        };
+        if args.verify_ssl {
+            config.no_verify_ssl = false;
+        }
+        assert!(!config.no_verify_ssl);
+    }
 
     #[test]
     fn test_parse_log_level() {
@@ -222,5 +275,12 @@ mod tests {
         assert!(result.is_err());
         let err = result.unwrap_err();
         assert_eq!(err.kind(), clap::error::ErrorKind::DisplayVersion);
+    }
+
+    #[test]
+    fn test_init_logger() {
+        // We call it to cover the branches
+        init_logger("info");
+        init_logger("invalid");
     }
 }

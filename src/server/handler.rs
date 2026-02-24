@@ -551,4 +551,171 @@ mod tests {
         let result = handler.handle_method("tools/call", Some(params)).await;
         assert!(result.is_err());
     }
+
+    #[tokio::test]
+    async fn test_handler_manage_tools_success() {
+        let config = Config {
+            lazy_mode: true,
+            ..Default::default()
+        };
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let prompt_registry = Arc::new(RwLock::new(PromptRegistry::default()));
+        let client = Arc::new(Aria2Client::new(config.clone()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        // List
+        let params =
+            serde_json::json!({ "name": "manage_tools", "arguments": { "action": "list" } });
+        let result = handler
+            .handle_method("tools/call", Some(params))
+            .await
+            .unwrap();
+        assert!(result["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("manage_downloads"));
+
+        // Enable
+        let params = serde_json::json!({ "name": "manage_tools", "arguments": { "action": "enable", "tools": ["manage_downloads"] } });
+        let result = handler
+            .handle_method("tools/call", Some(params))
+            .await
+            .unwrap();
+        assert!(result["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("Enabled"));
+
+        // Disable
+        let params = serde_json::json!({ "name": "manage_tools", "arguments": { "action": "disable", "tools": ["manage_downloads"] } });
+        let result = handler
+            .handle_method("tools/call", Some(params))
+            .await
+            .unwrap();
+        assert!(result["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("Disabled"));
+    }
+
+    #[tokio::test]
+    async fn test_handler_resources_read_success() {
+        let config = Config::default();
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let mut resource_registry = ResourceRegistry::default();
+
+        struct MockResource;
+        #[async_trait]
+        impl crate::resources::McpResource for MockResource {
+            fn uri(&self) -> String {
+                "test://res".to_string()
+            }
+            fn name(&self) -> String {
+                "test".to_string()
+            }
+            fn description(&self) -> Option<String> {
+                None
+            }
+            fn mime_type(&self) -> Option<String> {
+                Some("text/plain".to_string())
+            }
+            async fn read(&self, _client: &Aria2Client) -> anyhow::Result<serde_json::Value> {
+                Ok(serde_json::json!("content"))
+            }
+            async fn read_multi(
+                &self,
+                _clients: &[Arc<Aria2Client>],
+            ) -> anyhow::Result<serde_json::Value> {
+                Ok(serde_json::json!("content"))
+            }
+        }
+        resource_registry.register(Arc::new(MockResource));
+        let resource_registry = Arc::new(RwLock::new(resource_registry));
+        let prompt_registry = Arc::new(RwLock::new(PromptRegistry::default()));
+        let client = Arc::new(Aria2Client::new(config.clone()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        let params = serde_json::json!({ "uri": "test://res" });
+        let result = handler
+            .handle_method("resources/read", Some(params))
+            .await
+            .unwrap();
+        assert_eq!(result["contents"][0]["uri"], "test://res");
+        assert_eq!(result["contents"][0]["mimeType"], "text/plain");
+        assert_eq!(result["contents"][0]["text"], "content");
+    }
+
+    #[tokio::test]
+    async fn test_handler_initialize_shutdown() {
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&Config::default())));
+        let resource_registry = Arc::new(RwLock::new(ResourceRegistry::default()));
+        let prompt_registry = Arc::new(RwLock::new(PromptRegistry::default()));
+        let client = Arc::new(Aria2Client::new(Config::default()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        let result = handler
+            .initialize(
+                Implementation {
+                    name: "test".to_string(),
+                    version: "1.0".to_string(),
+                },
+                ClientCapabilities::default(),
+            )
+            .await
+            .unwrap();
+        assert!(result.tools.is_some());
+
+        let result = handler.shutdown().await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_handler_resources_read_structured_success() {
+        let config = Config::default();
+        let registry = Arc::new(RwLock::new(ToolRegistry::new(&config)));
+        let mut resource_registry = ResourceRegistry::default();
+
+        struct MockResource;
+        #[async_trait]
+        impl crate::resources::McpResource for MockResource {
+            fn uri(&self) -> String {
+                "test://res".to_string()
+            }
+            fn name(&self) -> String {
+                "test".to_string()
+            }
+            fn description(&self) -> Option<String> {
+                None
+            }
+            fn mime_type(&self) -> Option<String> {
+                None
+            }
+            async fn read(&self, _client: &Aria2Client) -> anyhow::Result<serde_json::Value> {
+                Ok(serde_json::json!({"key": "value"}))
+            }
+            async fn read_multi(
+                &self,
+                _clients: &[Arc<Aria2Client>],
+            ) -> anyhow::Result<serde_json::Value> {
+                Ok(serde_json::json!({"key": "value"}))
+            }
+        }
+        resource_registry.register(Arc::new(MockResource));
+        let resource_registry = Arc::new(RwLock::new(resource_registry));
+        let prompt_registry = Arc::new(RwLock::new(PromptRegistry::default()));
+        let client = Arc::new(Aria2Client::new(config.clone()));
+        let handler = McpHandler::new(registry, resource_registry, prompt_registry, vec![client]);
+
+        let params = serde_json::json!({ "uri": "test://res" });
+        let result = handler
+            .handle_method("resources/read", Some(params))
+            .await
+            .unwrap();
+        assert_eq!(result["contents"][0]["uri"], "test://res");
+        assert!(result["contents"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("key"));
+    }
 }

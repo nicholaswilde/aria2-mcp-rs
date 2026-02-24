@@ -1,10 +1,10 @@
 mod common;
 
 use anyhow::Result;
-use common::Aria2Container;
-use serde_json::json;
 use aria2_mcp_rs::tools::purge_policy::PurgePolicyTool;
 use aria2_mcp_rs::tools::registry::McpeTool;
+use common::Aria2Container;
+use serde_json::json;
 
 #[tokio::test]
 async fn test_purge_policy_tool_flow() -> Result<()> {
