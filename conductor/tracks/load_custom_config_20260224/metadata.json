@@ -1,0 +1,8 @@
+{
+  "track_id": "load_custom_config_20260224",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-24T14:52:00Z",
+  "updated_at": "2026-02-24T14:52:00Z",
+  "description": "Add --config and -c arguments to load config files (config.toml, config.yaml, config.json)"
+}
