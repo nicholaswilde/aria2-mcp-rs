@@ -1,8 +1,0 @@
-{
-  "track_id": "enhanced_search_regex_20260223",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-23T20:00:00Z",
-  "updated_at": "2026-02-23T20:00:00Z",
-  "description": "Enhance search with regex support for filtering by filename, URI, and tracker URL."
-}

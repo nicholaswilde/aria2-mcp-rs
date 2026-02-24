@@ -1,0 +1,23 @@
+description = "Updates README.md and config.toml.example to reflect current project state."
+
+prompt = '''
+You are a technical writer and senior developer tasked with keeping the project's public documentation and example configuration in sync with the source code.
+
+### Workflow:
+1.  **Analyze Codebase**: Review `src/config.rs`, `src/tools/mod.rs`, and the contents of `src/tools/` to identify all available configuration parameters and tools.
+2.  **Update README.md**:
+    - Ensure the "Implemented Tools" section accurately lists all tools in `src/tools/` with their correct descriptions.
+    - Ensure "Configuration Options" (if present) and other feature sections (Scheduling, Purging, RSS, etc.) match the latest implementation.
+    - Keep the visual style (emojis, formatting) consistent with the existing file.
+3.  **Update config.toml.example**:
+    - Ensure every configuration field defined in `src/config.rs` has a corresponding commented-out or default entry in the example file.
+    - Add clear, concise comments explaining each field.
+    - Organize fields logically (e.g., Required, Logging, Optional, Feature-specific).
+4.  **Verification**: 
+    - Check for broken links or outdated version numbers in `README.md`.
+    - Ensure `config.toml.example` is valid TOML syntax.
+5.  **Commit**: Stage both files and commit with the message `docs: update README and example config`.
+
+### Execution:
+Please start by analyzing the current configuration and tool definitions, then proceed with the updates.
+'''

@@ -2,10 +2,10 @@
 
 ## Phase 1: CLI Argument Implementation
 - [x] Task: Update `Args` struct in `src/main.rs` to include `--config` and `-c`. 98c5704
-- [ ] Task: Implement TDD for CLI argument parsing.
-    - [ ] Write failing tests in `tests/main_test.rs` for `--config` and `-c` flags.
-    - [ ] Implement logic in `Args` to handle the new arguments.
-    - [ ] Verify tests pass.
+- [x] Task: Implement TDD for CLI argument parsing. 98c5704
+    - [x] Write failing tests in `tests/main_test.rs` for `--config` and `-c` flags. 98c5704
+    - [x] Implement logic in `Args` to handle the new arguments. 98c5704
+    - [x] Verify tests pass. 98c5704
 - [ ] Task: Conductor - User Manual Verification 'CLI Argument Implementation' (Protocol in workflow.md)
 
 ## Phase 2: Exclusive Configuration Loading

@@ -6,5 +6,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Add --config and -c arguments to load config files (config.toml, config.yaml, config.json)**
+- [~] **Track: Add --config and -c arguments to load config files (config.toml, config.yaml, config.json)**
 *Link: [./tracks/load_custom_config_20260224/](./tracks/load_custom_config_20260224/)*
