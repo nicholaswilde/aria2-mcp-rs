@@ -10,7 +10,7 @@ A rust implementation of a aria2 MCP server.
 - **Power Users**: Power users who want to automate their download workflows.
 
 ## Core Features
-- **Download Control**: Support for adding, pausing, resuming, and removing downloads via MCP. Includes advanced control like force-pause, force-remove, moving download positions, bulk management, and specialized BitTorrent management (trackers, peers, file selection).
+- **Download Control**: Support for adding, pausing, resuming, and removing downloads via MCP. Includes advanced control like force-pause, force-remove, moving download positions, bulk management, and specialized BitTorrent management (trackers, peers, file selection, sequential downloading for media previewing).
 - **Status Monitoring**: High-level visibility into the download queue, including active, waiting, and stopped tasks, global statistics, and automated health monitoring for stalled downloads and system resources.
 - **Automated Error Recovery**: Enhances resiliency with smart retry logic for transient failures (e.g., network timeouts) and automated BitTorrent tracker injection for stalled downloads.
 - **RSS Feed Monitoring**: Automatically monitor multiple RSS feeds and add new items to the download queue based on user-defined keyword or regular expression filters, with persistent history to avoid duplicates.
