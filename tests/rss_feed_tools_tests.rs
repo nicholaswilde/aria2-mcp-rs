@@ -54,3 +54,19 @@ async fn test_list_rss_feeds_tool() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn test_matches_filters_internal() {
+    use aria2_mcp_rs::config::RSSFilter;
+    use aria2_mcp_rs::tools::rss::matches_filters;
+
+    let filters = vec![
+        RSSFilter::Keyword("ubuntu".to_string()),
+        RSSFilter::Regex(".*debian.*".to_string()),
+    ];
+
+    assert!(matches_filters("Ubuntu 24.04 Release", &filters));
+    assert!(matches_filters("Debian 12 ISO", &filters));
+    assert!(!matches_filters("Fedora 40", &filters));
+    assert!(matches_filters("Any Title", &[]));
+}

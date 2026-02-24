@@ -79,6 +79,13 @@ impl McpServer {
                     log::error!("Recovery task error: {}", e);
                 }
             });
+
+            let client_clone = Arc::clone(client);
+            tokio::spawn(async move {
+                if let Err(e) = crate::tools::rss::start_rss_monitoring(client_clone).await {
+                    log::error!("RSS monitoring error: {}", e);
+                }
+            });
         }
 
         match self.config.transport {

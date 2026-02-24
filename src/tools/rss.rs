@@ -1,10 +1,113 @@
-use anyhow::{Context, Result};
-use async_trait::async_trait;
-use serde_json::{json, Value};
-
 use crate::aria2::Aria2Client;
 use crate::config::{RSSFeed, RSSFilter};
 use crate::tools::registry::McpeTool;
+use anyhow::{Context, Result};
+use async_trait::async_trait;
+use rss::Channel;
+use serde_json::{json, Value};
+use std::sync::Arc;
+use tokio::time::{self, Duration};
+
+pub async fn start_rss_monitoring(client: Arc<Aria2Client>) -> Result<()> {
+    let mut interval = time::interval(Duration::from_secs(600)); // Every 10 minutes
+
+    loop {
+        interval.tick().await;
+        log::debug!("Checking RSS feeds for instance {}...", client.name);
+
+        let feeds = {
+            let config = client.config();
+            let config_guard = config
+                .read()
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            config_guard.rss_config.feeds.clone()
+        };
+
+        for (idx, mut feed) in feeds.into_iter().enumerate() {
+            if let Err(e) = process_feed(&client, &mut feed).await {
+                log::error!("Error processing RSS feed '{}': {}", feed.name, e);
+            } else {
+                // Update history in config
+                if let Ok(mut config_guard) = client.config().write() {
+                    if let Some(f) = config_guard.rss_config.feeds.get_mut(idx) {
+                        f.download_history = feed.download_history;
+                    }
+                }
+            }
+        }
+    }
+}
+
+async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()> {
+    let content = reqwest::get(&feed.url).await?.bytes().await?;
+    let channel = Channel::read_from(&content[..])?;
+
+    for item in channel.items() {
+        let title = item.title().unwrap_or("Unknown Title");
+        let link = item.link().and_then(|l| {
+            if l.is_empty() {
+                item.enclosure().map(|e| e.url())
+            } else {
+                Some(l)
+            }
+        });
+
+        let id = item
+            .guid()
+            .map(|g| g.value())
+            .or(item.link())
+            .unwrap_or(title);
+
+        if feed.has_downloaded(id) {
+            continue;
+        }
+
+        if let Some(url) = link {
+            if matches_filters(title, &feed.filters) {
+                log::info!("RSS Match: Adding download '{}' from {}", title, feed.name);
+                match client.add_uri(vec![url.to_string()], None).await {
+                    Ok(gid) => {
+                        log::info!("Added RSS download. GID: {}", gid);
+                        feed.mark_downloaded(id.to_string());
+                    }
+                    Err(e) => {
+                        log::error!("Failed to add RSS download '{}': {}", title, e);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+pub fn matches_filters(title: &str, filters: &[RSSFilter]) -> bool {
+    if filters.is_empty() {
+        return true;
+    }
+
+    for filter in filters {
+        match filter {
+            RSSFilter::Keyword(k) => {
+                if title.to_lowercase().contains(&k.to_lowercase()) {
+                    return true;
+                }
+            }
+            RSSFilter::Regex(r) => {
+                if let Ok(re) = regex::RegexBuilder::new(r)
+                    .case_insensitive(true)
+                    .build()
+                {
+                    if re.is_match(title) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    false
+}
 
 pub struct AddRssFeedTool;
 
