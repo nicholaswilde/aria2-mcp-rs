@@ -19,6 +19,7 @@ A rust implementation of a aria2 MCP server.
 - **Real-Time Notifications**: Proactively broadcasts aria2 events (e.g., download start, completion, error) to MCP clients via WebSockets, eliminating the need for constant polling.
 - **Automatic File Organization**: A tool to automatically move completed downloads to specific directories based on user-defined rules (e.g., file extensions, filename patterns).
 - **Configuration Management**: Tools to manage aria2 settings (global and per-download) on the fly, with support for secure network access via Bearer Token authentication and configurable application log levels.
+- **Automated Queue Purging**: A background task to automatically remove completed or errored downloads from the aria2 queue based on a configurable policy, with support for exclusions.
 - **Bandwidth Scheduling**: A tool to define bandwidth speed profiles and automatically activate them on a daily or weekly schedule (e.g., "Day Mode", "Night Mode").
 - **Filesystem Sandbox**: Securely inspect the contents of the download directory to verify files and structures, with strict path validation to prevent unauthorized access.
 - **Download Inspection**: Detailed inspection of specific download tasks, including file lists and URI information.
