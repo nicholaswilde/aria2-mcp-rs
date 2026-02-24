@@ -38,7 +38,7 @@ pub async fn start_rss_monitoring(client: Arc<Aria2Client>) -> Result<()> {
     }
 }
 
-async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()> {
+pub async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()> {
     let content = reqwest::get(&feed.url).await?.bytes().await?;
     let channel = Channel::read_from(&content[..])?;
 
