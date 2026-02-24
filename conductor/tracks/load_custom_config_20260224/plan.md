@@ -1,7 +1,7 @@
 # Implementation Plan - Load Custom Configuration Files
 
 ## Phase 1: CLI Argument Implementation
-- [ ] Task: Update `Args` struct in `src/main.rs` to include `--config` and `-c`.
+- [x] Task: Update `Args` struct in `src/main.rs` to include `--config` and `-c`. 98c5704
 - [ ] Task: Implement TDD for CLI argument parsing.
     - [ ] Write failing tests in `tests/main_test.rs` for `--config` and `-c` flags.
     - [ ] Implement logic in `Args` to handle the new arguments.
