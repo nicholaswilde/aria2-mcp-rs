@@ -174,4 +174,19 @@ mod tests {
             .to_string()
             .contains("trackers is required"));
     }
+
+    #[tokio::test]
+    async fn test_manage_torrent_toggle_sequential_logic() {
+        let tool = ManageTorrentTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({
+            "action": "toggleSequential",
+            "gid": "1",
+            "sequential": true
+        });
+        let result = tool.run(&client, args).await;
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(err_msg.contains("error sending request") || err_msg.contains("ConnectError"));
+    }
 }

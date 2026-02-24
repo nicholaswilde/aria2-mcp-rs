@@ -187,4 +187,24 @@ mod tests {
         let result = tool.run(&client, args).await;
         assert!(result.is_err());
     }
+
+    #[tokio::test]
+    async fn test_manage_downloads_sequential_logic() {
+        let tool = ManageDownloadsTool;
+        let client = Aria2Client::new(Config::default());
+        let args = json!({
+            "action": "add",
+            "uris": ["https://example.com"],
+            "sequential": true
+        });
+        // This will fail because it tries to connect to aria2,
+        // but we want to see if it reaches the point of calling client.add_uri with correct options.
+        // Actually, without a mock, we can't easily verify the options passed to client.
+        // But we can at least verify the args parsing.
+        let result = tool.run(&client, args).await;
+        // It should fail with connection error, not validation error
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(err_msg.contains("error sending request") || err_msg.contains("ConnectError"));
+    }
 }
