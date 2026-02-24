@@ -245,7 +245,10 @@ mod tests {
         config.rpc_url = "http://192.168.1.10:6800/jsonrpc".to_string();
         config.normalize();
 
-        assert_eq!(config.instances[0].rpc_url, "http://192.168.1.10:6800/jsonrpc");
+        assert_eq!(
+            config.instances[0].rpc_url,
+            "http://192.168.1.10:6800/jsonrpc"
+        );
     }
 
     #[test]

@@ -173,9 +173,16 @@ mod tests {
         .unwrap();
 
         let config = Config {
-            rpc_url: args.rpc_url.unwrap_or_else(|| "http://localhost:6800/jsonrpc".to_string()),
+            rpc_url: args
+                .rpc_url
+                .unwrap_or_else(|| "http://localhost:6800/jsonrpc".to_string()),
             rpc_secret: args.rpc_secret,
-            transport: match args.transport.unwrap_or_else(|| "stdio".to_string()).to_lowercase().as_str() {
+            transport: match args
+                .transport
+                .unwrap_or_else(|| "stdio".to_string())
+                .to_lowercase()
+                .as_str()
+            {
                 "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
                 _ => aria2_mcp_rs::TransportType::Stdio,
             },
