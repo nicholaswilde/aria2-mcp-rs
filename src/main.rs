@@ -5,23 +5,18 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(
-        short = 'u',
-        long,
-        env = "ARIA2_MCP_RPC_URL",
-        default_value = "http://localhost:6800/jsonrpc"
-    )]
-    rpc_url: String,
+    #[arg(short = 'u', long, env = "ARIA2_MCP_RPC_URL")]
+    rpc_url: Option<String>,
     #[arg(short = 's', long, env = "ARIA2_MCP_RPC_SECRET")]
     rpc_secret: Option<String>,
-    #[arg(short, long, env = "ARIA2_MCP_TRANSPORT", default_value = "stdio")]
-    transport: String,
-    #[arg(long, env = "ARIA2_MCP_HTTP_PORT", default_value = "3000")]
-    http_port: u16,
+    #[arg(short, long, env = "ARIA2_MCP_TRANSPORT")]
+    transport: Option<String>,
+    #[arg(long, env = "ARIA2_MCP_HTTP_PORT")]
+    http_port: Option<u16>,
     #[arg(long, env = "ARIA2_MCP_HTTP_AUTH_TOKEN")]
     http_auth_token: Option<String>,
-    #[arg(short = 'L', long, env = "ARIA2_MCP_LOG_LEVEL", default_value = "info")]
-    log_level: String,
+    #[arg(short = 'L', long, env = "ARIA2_MCP_LOG_LEVEL")]
+    log_level: Option<String>,
     #[arg(short, long, env = "ARIA2_MCP_LAZY")]
     lazy: bool,
     #[arg(long, env = "ARIA2_MCP_NO_VERIFY_SSL")]
@@ -35,19 +30,27 @@ fn main() -> Result<()> {
     let mut config = Config::load()?;
 
     // Override config with CLI arguments if provided
-    config.rpc_url = args.rpc_url;
+    if let Some(rpc_url) = args.rpc_url {
+        config.rpc_url = rpc_url;
+    }
     if let Some(secret) = args.rpc_secret {
         config.rpc_secret = Some(secret);
     }
-    config.transport = match args.transport.to_lowercase().as_str() {
-        "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
-        _ => aria2_mcp_rs::TransportType::Stdio,
-    };
-    config.http_port = args.http_port;
+    if let Some(transport) = args.transport {
+        config.transport = match transport.to_lowercase().as_str() {
+            "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
+            _ => aria2_mcp_rs::TransportType::Stdio,
+        };
+    }
+    if let Some(port) = args.http_port {
+        config.http_port = port;
+    }
     if let Some(token) = args.http_auth_token {
         config.http_auth_token = Some(token);
     }
-    config.log_level = args.log_level;
+    if let Some(log_level) = args.log_level {
+        config.log_level = log_level;
+    }
     if args.lazy {
         config.lazy_mode = true;
     }
@@ -56,6 +59,8 @@ fn main() -> Result<()> {
     } else if args.no_verify_ssl {
         config.no_verify_ssl = true;
     }
+
+    config.normalize();
 
     init_logger(&config.log_level);
 
@@ -168,13 +173,13 @@ mod tests {
         .unwrap();
 
         let config = Config {
-            rpc_url: args.rpc_url,
+            rpc_url: args.rpc_url.unwrap_or_else(|| "http://localhost:6800/jsonrpc".to_string()),
             rpc_secret: args.rpc_secret,
-            transport: match args.transport.to_lowercase().as_str() {
+            transport: match args.transport.unwrap_or_else(|| "stdio".to_string()).to_lowercase().as_str() {
                 "sse" | "http" => aria2_mcp_rs::TransportType::Sse,
                 _ => aria2_mcp_rs::TransportType::Stdio,
             },
-            http_port: args.http_port,
+            http_port: args.http_port.unwrap_or(3000),
             http_auth_token: args.http_auth_token,
             lazy_mode: args.lazy,
             no_verify_ssl: args.no_verify_ssl,
@@ -217,19 +222,19 @@ mod tests {
     #[test]
     fn test_args_parse_transport_invalid() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--transport", "unknown"]).unwrap();
-        assert_eq!(args.transport, "unknown".to_string());
+        assert_eq!(args.transport, Some("unknown".to_string()));
     }
 
     #[test]
     fn test_args_parse_no_args() {
         let args = Args::try_parse_from(["aria2-mcp-rs"]).unwrap();
-        assert_eq!(args.rpc_url, "http://localhost:6800/jsonrpc".to_string());
+        assert_eq!(args.rpc_url, None);
     }
 
     #[test]
     fn test_args_parse() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "-u", "http://test"]).unwrap();
-        assert_eq!(args.rpc_url, "http://test".to_string());
+        assert_eq!(args.rpc_url, Some("http://test".to_string()));
     }
 
     #[test]
@@ -241,13 +246,13 @@ mod tests {
     #[test]
     fn test_args_parse_transport_sse() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--transport", "sse"]).unwrap();
-        assert_eq!(args.transport, "sse".to_string());
+        assert_eq!(args.transport, Some("sse".to_string()));
     }
 
     #[test]
     fn test_args_parse_port() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--http-port", "4000"]).unwrap();
-        assert_eq!(args.http_port, 4000);
+        assert_eq!(args.http_port, Some(4000));
     }
 
     #[test]
@@ -260,7 +265,7 @@ mod tests {
     #[test]
     fn test_args_parse_log_level() {
         let args = Args::try_parse_from(["aria2-mcp-rs", "--log-level", "debug"]).unwrap();
-        assert_eq!(args.log_level, "debug".to_string());
+        assert_eq!(args.log_level, Some("debug".to_string()));
     }
 
     #[test]
@@ -279,18 +284,18 @@ mod tests {
             "test-token",
         ])
         .unwrap();
-        assert_eq!(args.rpc_url, "http://test".to_string());
+        assert_eq!(args.rpc_url, Some("http://test".to_string()));
         assert_eq!(args.rpc_secret, Some("secret".to_string()));
-        assert_eq!(args.transport, "sse".to_string());
-        assert_eq!(args.http_port, 5000);
+        assert_eq!(args.transport, Some("sse".to_string()));
+        assert_eq!(args.http_port, Some(5000));
         assert_eq!(args.http_auth_token, Some("test-token".to_string()));
     }
 
     #[test]
     fn test_args_default() {
         let args = Args::try_parse_from(["aria2-mcp-rs"]).unwrap();
-        assert_eq!(args.rpc_url, "http://localhost:6800/jsonrpc".to_string());
-        assert_eq!(args.transport, "stdio".to_string());
+        assert_eq!(args.rpc_url, None);
+        assert_eq!(args.transport, None);
     }
 
     #[test]

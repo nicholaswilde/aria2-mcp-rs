@@ -252,6 +252,7 @@ impl Aria2Client {
                 .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
+
         let mut params = Vec::new();
         if let Some(secret) = &rpc_secret {
             params.push(serde_json::json!(format!("token:{}", secret)));

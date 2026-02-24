@@ -190,6 +190,11 @@ impl Config {
                 rpc_url: self.rpc_url.clone(),
                 rpc_secret: self.rpc_secret.clone(),
             });
+        } else if self.instances.len() == 1 && self.instances[0].name == "default" {
+            // Ensure the default instance matches the top-level fields,
+            // which might have been overridden by CLI arguments.
+            self.instances[0].rpc_url = self.rpc_url.clone();
+            self.instances[0].rpc_secret = self.rpc_secret.clone();
         }
     }
 
@@ -230,6 +235,17 @@ mod tests {
     fn test_load_config() {
         let config = Config::load();
         assert!(config.is_ok());
+    }
+
+    #[test]
+    fn test_normalize_updates_default_instance() {
+        let mut config = Config::default();
+        assert_eq!(config.instances[0].rpc_url, "http://localhost:6800/jsonrpc");
+
+        config.rpc_url = "http://192.168.1.10:6800/jsonrpc".to_string();
+        config.normalize();
+
+        assert_eq!(config.instances[0].rpc_url, "http://192.168.1.10:6800/jsonrpc");
     }
 
     #[test]
