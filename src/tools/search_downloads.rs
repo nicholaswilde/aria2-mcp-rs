@@ -13,6 +13,8 @@ pub struct SearchDownloadsTool;
 pub struct SearchDownloadsArgs {
     /// Substring to search for in filenames or URIs
     pub query: Option<String>,
+    /// Regular expression to search for in filenames or URIs
+    pub regex: Option<String>,
     /// Filter by status: active, waiting, paused, error, complete, removed
     pub status: Option<String>,
     /// Keys to return for each match
@@ -37,6 +39,10 @@ impl McpeTool for SearchDownloadsTool {
                     "type": "string",
                     "description": "Substring to search for in filenames or URIs"
                 },
+                "regex": {
+                    "type": "string",
+                    "description": "Regular expression to search for in filenames or URIs"
+                },
                 "status": {
                     "type": "string",
                     "enum": ["active", "waiting", "paused", "error", "complete", "removed"],
@@ -56,11 +62,11 @@ impl McpeTool for SearchDownloadsTool {
 
         let mut all_downloads = Vec::new();
 
-        // If query is provided, we need files and bittorrent info to search
+        // If query or regex is provided, we need files and bittorrent info to search
         let mut keys = args.keys.clone();
-        if args.query.is_some() || args.status.is_some() {
+        if args.query.is_some() || args.regex.is_some() || args.status.is_some() {
             if let Some(ref mut k) = keys {
-                if args.query.is_some() {
+                if args.query.is_some() || args.regex.is_some() {
                     if !k.contains(&"files".to_string()) {
                         k.push("files".to_string());
                     }
@@ -121,6 +127,8 @@ impl McpeTool for SearchDownloadsTool {
 
 impl SearchDownloadsTool {
     fn filter_downloads(&self, downloads: Vec<Value>, args: &SearchDownloadsArgs) -> Vec<Value> {
+        let regex = args.regex.as_ref().and_then(|r| regex::Regex::new(r).ok());
+
         downloads
             .into_iter()
             .filter(|item| {
@@ -140,7 +148,52 @@ impl SearchDownloadsTool {
                     }
                 }
 
-                // Filter by query if provided
+                // Filter by regex if provided
+                if let Some(re) = &regex {
+                    // Check files for path/name
+                    let files_match =
+                        if let Some(files) = item.get("files").and_then(|f| f.as_array()) {
+                            files.iter().any(|file| {
+                                file.get("path")
+                                    .and_then(|p| p.as_str())
+                                    .map(|p| re.is_match(p))
+                                    .unwrap_or(false)
+                                    || file
+                                        .get("uris")
+                                        .and_then(|u| u.as_array())
+                                        .map(|uris| {
+                                            uris.iter().any(|uri| {
+                                                uri.get("uri")
+                                                    .and_then(|u| u.as_str())
+                                                    .map(|u| re.is_match(u))
+                                                    .unwrap_or(false)
+                                            })
+                                        })
+                                        .unwrap_or(false)
+                            })
+                        } else {
+                            false
+                        };
+
+                    if files_match {
+                        return true;
+                    }
+
+                    // Check bittorrent name if available
+                    if let Some(bt) = item.get("bittorrent") {
+                        if let Some(info) = bt.get("info") {
+                            if let Some(name) = info.get("name").and_then(|n| n.as_str()) {
+                                if re.is_match(name) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                    return false;
+                }
+
+                // Filter by query if provided (substring match, case-insensitive)
                 if let Some(query) = &args.query {
                     let query = query.to_lowercase();
 
@@ -237,6 +290,7 @@ mod tests {
             query: None,
             status: Some("active".to_string()),
             keys: None,
+            regex: None,
         };
         let results = tool.filter_downloads(downloads.clone(), &args);
         assert_eq!(results.len(), 1);
@@ -247,6 +301,7 @@ mod tests {
             query: None,
             status: Some("paused".to_string()),
             keys: None,
+            regex: None,
         };
         let results = tool.filter_downloads(downloads.clone(), &args);
         assert_eq!(results.len(), 1);
@@ -271,6 +326,7 @@ mod tests {
             query: Some("movie".to_string()),
             status: None,
             keys: None,
+            regex: None,
         };
         let results = tool.filter_downloads(downloads, &args);
         assert_eq!(results.len(), 1);
@@ -289,6 +345,7 @@ mod tests {
             query: Some("example".to_string()),
             status: None,
             keys: None,
+            regex: None,
         };
         let results = tool.filter_downloads(downloads, &args);
         assert_eq!(results.len(), 1);
@@ -307,6 +364,44 @@ mod tests {
             query: Some("linux".to_string()),
             status: None,
             keys: None,
+            regex: None,
+        };
+        let results = tool.filter_downloads(downloads, &args);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0]["gid"], "1");
+    }
+
+    #[test]
+    fn test_filter_downloads_by_regex() {
+        let tool = SearchDownloadsTool;
+        let downloads = vec![
+            json!({
+                "gid": "1",
+                "files": [{ "path": "/downloads/movie_2024.mp4", "uris": [] }]
+            }),
+            json!({
+                "gid": "2",
+                "files": [{ "path": "/downloads/other_2023.txt", "uris": [] }]
+            }),
+        ];
+
+        // Regex for 2024
+        let args = SearchDownloadsArgs {
+            query: None,
+            status: None,
+            keys: None,
+            regex: Some(".*2024.*".to_string()),
+        };
+        let results = tool.filter_downloads(downloads.clone(), &args);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0]["gid"], "1");
+
+        // Case insensitive regex
+        let args = SearchDownloadsArgs {
+            query: None,
+            status: None,
+            keys: None,
+            regex: Some("(?i)MOVIE".to_string()),
         };
         let results = tool.filter_downloads(downloads, &args);
         assert_eq!(results.len(), 1);
