@@ -179,12 +179,29 @@ impl SearchDownloadsTool {
                         return true;
                     }
 
-                    // Check bittorrent name if available
+                    // Check bittorrent name and trackers if available
                     if let Some(bt) = item.get("bittorrent") {
                         if let Some(info) = bt.get("info") {
                             if let Some(name) = info.get("name").and_then(|n| n.as_str()) {
                                 if re.is_match(name) {
                                     return true;
+                                }
+                            }
+                        }
+
+                        // Check trackers in announceList
+                        if let Some(announce_list) =
+                            bt.get("announceList").and_then(|a| a.as_array())
+                        {
+                            for tier in announce_list {
+                                if let Some(urls) = tier.as_array() {
+                                    for url in urls {
+                                        if let Some(u) = url.as_str() {
+                                            if re.is_match(u) {
+                                                return true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -226,12 +243,29 @@ impl SearchDownloadsTool {
                         return true;
                     }
 
-                    // Check bittorrent name if available
+                    // Check bittorrent name and trackers if available
                     if let Some(bt) = item.get("bittorrent") {
                         if let Some(info) = bt.get("info") {
                             if let Some(name) = info.get("name").and_then(|n| n.as_str()) {
                                 if name.to_lowercase().contains(&query) {
                                     return true;
+                                }
+                            }
+                        }
+
+                        // Check trackers in announceList
+                        if let Some(announce_list) =
+                            bt.get("announceList").and_then(|a| a.as_array())
+                        {
+                            for tier in announce_list {
+                                if let Some(urls) = tier.as_array() {
+                                    for url in urls {
+                                        if let Some(u) = url.as_str() {
+                                            if u.to_lowercase().contains(&query) {
+                                                return true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -355,10 +389,18 @@ mod tests {
     #[test]
     fn test_filter_downloads_by_query_bt_name() {
         let tool = SearchDownloadsTool;
-        let downloads = vec![json!({
-            "gid": "1",
-            "bittorrent": { "info": { "name": "Linux ISO" } }
-        })];
+        let downloads = vec![
+            json!({
+                "gid": "1",
+                "bittorrent": { "info": { "name": "Linux ISO" } }
+            }),
+            json!({
+                "gid": "2",
+                "bittorrent": {
+                    "announceList": [["http://tracker.linux.org/announce"]]
+                }
+            }),
+        ];
 
         let args = SearchDownloadsArgs {
             query: Some("linux".to_string()),
@@ -367,8 +409,7 @@ mod tests {
             regex: None,
         };
         let results = tool.filter_downloads(downloads, &args);
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0]["gid"], "1");
+        assert_eq!(results.len(), 2);
     }
 
     #[test]
@@ -382,6 +423,12 @@ mod tests {
             json!({
                 "gid": "2",
                 "files": [{ "path": "/downloads/other_2023.txt", "uris": [] }]
+            }),
+            json!({
+                "gid": "3",
+                "bittorrent": {
+                    "announceList": [["http://tracker.example.com/announce"]]
+                }
             }),
         ];
 
@@ -403,8 +450,19 @@ mod tests {
             keys: None,
             regex: Some("(?i)MOVIE".to_string()),
         };
-        let results = tool.filter_downloads(downloads, &args);
+        let results = tool.filter_downloads(downloads.clone(), &args);
         assert_eq!(results.len(), 1);
         assert_eq!(results[0]["gid"], "1");
+
+        // Tracker URL regex
+        let args = SearchDownloadsArgs {
+            query: None,
+            status: None,
+            keys: None,
+            regex: Some("tracker.example".to_string()),
+        };
+        let results = tool.filter_downloads(downloads, &args);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0]["gid"], "3");
     }
 }
