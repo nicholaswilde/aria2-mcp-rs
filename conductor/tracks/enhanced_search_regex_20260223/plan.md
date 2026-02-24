@@ -4,7 +4,7 @@
 - [x] Task: Update the `search_downloads` tool to support regex filtering. [182c94d]
 - [x] Task: Add a new regex option to the search tool schema. [182c94d]
 
-## Phase 2: Implementation & Refinement
+## Phase 2: Implementation & Refinement [checkpoint: 900a7f6]
 - [x] Task: Integrate regex library for pattern matching. [182c94d]
 - [x] Task: Implement filtering logic across all metadata fields. [dca7550]
 
