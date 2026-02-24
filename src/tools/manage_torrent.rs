@@ -11,7 +11,7 @@ pub struct ManageTorrentTool;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManageTorrentArgs {
-    /// Action to perform: getPeers, changeFiles, addTrackers
+    /// Action to perform: getPeers, changeFiles, addTrackers, toggleSequential
     pub action: String,
     /// GID of the download
     pub gid: String,
@@ -19,6 +19,8 @@ pub struct ManageTorrentArgs {
     pub selected_files: Option<String>,
     /// Trackers (comma-separated URIs, for addTrackers)
     pub trackers: Option<String>,
+    /// Whether to download sequentially (for toggleSequential)
+    pub sequential: Option<bool>,
 }
 
 #[async_trait]
@@ -28,7 +30,7 @@ impl McpeTool for ManageTorrentTool {
     }
 
     fn description(&self) -> String {
-        "Manage BitTorrent-specific settings: get peers, select files, and update trackers"
+        "Manage BitTorrent-specific settings: get peers, select files, update trackers, and toggle sequential download"
             .to_string()
     }
 
@@ -38,7 +40,7 @@ impl McpeTool for ManageTorrentTool {
             "properties": {
                 "action": {
                     "type": "string",
-                    "enum": ["getPeers", "changeFiles", "addTrackers"],
+                    "enum": ["getPeers", "changeFiles", "addTrackers", "toggleSequential"],
                     "description": "Action to perform"
                 },
                 "gid": {
@@ -52,6 +54,10 @@ impl McpeTool for ManageTorrentTool {
                 "trackers": {
                     "type": "string",
                     "description": "Comma-separated list of tracker URIs"
+                },
+                "sequential": {
+                    "type": "boolean",
+                    "description": "Whether to download sequentially (for action='toggleSequential')"
                 }
             },
             "required": ["action", "gid"]
@@ -83,6 +89,18 @@ impl McpeTool for ManageTorrentTool {
                     .change_option(&args.gid, json!({ "bt-tracker": trackers }))
                     .await?;
                 Ok(json!({ "status": "success", "gid": args.gid, "trackers": trackers }))
+            }
+            "toggleSequential" => {
+                let sequential = args.sequential.ok_or_else(|| {
+                    anyhow::anyhow!("sequential is required for toggleSequential")
+                })?;
+                client
+                    .change_option(
+                        &args.gid,
+                        json!({ "bt-sequential": sequential.to_string() }),
+                    )
+                    .await?;
+                Ok(json!({ "status": "success", "gid": args.gid, "sequential": sequential }))
             }
             _ => Err(anyhow::anyhow!("Unknown action: {}", args.action)),
         }

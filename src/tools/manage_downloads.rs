@@ -23,6 +23,8 @@ pub struct ManageDownloadsArgs {
     pub how: Option<String>,
     /// Options for adding the download
     pub options: Option<Value>,
+    /// Whether to download sequentially (for BitTorrent)
+    pub sequential: Option<bool>,
 }
 
 #[async_trait]
@@ -65,6 +67,10 @@ impl McpeTool for ManageDownloadsTool {
                 "options": {
                     "type": "object",
                     "description": "Options for the added download (for action='add')"
+                },
+                "sequential": {
+                    "type": "boolean",
+                    "description": "Whether to download sequentially (for action='add', BitTorrent only)"
                 }
             },
             "required": ["action"]
@@ -79,7 +85,15 @@ impl McpeTool for ManageDownloadsTool {
                 let uris = args
                     .uris
                     .ok_or_else(|| anyhow::anyhow!("'uris' is required for action 'add'"))?;
-                let gid = client.add_uri(uris, args.options).await?;
+
+                let mut options = args.options.unwrap_or(json!({}));
+                if let Some(sequential) = args.sequential {
+                    if let Some(obj) = options.as_object_mut() {
+                        obj.insert("bt-sequential".to_string(), json!(sequential.to_string()));
+                    }
+                }
+
+                let gid = client.add_uri(uris, Some(options)).await?;
                 Ok(json!({ "gid": gid }))
             }
             "pause" => {
