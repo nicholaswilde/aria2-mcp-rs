@@ -11,6 +11,6 @@
 - [x] Task: Integrate item addition with the `Aria2Client`. 779ee56
 
 ## Phase 3: Integration & Testing
-- [ ] Task: Add unit tests for RSS feed parsing and filtering.
+- [x] Task: Add unit tests for RSS feed parsing and filtering. df6daf5
 - [ ] Task: Add integration tests with mocked RSS feeds.
 - [ ] Task: Update project documentation to include RSS monitoring details.
