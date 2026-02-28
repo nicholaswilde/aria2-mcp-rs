@@ -261,25 +261,28 @@ pub async fn handle_request(
             Ok(json!({ "resources": resources }))
         }
         "resources/read" => {
-             let params = req.params.unwrap_or(json!({}));
-             let uri = params["uri"].as_str().unwrap_or_default();
-             let reg = resource_registry.read().await;
-             if let Some(resource) = reg.get_resource(uri) {
-                 // Check if ResourceRegistry has read_resource or we call it on the resource itself.
-                 // ResourceRegistry has get_resource which returns McpResource.
-                 // Need to find which client to use for McpResource::read.
-                 // Use first client for now as default.
-                 if let Some(client) = clients.first() {
+            let params = req.params.unwrap_or(json!({}));
+            let uri = params["uri"].as_str().unwrap_or_default();
+            let reg = resource_registry.read().await;
+            if let Some(resource) = reg.get_resource(uri) {
+                // Check if ResourceRegistry has read_resource or we call it on the resource itself.
+                // ResourceRegistry has get_resource which returns McpResource.
+                // Need to find which client to use for McpResource::read.
+                // Use first client for now as default.
+                if let Some(client) = clients.first() {
                     match resource.read(client).await {
                         Ok(res) => Ok(json!(res)),
                         Err(e) => Err(JsonRpcError::new(-32603, &format!("Resource error: {}", e))),
                     }
-                 } else {
-                    Err(JsonRpcError::new(-32603, "No clients available for resource read"))
-                 }
-             } else {
+                } else {
+                    Err(JsonRpcError::new(
+                        -32603,
+                        "No clients available for resource read",
+                    ))
+                }
+            } else {
                 Err(JsonRpcError::new(-32601, "Resource not found"))
-             }
+            }
         }
         "prompts/list" => {
             let reg = prompt_registry.read().await;

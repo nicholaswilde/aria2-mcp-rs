@@ -1,8 +1,8 @@
-use aria2_mcp_rs::server::mcp::{JsonRpcRequest, JsonRpcResponse, JsonRpcError, RequestId, McpState, handle_request};
-use aria2_mcp_rs::tools::ToolRegistry;
-use aria2_mcp_rs::resources::ResourceRegistry;
-use aria2_mcp_rs::prompts::PromptRegistry;
 use aria2_mcp_rs::config::Config;
+use aria2_mcp_rs::prompts::PromptRegistry;
+use aria2_mcp_rs::resources::ResourceRegistry;
+use aria2_mcp_rs::server::mcp::{handle_request, JsonRpcRequest, McpState, RequestId};
+use aria2_mcp_rs::tools::ToolRegistry;
 use serde_json::json;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -52,12 +52,15 @@ async fn test_handle_request_initialize() {
         Arc::clone(&registry),
         Arc::clone(&resource_registry),
         Arc::clone(&prompt_registry),
-        &clients
-    ).await.unwrap().unwrap();
+        &clients,
+    )
+    .await
+    .unwrap()
+    .unwrap();
 
     assert_eq!(res.id, Some(RequestId::Number(1)));
     assert_eq!(res.result.unwrap()["serverInfo"]["name"], "aria2-mcp-rs");
-    
+
     let state_guard = state.read().await;
     assert!(state_guard.initialized);
 }
@@ -84,8 +87,11 @@ async fn test_handle_request_tools_list() {
         Arc::clone(&registry),
         Arc::clone(&resource_registry),
         Arc::clone(&prompt_registry),
-        &clients
-    ).await.unwrap().unwrap();
+        &clients,
+    )
+    .await
+    .unwrap()
+    .unwrap();
 
     assert_eq!(res.id, Some(RequestId::String("req-1".to_string())));
     assert!(res.result.unwrap()["tools"].is_array());
@@ -113,8 +119,11 @@ async fn test_handle_request_method_not_found() {
         Arc::clone(&registry),
         Arc::clone(&resource_registry),
         Arc::clone(&prompt_registry),
-        &clients
-    ).await.unwrap().unwrap();
+        &clients,
+    )
+    .await
+    .unwrap()
+    .unwrap();
 
     assert_eq!(res.id, Some(RequestId::Number(99)));
     assert_eq!(res.error.unwrap().code, -32601);
