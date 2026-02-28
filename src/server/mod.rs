@@ -101,7 +101,8 @@ impl McpServer {
 
         match self.config.transport {
             TransportType::Stdio => {
-                stdio::run_server(
+                mcp::run_stdio(
+                    Arc::clone(&self.state),
                     Arc::clone(&self.registry),
                     Arc::clone(&self.resource_registry),
                     Arc::clone(&self.prompt_registry),
