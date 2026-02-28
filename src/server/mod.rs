@@ -1,4 +1,5 @@
 pub mod handler;
+pub mod mcp;
 pub mod sse;
 pub mod stdio;
 
