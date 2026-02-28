@@ -24,6 +24,7 @@ pub struct McpServer {
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
     recovery_manager: Arc<RecoveryManager>,
+    state: Arc<RwLock<mcp::McpState>>,
 }
 
 impl McpServer {
@@ -35,6 +36,7 @@ impl McpServer {
         clients: Vec<Aria2Client>,
     ) -> Self {
         let recovery_manager = Arc::new(RecoveryManager::new(config.retry_config.clone()));
+        let lazy_mode = config.lazy_mode;
         Self {
             config,
             registry: Arc::new(RwLock::new(registry)),
@@ -42,6 +44,7 @@ impl McpServer {
             prompt_registry: Arc::new(RwLock::new(prompt_registry)),
             clients: clients.into_iter().map(Arc::new).collect(),
             recovery_manager,
+            state: Arc::new(RwLock::new(mcp::McpState::new(lazy_mode))),
         }
     }
 
