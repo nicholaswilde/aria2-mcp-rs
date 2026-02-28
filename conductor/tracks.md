@@ -11,5 +11,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement Stdio JSON-RPC 2.0 Server**
+- [x] **Track: Implement Stdio JSON-RPC 2.0 Server**
 *Link: [./tracks/implement_stdio_jsonrpc_20260228/](./tracks/implement_stdio_jsonrpc_20260228/)*
