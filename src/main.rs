@@ -614,6 +614,34 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_instance_arg_invalid_format() {
+        let result = parse_instance_arg("invalid");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Invalid instance part"));
+    }
+
+    #[test]
+    fn test_parse_instance_arg_missing_name() {
+        let result = parse_instance_arg("url=http://localhost:6800/jsonrpc");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Missing 'name'"));
+    }
+
+    #[test]
+    fn test_parse_instance_arg_missing_url() {
+        let result = parse_instance_arg("name=local");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Missing 'url'"));
+    }
+
+    #[test]
+    fn test_parse_instance_arg_unknown_key() {
+        let result = parse_instance_arg("name=local,url=http://localhost:6800/jsonrpc,unknown=val");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unknown instance key"));
+    }
+
+    #[test]
     fn test_init_logger() {
         // We call it to cover the branches
         init_logger("info");

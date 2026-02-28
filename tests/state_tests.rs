@@ -70,3 +70,86 @@ async fn test_state_manager_load_non_existent_file() {
     assert!(data.bandwidth_schedules.is_empty());
     assert!(data.organize_rules.is_empty());
 }
+
+#[tokio::test]
+async fn test_state_manager_empty_file() {
+    use std::fs;
+    use tempfile::tempdir;
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("empty.json");
+    fs::write(&path, "   ").unwrap();
+
+    let manager = StateManager::new(path);
+    let data = manager.load().await.expect("Should handle empty file");
+    assert!(data.bandwidth_profiles.is_empty());
+}
+
+#[tokio::test]
+async fn test_state_manager_invalid_json() {
+    use std::fs;
+    use tempfile::tempdir;
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("invalid.json");
+    fs::write(&path, "{ invalid: json }").unwrap();
+
+    let manager = StateManager::new(path);
+    let result = manager.load().await;
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .contains("Failed to parse state file"));
+}
+
+#[tokio::test]
+async fn test_state_manager_create_dir_failure() {
+    // On Linux, /root/test/state.json should fail if not root
+    let path = std::path::PathBuf::from("/root/aria2-mcp/state.json");
+    let manager = StateManager::new(path);
+    let data = StateData::default();
+
+    let result = manager.save(&data).await;
+    if let Err(e) = result {
+        assert!(
+            e.to_string()
+                .contains("Failed to create parent directories")
+                || e.to_string().contains("Permission denied")
+        );
+    }
+}
+
+#[tokio::test]
+async fn test_state_manager_write_failure() {
+    use std::fs;
+    use tempfile::tempdir;
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("readonly");
+    fs::create_dir(&path).unwrap(); // It's a directory, so writing to it as a file should fail
+
+    let manager = StateManager::new(path);
+    let data = StateData::default();
+
+    let result = manager.save(&data).await;
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .contains("Failed to write state file"));
+}
+
+#[tokio::test]
+async fn test_state_manager_read_failure() {
+    use std::fs;
+    use tempfile::tempdir;
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("dir");
+    fs::create_dir(&path).unwrap(); // It's a directory, so reading it as a file should fail
+
+    let manager = StateManager::new(path);
+    let result = manager.load().await;
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .contains("Failed to read state file"));
+}

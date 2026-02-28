@@ -1,0 +1,8 @@
+{
+  "id": "increase_coverage_20260228",
+  "title": "Increase Code Coverage to 90%+",
+  "description": "Improve testing to reach at least 90% total code coverage, focusing on low-coverage areas like server/stdio.rs and state.rs.",
+  "status": "in_progress",
+  "created_at": "2026-02-28T07:25:00Z",
+  "updated_at": "2026-02-28T07:25:00Z"
+}

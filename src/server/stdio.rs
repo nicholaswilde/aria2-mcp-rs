@@ -110,4 +110,15 @@ mod tests {
         let received = transport_rx.recv().await.unwrap().unwrap();
         assert!(format!("{:?}", received).contains("notifications/aria2/event"));
     }
+
+    #[tokio::test]
+    async fn test_notification_serialization_error() {
+        // A plain string should fail to deserialize into the Message struct/enum
+        let invalid_mcp_notification = serde_json::json!("not a message");
+
+        // This should fail to deserialize into mcp_sdk_rs::transport::Message
+        let result =
+            serde_json::from_value::<mcp_sdk_rs::transport::Message>(invalid_mcp_notification);
+        assert!(result.is_err());
+    }
 }
