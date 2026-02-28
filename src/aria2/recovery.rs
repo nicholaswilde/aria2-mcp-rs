@@ -25,14 +25,17 @@ impl Default for RetryConfig {
 pub struct ErrorAnalyzer;
 
 impl ErrorAnalyzer {
+    #[must_use]
     pub fn new() -> Self {
         Self
     }
 
+    #[must_use]
     pub fn is_retryable(&self, error_code: &str) -> bool {
-        matches!(error_code, "2" | "6" | "17" | "20" | "21" | "22")
+        matches!(error_code, "2" | "6" | "17" | "19" | "20" | "21" | "22")
     }
 
+    #[must_use]
     pub fn should_retry(&self, status: &serde_json::Value) -> bool {
         if let Some(s) = status.get("status").and_then(|v| v.as_str()) {
             if s == "error" {
@@ -59,6 +62,7 @@ pub struct RecoveryManager {
 }
 
 impl RecoveryManager {
+    #[must_use]
     pub fn new(config: RetryConfig) -> Self {
         Self {
             config,
@@ -105,7 +109,7 @@ impl RecoveryManager {
     }
 
     pub async fn perform_retry(&self, client: &Aria2Client, gid: &str) -> anyhow::Result<String> {
-        log::info!("Attempting retry for download {}...", gid);
+        log::info!("Attempting retry for download {gid}...");
 
         // 1. Get URIs and options from old download
         let status = client.tell_status(gid).await?;
@@ -117,13 +121,16 @@ impl RecoveryManager {
             .and_then(|u| u.as_array())
             .map(|uris| {
                 uris.iter()
-                    .filter_map(|u| u.get("uri").and_then(|v| v.as_str().map(|s| s.to_string())))
+                    .filter_map(|u| {
+                        u.get("uri")
+                            .and_then(|v| v.as_str().map(std::string::ToString::to_string))
+                    })
                     .collect()
             })
             .unwrap_or_default();
 
         if uris.is_empty() {
-            let res = Err(anyhow::anyhow!("No URIs found for download {}", gid));
+            let res = Err(anyhow::anyhow!("No URIs found for download {gid}"));
             let mut pending = self.pending_retries.write().await;
             pending.remove(gid);
             return res;
@@ -139,7 +146,7 @@ impl RecoveryManager {
             }
         };
 
-        log::info!("Retry successful. New GID: {}", new_gid);
+        log::info!("Retry successful. New GID: {new_gid}");
 
         // 3. Cleanup old download result (optional but recommended)
         // If we don't remove it, it stays in the stopped list.
@@ -195,6 +202,7 @@ pub struct TrackerScraper {
 }
 
 impl TrackerScraper {
+    #[must_use]
     pub fn new(url: String) -> Self {
         Self { url }
     }

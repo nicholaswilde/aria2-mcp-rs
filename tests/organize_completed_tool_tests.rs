@@ -130,11 +130,10 @@ async fn test_organize_completed_not_complete_error() -> Result<()> {
     // Should fail because it's not complete
     assert!(result.is_err(), "Expected error for non-complete download");
     let err_msg = result.unwrap_err().to_string();
-    println!("Error message: {}", err_msg);
+    println!("Error message: {err_msg}");
     assert!(
         err_msg.contains("is not complete"),
-        "Error message '{}' does not contain 'is not complete'",
-        err_msg
+        "Error message '{err_msg}' does not contain 'is not complete'"
     );
 
     Ok(())

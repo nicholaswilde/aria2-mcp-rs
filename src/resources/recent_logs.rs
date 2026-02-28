@@ -11,6 +11,7 @@ pub struct RecentLogsResource {
 }
 
 impl RecentLogsResource {
+    #[must_use]
     pub fn new(log_path: String, lines: usize) -> Self {
         Self { log_path, lines }
     }

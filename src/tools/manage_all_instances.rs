@@ -49,13 +49,13 @@ impl McpeTool for ManageAllInstancesTool {
                 "pause" => client.pause_all().await,
                 "resume" => client.unpause_all().await,
                 "purge" => client.purge_download_result().await,
-                _ => Err(anyhow::anyhow!("Invalid action: {}", action)),
+                _ => Err(anyhow::anyhow!("Invalid action: {action}")),
             };
 
             results.push(json!({
                 "instance": client.name,
                 "status": if res.is_ok() { "ok" } else { "error" },
-                "message": res.err().map(|e| e.to_string()).unwrap_or_else(|| "Success".to_string())
+                "message": res.err().map_or_else(|| "Success".to_string(), |e| e.to_string())
             }));
         }
 

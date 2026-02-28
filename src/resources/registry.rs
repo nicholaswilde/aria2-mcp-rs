@@ -19,6 +19,7 @@ impl Default for ResourceRegistry {
 }
 
 impl ResourceRegistry {
+    #[must_use]
     pub fn new() -> Self {
         let mut registry = Self {
             resources: HashMap::new(),
@@ -39,10 +40,12 @@ impl ResourceRegistry {
         self.resources.insert(resource.uri(), resource);
     }
 
+    #[must_use]
     pub fn get_resource(&self, uri: &str) -> Option<Arc<dyn McpResource>> {
         self.resources.get(uri).cloned()
     }
 
+    #[must_use]
     pub fn list_resources(&self) -> Vec<Value> {
         let mut results = Vec::new();
         for resource in self.resources.values() {

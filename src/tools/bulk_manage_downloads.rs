@@ -61,7 +61,7 @@ impl McpeTool for BulkManageDownloadsTool {
                     "remove" => client.remove(&gid).await,
                     "forcePause" => client.force_pause(&gid).await,
                     "forceRemove" => client.force_remove(&gid).await,
-                    _ => Err(anyhow::anyhow!("Unknown action: {}", action)),
+                    _ => Err(anyhow::anyhow!("Unknown action: {action}")),
                 };
                 (gid, result)
             }
@@ -75,7 +75,7 @@ impl McpeTool for BulkManageDownloadsTool {
 
         for (gid, res) in results {
             match res {
-                Ok(_) => {
+                Ok(()) => {
                     success_count += 1;
                     details.push(json!({ "gid": gid, "status": "success" }));
                 }

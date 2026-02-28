@@ -28,7 +28,7 @@ impl McpPrompt for DiagnoseDownloadPrompt {
 
         let mut text = "I need help diagnosing a download issue.".to_string();
         if let Some(gid) = gid {
-            text.push_str(&format!(" The GID is {}.", gid));
+            text.push_str(&format!(" The GID is {gid}."));
         }
 
         Ok(vec![

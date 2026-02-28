@@ -76,7 +76,7 @@ impl McpeTool for ScheduleLimitsTool {
                 let config = client.config();
                 let config_guard = config
                     .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
                 let profiles = config_guard.bandwidth_profiles.clone();
                 Ok(json!({ "profiles": profiles }))
             }
@@ -103,7 +103,7 @@ impl McpeTool for ScheduleLimitsTool {
                 {
                     let mut config_guard = config
                         .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
                     config_guard
                         .bandwidth_profiles
                         .insert(name.to_string(), profile);
@@ -122,7 +122,7 @@ impl McpeTool for ScheduleLimitsTool {
                 {
                     let mut config_guard = config
                         .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
                     config_guard.bandwidth_profiles.remove(name);
                 }
                 let _ = client.save_state().await;
@@ -133,7 +133,7 @@ impl McpeTool for ScheduleLimitsTool {
                 let config = client.config();
                 let config_guard = config
                     .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
                 let schedules = config_guard.bandwidth_schedules.clone();
                 Ok(json!({ "schedules": schedules }))
             }
@@ -167,11 +167,11 @@ impl McpeTool for ScheduleLimitsTool {
                 {
                     let mut config_guard = config
                         .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
                     // Validate profile exists
                     if !config_guard.bandwidth_profiles.contains_key(profile_name) {
-                        return Err(anyhow::anyhow!("Profile '{}' does not exist", profile_name));
+                        return Err(anyhow::anyhow!("Profile '{profile_name}' does not exist"));
                     }
 
                     config_guard.bandwidth_schedules.push(schedule);
@@ -183,14 +183,14 @@ impl McpeTool for ScheduleLimitsTool {
             "remove_schedule" => {
                 let index = args
                     .get("index")
-                    .and_then(|v| v.as_u64())
+                    .and_then(serde_json::Value::as_u64)
                     .context("Missing or invalid 'index'")? as usize;
 
                 let config = client.config();
                 {
                     let mut config_guard = config
                         .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
                     if index >= config_guard.bandwidth_schedules.len() {
                         return Err(anyhow::anyhow!("Schedule index out of bounds"));
@@ -212,12 +212,12 @@ impl McpeTool for ScheduleLimitsTool {
                     let config = client.config();
                     let config_guard = config
                         .read()
-                        .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
                     config_guard
                         .bandwidth_profiles
                         .get(name)
                         .cloned()
-                        .context(format!("Profile '{}' not found", name))?
+                        .context(format!("Profile '{name}' not found"))?
                 };
 
                 let options = json!({
@@ -231,7 +231,7 @@ impl McpeTool for ScheduleLimitsTool {
                     json!({ "status": "success", "message": format!("Profile '{}' activated", name) }),
                 )
             }
-            _ => Err(anyhow::anyhow!("Action '{}' not implemented yet", action)),
+            _ => Err(anyhow::anyhow!("Action '{action}' not implemented yet")),
         }
     }
 }

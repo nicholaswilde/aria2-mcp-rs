@@ -108,10 +108,10 @@ impl McpeTool for ToolWrapper {
         // 1. If 'instance' is provided, route to specific client.
         // 2. If 'instance' is NOT provided, call the underlying tool's run_multi.
 
-        if let Some(instance_idx) = args.get("instance").and_then(|v| v.as_u64()) {
+        if let Some(instance_idx) = args.get("instance").and_then(serde_json::Value::as_u64) {
             let client = clients
                 .get(instance_idx as usize)
-                .ok_or_else(|| anyhow::anyhow!("Invalid instance index: {}", instance_idx))?;
+                .ok_or_else(|| anyhow::anyhow!("Invalid instance index: {instance_idx}"))?;
             self.tool.run(client, args).await
         } else {
             self.tool.run_multi(clients, args).await
@@ -126,6 +126,7 @@ impl Default for ToolRegistry {
 }
 
 impl ToolRegistry {
+    #[must_use]
     pub fn new(config: &Config) -> Self {
         let mut registry = Self {
             tools: HashMap::new(),
@@ -167,10 +168,12 @@ impl ToolRegistry {
         }
     }
 
+    #[must_use]
     pub fn get_tool(&self, name: &str) -> Option<Arc<dyn McpeTool>> {
         self.tools.get(name).cloned()
     }
 
+    #[must_use]
     pub fn list_tools(&self) -> Vec<Arc<dyn McpeTool>> {
         self.tools
             .iter()
@@ -192,10 +195,12 @@ impl ToolRegistry {
         self.enabled_tools.remove(name)
     }
 
+    #[must_use]
     pub fn is_tool_enabled(&self, name: &str) -> bool {
         self.enabled_tools.contains(name)
     }
 
+    #[must_use]
     pub fn list_available_tools(&self) -> Vec<Value> {
         let mut result = Vec::new();
         for (name, tool) in &self.tools {
@@ -209,6 +214,7 @@ impl ToolRegistry {
         result
     }
 
+    #[must_use]
     pub fn is_lazy_mode(&self) -> bool {
         self.lazy_mode
     }

@@ -29,6 +29,7 @@ pub struct Aria2EventParams {
 }
 
 impl Aria2Notification {
+    #[must_use]
     pub fn to_mcp_notification(&self) -> serde_json::Value {
         let event_name = match self.method {
             Aria2Event::DownloadStart => "download_start",
@@ -39,7 +40,7 @@ impl Aria2Notification {
             Aria2Event::BtDownloadComplete => "bt_download_complete",
         };
 
-        let gid = self.params.first().map(|p| p.gid.as_str()).unwrap_or("");
+        let gid = self.params.first().map_or("", |p| p.gid.as_str());
 
         serde_json::json!({
             "jsonrpc": "2.0",

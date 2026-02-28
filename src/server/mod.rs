@@ -48,6 +48,7 @@ impl McpServer {
         }
     }
 
+    #[must_use]
     pub fn clients(&self) -> &[Arc<Aria2Client>] {
         &self.clients
     }
@@ -60,7 +61,7 @@ impl McpServer {
             let client_clone = Arc::clone(client);
             let tx_clone = notification_tx.clone();
             tokio::spawn(async move {
-                if let Err(e) = client_clone.start_notifications(tx_clone).await {
+                if let Err(e) = client_clone.start_notifications(tx_clone) {
                     log::error!(
                         "Notification error for instance {}: {}",
                         client_clone.name,
@@ -72,7 +73,7 @@ impl McpServer {
             let client_clone = Arc::clone(client);
             tokio::spawn(async move {
                 if let Err(e) = start_scheduler(client_clone).await {
-                    log::error!("Scheduler error: {}", e);
+                    log::error!("Scheduler error: {e}");
                 }
             });
 
@@ -80,21 +81,21 @@ impl McpServer {
             let recovery_manager_clone = Arc::clone(&self.recovery_manager);
             tokio::spawn(async move {
                 if let Err(e) = start_recovery_task(client_clone, recovery_manager_clone).await {
-                    log::error!("Recovery task error: {}", e);
+                    log::error!("Recovery task error: {e}");
                 }
             });
 
             let client_clone = Arc::clone(client);
             tokio::spawn(async move {
                 if let Err(e) = crate::tools::rss::start_rss_monitoring(client_clone).await {
-                    log::error!("RSS monitoring error: {}", e);
+                    log::error!("RSS monitoring error: {e}");
                 }
             });
 
             let client_clone = Arc::clone(client);
             tokio::spawn(async move {
                 if let Err(e) = start_purge_task(client_clone).await {
-                    log::error!("Purge task error: {}", e);
+                    log::error!("Purge task error: {e}");
                 }
             });
         }
@@ -145,7 +146,7 @@ pub async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
         let purge_config = {
             let config_guard = config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             config_guard.purge_config.clone()
         };
 
@@ -162,7 +163,7 @@ pub async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
         let stopped = match client.tell_stopped(0, 1000, None).await {
             Ok(s) => s,
             Err(e) => {
-                log::error!("Failed to fetch stopped downloads for purge: {}", e);
+                log::error!("Failed to fetch stopped downloads for purge: {e}");
                 continue;
             }
         };
@@ -177,7 +178,7 @@ pub async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
                     if is_purgeable(item) {
                         log::info!("Purging download {} (instance {})...", gid, client.name);
                         if let Err(e) = client.remove_download_result(gid).await {
-                            log::error!("Failed to purge download {}: {}", gid, e);
+                            log::error!("Failed to purge download {gid}: {e}");
                         }
                     }
                 }
@@ -186,6 +187,7 @@ pub async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
     }
 }
 
+#[must_use]
 pub fn is_purgeable(item: &serde_json::Value) -> bool {
     if let Some(status) = item.get("status").and_then(|v| v.as_str()) {
         // For now, we purge anything that is complete or error.
@@ -208,7 +210,7 @@ async fn start_recovery_task(
         let stopped = match client.tell_stopped(0, 100, None).await {
             Ok(s) => s,
             Err(e) => {
-                log::error!("Failed to fetch stopped downloads for recovery: {}", e);
+                log::error!("Failed to fetch stopped downloads for recovery: {e}");
                 continue;
             }
         };
@@ -237,7 +239,7 @@ async fn start_recovery_task(
                                 .perform_retry(&client_retry, &gid_retry)
                                 .await
                             {
-                                log::error!("Retry failed for download {}: {}", gid_retry, e);
+                                log::error!("Retry failed for download {gid_retry}: {e}");
                             }
                         });
                     }
@@ -248,7 +250,7 @@ async fn start_recovery_task(
 }
 
 async fn check_port_available(host: &str, port: u16) -> bool {
-    let addr_str = format!("{}:{}", host, port);
+    let addr_str = format!("{host}:{port}");
     tokio::net::TcpListener::bind(&addr_str).await.is_ok()
 }
 
@@ -301,7 +303,7 @@ async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
             let config = client.config();
             let config_guard = config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (
                 config_guard.bandwidth_profiles.clone(),
                 config_guard.bandwidth_schedules.clone(),
@@ -313,13 +315,13 @@ async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
         if let Some(profile_name) = active_profile_name {
             if last_profile.as_ref() != Some(&profile_name) {
                 if let Some(profile) = profiles.get(&profile_name) {
-                    log::info!("Activating bandwidth profile: {}", profile_name);
+                    log::info!("Activating bandwidth profile: {profile_name}");
                     let options = serde_json::json!({
                         "max-overall-download-limit": profile.max_download,
                         "max-overall-upload-limit": profile.max_upload,
                     });
                     if let Err(e) = client.change_global_option(options).await {
-                        log::error!("Failed to activate profile '{}': {}", profile_name, e);
+                        log::error!("Failed to activate profile '{profile_name}': {e}");
                     } else {
                         last_profile = Some(profile_name);
                     }

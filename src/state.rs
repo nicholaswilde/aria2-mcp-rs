@@ -24,6 +24,7 @@ pub struct StateManager {
 }
 
 impl StateManager {
+    #[must_use]
     pub fn new(path: PathBuf) -> Self {
         Self { path }
     }
@@ -35,28 +36,27 @@ impl StateManager {
 
         let content = fs::read_to_string(&self.path)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to read state file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to read state file: {e}")))?;
 
         if content.trim().is_empty() {
             return Ok(StateData::default());
         }
 
         let data = serde_json::from_str(&content)
-            .map_err(|e| Error::Internal(format!("Failed to parse state file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to parse state file: {e}")))?;
 
         Ok(data)
     }
 
     pub async fn save(&self, data: &StateData) -> Result<()> {
         let content = serde_json::to_string_pretty(data)
-            .map_err(|e| Error::Internal(format!("Failed to serialize state: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to serialize state: {e}")))?;
 
         if let Some(parent) = self.path.parent() {
             if !parent.exists() {
                 fs::create_dir_all(parent).await.map_err(|e| {
                     Error::Internal(format!(
-                        "Failed to create parent directories for state: {}",
-                        e
+                        "Failed to create parent directories for state: {e}"
                     ))
                 })?;
             }
@@ -64,7 +64,7 @@ impl StateManager {
 
         fs::write(&self.path, content)
             .await
-            .map_err(|e| Error::Internal(format!("Failed to write state file: {}", e)))?;
+            .map_err(|e| Error::Internal(format!("Failed to write state file: {e}")))?;
 
         Ok(())
     }

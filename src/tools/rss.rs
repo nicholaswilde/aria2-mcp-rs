@@ -19,7 +19,7 @@ pub async fn start_rss_monitoring(client: Arc<Aria2Client>) -> Result<()> {
             let config = client.config();
             let config_guard = config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             config_guard.rss_config.feeds.clone()
         };
 
@@ -46,7 +46,7 @@ pub async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()
         let title = item.title().unwrap_or("Unknown Title");
         let link = item.link().and_then(|l| {
             if l.is_empty() {
-                item.enclosure().map(|e| e.url())
+                item.enclosure().map(rss::Enclosure::url)
             } else {
                 Some(l)
             }
@@ -54,7 +54,7 @@ pub async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()
 
         let id = item
             .guid()
-            .map(|g| g.value())
+            .map(rss::Guid::value)
             .or(item.link())
             .unwrap_or(title);
 
@@ -67,11 +67,11 @@ pub async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()
                 log::info!("RSS Match: Adding download '{}' from {}", title, feed.name);
                 match client.add_uri(vec![url.to_string()], None).await {
                     Ok(gid) => {
-                        log::info!("Added RSS download. GID: {}", gid);
+                        log::info!("Added RSS download. GID: {gid}");
                         feed.mark_downloaded(id.to_string());
                     }
                     Err(e) => {
-                        log::error!("Failed to add RSS download '{}': {}", title, e);
+                        log::error!("Failed to add RSS download '{title}': {e}");
                     }
                 }
             }
@@ -81,6 +81,7 @@ pub async fn process_feed(client: &Aria2Client, feed: &mut RSSFeed) -> Result<()
     Ok(())
 }
 
+#[must_use]
 pub fn matches_filters(title: &str, filters: &[RSSFilter]) -> bool {
     if filters.is_empty() {
         return true;
@@ -175,7 +176,7 @@ impl McpeTool for AddRssFeedTool {
         let config = client.config();
         let mut config_guard = config
             .write()
-            .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
         config_guard.rss_config.feeds.push(feed);
 
         Ok(json!({
@@ -208,7 +209,7 @@ impl McpeTool for ListRssFeedsTool {
         let config = client.config();
         let config_guard = config
             .read()
-            .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
 
         Ok(json!({
             "feeds": config_guard.rss_config.feeds

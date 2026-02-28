@@ -93,13 +93,13 @@ impl McpeTool for SearchDownloadsTool {
                     all_downloads.extend(arr.clone());
                 }
             }
-            Some("waiting") | Some("paused") => {
+            Some("waiting" | "paused") => {
                 let waiting = client.tell_waiting(0, 1000, keys).await?;
                 if let Some(arr) = waiting.as_array() {
                     all_downloads.extend(arr.clone());
                 }
             }
-            Some("error") | Some("complete") | Some("removed") => {
+            Some("error" | "complete" | "removed") => {
                 let stopped = client.tell_stopped(0, 1000, keys).await?;
                 if let Some(arr) = stopped.as_array() {
                     all_downloads.extend(arr.clone());
@@ -157,20 +157,16 @@ impl SearchDownloadsTool {
                             files.iter().any(|file| {
                                 file.get("path")
                                     .and_then(|p| p.as_str())
-                                    .map(|p| re.is_match(p))
-                                    .unwrap_or(false)
-                                    || file
-                                        .get("uris")
-                                        .and_then(|u| u.as_array())
-                                        .map(|uris| {
+                                    .is_some_and(|p| re.is_match(p))
+                                    || file.get("uris").and_then(|u| u.as_array()).is_some_and(
+                                        |uris| {
                                             uris.iter().any(|uri| {
                                                 uri.get("uri")
                                                     .and_then(|u| u.as_str())
-                                                    .map(|u| re.is_match(u))
-                                                    .unwrap_or(false)
+                                                    .is_some_and(|u| re.is_match(u))
                                             })
-                                        })
-                                        .unwrap_or(false)
+                                        },
+                                    )
                             })
                         } else {
                             false
@@ -221,20 +217,16 @@ impl SearchDownloadsTool {
                             files.iter().any(|file| {
                                 file.get("path")
                                     .and_then(|p| p.as_str())
-                                    .map(|p| p.to_lowercase().contains(&query))
-                                    .unwrap_or(false)
-                                    || file
-                                        .get("uris")
-                                        .and_then(|u| u.as_array())
-                                        .map(|uris| {
+                                    .is_some_and(|p| p.to_lowercase().contains(&query))
+                                    || file.get("uris").and_then(|u| u.as_array()).is_some_and(
+                                        |uris| {
                                             uris.iter().any(|uri| {
-                                                uri.get("uri")
-                                                    .and_then(|u| u.as_str())
-                                                    .map(|u| u.to_lowercase().contains(&query))
-                                                    .unwrap_or(false)
+                                                uri.get("uri").and_then(|u| u.as_str()).is_some_and(
+                                                    |u| u.to_lowercase().contains(&query),
+                                                )
                                             })
-                                        })
-                                        .unwrap_or(false)
+                                        },
+                                    )
                             })
                         } else {
                             false

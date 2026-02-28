@@ -20,6 +20,7 @@ pub struct Rule {
 }
 
 impl Rule {
+    #[must_use]
     pub fn matches(&self, filename: &str) -> bool {
         if let Some(extensions) = &self.extensions {
             let path = Path::new(filename);
@@ -107,7 +108,7 @@ impl McpeTool for OrganizeCompletedTool {
                 let config = client.config();
                 let config_guard = config
                     .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
                 let rules = config_guard.organize_rules.clone();
                 Ok(json!({ "rules": rules }))
             }
@@ -125,7 +126,7 @@ impl McpeTool for OrganizeCompletedTool {
                 {
                     let mut config_guard = config
                         .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
                     if config_guard
                         .organize_rules
@@ -156,13 +157,13 @@ impl McpeTool for OrganizeCompletedTool {
                 {
                     let mut config_guard = config
                         .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
                     let initial_len = config_guard.organize_rules.len();
                     config_guard.organize_rules.retain(|r| r.name != rule_name);
 
                     if config_guard.organize_rules.len() == initial_len {
-                        return Err(anyhow::anyhow!("Rule '{}' not found", rule_name));
+                        return Err(anyhow::anyhow!("Rule '{rule_name}' not found"));
                     }
                 }
                 let _ = client.save_state().await;
@@ -179,7 +180,7 @@ impl McpeTool for OrganizeCompletedTool {
                     let config = client.config();
                     let config_guard = config
                         .read()
-                        .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                        .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
                     config_guard.organize_rules.clone()
                 };
 
@@ -244,7 +245,7 @@ impl OrganizeCompletedTool {
             let filename = path
                 .file_name()
                 .and_then(|s| s.to_str())
-                .ok_or_else(|| anyhow::anyhow!("Failed to get filename from path: {}", path_str))?;
+                .ok_or_else(|| anyhow::anyhow!("Failed to get filename from path: {path_str}"))?;
 
             for rule in rules {
                 if rule.matches(filename) {

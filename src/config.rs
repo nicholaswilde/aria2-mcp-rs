@@ -68,6 +68,7 @@ pub struct RSSFeed {
 }
 
 impl RSSFeed {
+    #[must_use]
     pub fn has_downloaded(&self, id: &str) -> bool {
         self.download_history.contains(id)
     }
@@ -201,6 +202,7 @@ impl Config {
         }
     }
 
+    #[must_use]
     pub fn new(rpc_url: String, rpc_secret: Option<String>) -> Self {
         Self {
             rpc_url: rpc_url.clone(),

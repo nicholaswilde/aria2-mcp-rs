@@ -61,21 +61,22 @@ impl McpeTool for PurgePolicyTool {
             "get_policy" => {
                 let config_guard = config
                     .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
                 Ok(json!({ "policy": config_guard.purge_config }))
             }
             "update_policy" => {
                 let mut config_guard = config
                     .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
-                if let Some(enabled) = args.get("enabled").and_then(|v| v.as_bool()) {
+                if let Some(enabled) = args.get("enabled").and_then(serde_json::Value::as_bool) {
                     config_guard.purge_config.enabled = enabled;
                 }
-                if let Some(interval) = args.get("intervalSecs").and_then(|v| v.as_u64()) {
+                if let Some(interval) = args.get("intervalSecs").and_then(serde_json::Value::as_u64)
+                {
                     config_guard.purge_config.interval_secs = interval;
                 }
-                if let Some(min_age) = args.get("minAgeSecs").and_then(|v| v.as_u64()) {
+                if let Some(min_age) = args.get("minAgeSecs").and_then(serde_json::Value::as_u64) {
                     config_guard.purge_config.min_age_secs = min_age;
                 }
 
@@ -91,7 +92,7 @@ impl McpeTool for PurgePolicyTool {
 
                 let mut config_guard = config
                     .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
                 config_guard
                     .purge_config
@@ -110,7 +111,7 @@ impl McpeTool for PurgePolicyTool {
 
                 let mut config_guard = config
                     .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {}", e))?;
+                    .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
 
                 let removed = config_guard.purge_config.excluded_gids.remove(gid);
 
@@ -124,7 +125,7 @@ impl McpeTool for PurgePolicyTool {
                     )
                 }
             }
-            _ => Err(anyhow::anyhow!("Unknown action: {}", action)),
+            _ => Err(anyhow::anyhow!("Unknown action: {action}")),
         }
     }
 }

@@ -78,7 +78,7 @@ impl McpeTool for ConfigureAria2Tool {
                     json!({"status": "success", "message": format!("Options updated for GID {}", gid)}),
                 )
             }
-            _ => Err(anyhow::anyhow!("Unknown action: {}", action)),
+            _ => Err(anyhow::anyhow!("Unknown action: {action}")),
         }
     }
 }

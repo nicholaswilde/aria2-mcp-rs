@@ -112,7 +112,7 @@ impl McpHandler {
             }
             _ => Err(Error::protocol(
                 ErrorCode::InvalidParams,
-                format!("Invalid action: {}", action),
+                format!("Invalid action: {action}"),
             )),
         }
     }
@@ -169,7 +169,7 @@ impl ServerHandler for McpHandler {
                 let prompt = registry.get_prompt(name).ok_or_else(|| {
                     Error::protocol(
                         ErrorCode::MethodNotFound,
-                        format!("Prompt not found: {}", name),
+                        format!("Prompt not found: {name}"),
                     )
                 })?;
                 drop(registry);
@@ -209,7 +209,7 @@ impl ServerHandler for McpHandler {
                 let resource = registry.get_resource(uri).ok_or_else(|| {
                     Error::protocol(
                         ErrorCode::MethodNotFound,
-                        format!("Resource not found: {}", uri),
+                        format!("Resource not found: {uri}"),
                     )
                 })?;
                 drop(registry);
@@ -245,7 +245,7 @@ impl ServerHandler for McpHandler {
                 let mut tool_infos = Vec::new();
                 for t in tools {
                     let schema = t.schema().map_err(|e| {
-                        Error::protocol(ErrorCode::InternalError, format!("Schema error: {}", e))
+                        Error::protocol(ErrorCode::InternalError, format!("Schema error: {e}"))
                     })?;
                     tool_infos.push(serde_json::json!({
                         "name": t.name(),
@@ -306,10 +306,7 @@ impl ServerHandler for McpHandler {
 
                 let registry = self.registry.read().await;
                 let tool = registry.get_tool(name).ok_or_else(|| {
-                    Error::protocol(
-                        ErrorCode::MethodNotFound,
-                        format!("Tool not found: {}", name),
-                    )
+                    Error::protocol(ErrorCode::MethodNotFound, format!("Tool not found: {name}"))
                 })?;
                 drop(registry);
 
@@ -327,7 +324,7 @@ impl ServerHandler for McpHandler {
             }
             _ => Err(Error::protocol(
                 ErrorCode::MethodNotFound,
-                format!("Unknown method: {}", method),
+                format!("Unknown method: {method}"),
             )),
         }
     }

@@ -30,7 +30,7 @@ async fn test_aria2_client_connect_notifications() {
     let addr = server.local_addr().unwrap();
 
     let config = Config {
-        rpc_url: format!("http://{}", addr),
+        rpc_url: format!("http://{addr}"),
         ..Default::default()
     };
     let client = Aria2Client::new(config);
@@ -54,7 +54,7 @@ async fn test_aria2_client_receive_notification() {
     let addr = server.local_addr().unwrap();
 
     let config = Config {
-        rpc_url: format!("http://{}", addr),
+        rpc_url: format!("http://{addr}"),
         ..Default::default()
     };
     let client = Aria2Client::new(config);
@@ -76,7 +76,7 @@ async fn test_aria2_client_receive_notification() {
 
     let (tx, mut rx) =
         tokio::sync::mpsc::channel::<aria2_mcp_rs::aria2::notifications::Aria2Notification>(10);
-    client.start_notifications(tx).await.unwrap();
+    client.start_notifications(tx).unwrap();
 
     let received = rx.recv().await.unwrap();
     assert_eq!(

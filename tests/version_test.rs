@@ -8,10 +8,7 @@ fn test_version_flag_long() {
     let output = match output {
         Ok(o) => o,
         Err(e) => {
-            eprintln!(
-                "Skipping test: failed to execute binary '{}': {}",
-                binary_path, e
-            );
+            eprintln!("Skipping test: failed to execute binary '{binary_path}': {e}");
             return;
         }
     };
@@ -26,15 +23,15 @@ fn test_version_flag_long() {
         {
             eprintln!("Skipping test: binary cannot be executed on this host (likely architecture mismatch or missing loader).");
             eprintln!("Status: {:?}", output.status);
-            eprintln!("STDERR: {}", stderr);
+            eprintln!("STDERR: {stderr}");
             return;
         }
 
-        eprintln!("Binary path: {}", binary_path);
+        eprintln!("Binary path: {binary_path}");
         eprintln!("Exit status: {:?}", output.status);
         eprintln!("Exit code: {:?}", output.status.code());
         eprintln!("STDOUT: {}", String::from_utf8_lossy(&output.stdout));
-        eprintln!("STDERR: {}", stderr);
+        eprintln!("STDERR: {stderr}");
     }
 
     assert!(
@@ -45,8 +42,7 @@ fn test_version_flag_long() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(
         stdout.contains(&format!("aria2-mcp-rs {}", env!("CARGO_PKG_VERSION"))),
-        "STDOUT does not contain version: {}",
-        stdout
+        "STDOUT does not contain version: {stdout}"
     );
 }
 
@@ -58,10 +54,7 @@ fn test_version_flag_short() {
     let output = match output {
         Ok(o) => o,
         Err(e) => {
-            eprintln!(
-                "Skipping test: failed to execute binary '{}': {}",
-                binary_path, e
-            );
+            eprintln!("Skipping test: failed to execute binary '{binary_path}': {e}");
             return;
         }
     };
@@ -76,15 +69,15 @@ fn test_version_flag_short() {
         {
             eprintln!("Skipping test: binary cannot be executed on this host (likely architecture mismatch or missing loader).");
             eprintln!("Status: {:?}", output.status);
-            eprintln!("STDERR: {}", stderr);
+            eprintln!("STDERR: {stderr}");
             return;
         }
 
-        eprintln!("Binary path: {}", binary_path);
+        eprintln!("Binary path: {binary_path}");
         eprintln!("Exit status: {:?}", output.status);
         eprintln!("Exit code: {:?}", output.status.code());
         eprintln!("STDOUT: {}", String::from_utf8_lossy(&output.stdout));
-        eprintln!("STDERR: {}", stderr);
+        eprintln!("STDERR: {stderr}");
     }
 
     assert!(
@@ -95,7 +88,6 @@ fn test_version_flag_short() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(
         stdout.contains(&format!("aria2-mcp-rs {}", env!("CARGO_PKG_VERSION"))),
-        "STDOUT does not contain version: {}",
-        stdout
+        "STDOUT does not contain version: {stdout}"
     );
 }

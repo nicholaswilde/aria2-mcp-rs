@@ -29,7 +29,7 @@ impl Aria2Client {
         Ok(ws_stream)
     }
 
-    pub async fn start_notifications(
+    pub fn start_notifications(
         &self,
         tx: tokio::sync::mpsc::Sender<Aria2Notification>,
     ) -> Result<()> {
@@ -57,7 +57,7 @@ impl Aria2Client {
                                 }
                                 Ok(tokio_tungstenite::tungstenite::Message::Close(_)) => break,
                                 Err(e) => {
-                                    log::error!("WebSocket error: {}", e);
+                                    log::error!("WebSocket error: {e}");
                                     break;
                                 }
                                 _ => {}
@@ -66,10 +66,8 @@ impl Aria2Client {
                     }
                     Err(e) => {
                         log::error!(
-                            "Failed to connect to aria2 WebSocket for {}: {}. Retrying in {:?}...",
-                            client.name,
-                            e,
-                            backoff
+                            "Failed to connect to aria2 WebSocket for {}: {e}. Retrying in {backoff:?}...",
+                            client.name
                         );
                     }
                 }
@@ -80,6 +78,7 @@ impl Aria2Client {
         Ok(())
     }
 
+    #[must_use]
     pub fn new(config: Config) -> Self {
         let client = Client::builder()
             .danger_accept_invalid_certs(config.no_verify_ssl)
@@ -96,6 +95,7 @@ impl Aria2Client {
         }
     }
 
+    #[must_use]
     pub fn new_with_instance(config: Config, instance: crate::config::Aria2Instance) -> Self {
         let mut config = config;
         config.rpc_url = instance.rpc_url;
@@ -117,10 +117,12 @@ impl Aria2Client {
         }
     }
 
+    #[must_use]
     pub fn config(&self) -> Arc<RwLock<Config>> {
         Arc::clone(&self.config)
     }
 
+    #[must_use]
     pub fn state_manager(&self) -> Arc<crate::state::StateManager> {
         Arc::clone(&self.state_manager)
     }
@@ -130,7 +132,7 @@ impl Aria2Client {
             let config_guard = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             crate::state::StateData {
                 bandwidth_profiles: config_guard.bandwidth_profiles.clone(),
                 bandwidth_schedules: config_guard.bandwidth_schedules.clone(),
@@ -141,7 +143,7 @@ impl Aria2Client {
         self.state_manager
             .save(&state_data)
             .await
-            .map_err(|e| anyhow::anyhow!("Failed to save state: {}", e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to save state: {e}"))?;
         Ok(())
     }
 
@@ -150,7 +152,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             config.rpc_url.clone()
         };
 
@@ -159,7 +161,7 @@ impl Aria2Client {
         } else if rpc_url.starts_with("https://") {
             Ok(rpc_url.replace("https://", "wss://"))
         } else {
-            Err(anyhow::anyhow!("Invalid RPC URL protocol: {}", rpc_url))
+            Err(anyhow::anyhow!("Invalid RPC URL protocol: {rpc_url}"))
         }
     }
 
@@ -168,7 +170,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
 
@@ -192,7 +194,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -208,7 +210,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -233,7 +235,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -249,7 +251,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
 
@@ -275,7 +277,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -286,7 +288,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -306,7 +308,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -317,7 +319,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -337,7 +339,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -348,7 +350,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -369,7 +371,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -380,7 +382,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -401,7 +403,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -412,7 +414,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -434,7 +436,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -445,7 +447,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -466,7 +468,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -477,7 +479,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -498,7 +500,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -509,7 +511,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -530,7 +532,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -541,7 +543,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -562,7 +564,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -573,7 +575,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -594,7 +596,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -605,7 +607,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -628,7 +630,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         let new_pos = res["result"]
@@ -643,7 +645,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -664,7 +666,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -679,7 +681,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -703,7 +705,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         let gid = res["result"]
@@ -718,7 +720,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -738,7 +740,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         let version = res["result"]["version"]
@@ -753,7 +755,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -774,7 +776,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -785,7 +787,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -806,7 +808,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -817,7 +819,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -838,7 +840,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(res["result"].clone())
@@ -849,7 +851,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -868,7 +870,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -879,7 +881,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -898,7 +900,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -909,7 +911,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -928,7 +930,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())
@@ -939,7 +941,7 @@ impl Aria2Client {
             let config = self
                 .config
                 .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
             (config.rpc_url.clone(), config.rpc_secret.clone())
         };
         let mut params = Vec::new();
@@ -959,7 +961,7 @@ impl Aria2Client {
         let res: serde_json::Value = resp.json().await?;
 
         if let Some(err) = res.get("error") {
-            return Err(anyhow::anyhow!("aria2 error: {}", err));
+            return Err(anyhow::anyhow!("aria2 error: {err}"));
         }
 
         Ok(())

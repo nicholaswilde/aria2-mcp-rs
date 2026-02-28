@@ -42,13 +42,10 @@ fn parse_instance_arg(s: &str) -> Result<aria2_mcp_rs::config::Aria2Instance, St
                 "name" => name = Some(value.to_string()),
                 "url" => url = Some(value.to_string()),
                 "secret" => secret = Some(value.to_string()),
-                _ => return Err(format!("Unknown instance key: {}", key)),
+                _ => return Err(format!("Unknown instance key: {key}")),
             }
         } else {
-            return Err(format!(
-                "Invalid instance part: {}. Expected key=value",
-                part
-            ));
+            return Err(format!("Invalid instance part: {part}. Expected key=value"));
         }
     }
 
@@ -164,10 +161,7 @@ fn init_logger(level: &str) {
     let _ = env_logger::Builder::from_env(env).try_init();
 
     if is_invalid {
-        log::warn!(
-            "Invalid log level '{}' provided, defaulting to 'info'",
-            level
-        );
+        log::warn!("Invalid log level '{level}' provided, defaulting to 'info'");
     }
 }
 
@@ -175,7 +169,6 @@ fn parse_log_level(level: &str) -> &str {
     match level.to_lowercase().as_str() {
         "error" => "error",
         "warn" => "warn",
-        "info" => "info",
         "debug" => "debug",
         "trace" => "trace",
         _ => "info",

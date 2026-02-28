@@ -209,8 +209,8 @@ async fn test_lazy_mode_token_savings() -> Result<()> {
     let result_lazy = handler_lazy.handle_method("tools/list", None).await?;
     let size_lazy = serde_json::to_string(&result_lazy)?.len();
 
-    println!("Normal Mode Tools List Size: {} bytes", size_normal);
-    println!("Lazy Mode Tools List Size:   {} bytes", size_lazy);
+    println!("Normal Mode Tools List Size: {size_normal} bytes");
+    println!("Lazy Mode Tools List Size:   {size_lazy} bytes");
 
     // Expect significant savings (more than 50%)
     assert!(size_lazy < size_normal);

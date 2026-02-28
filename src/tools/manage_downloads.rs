@@ -19,11 +19,11 @@ pub struct ManageDownloadsArgs {
     pub uris: Option<Vec<String>>,
     /// New position (required for 'move')
     pub pos: Option<i32>,
-    /// How to move: POS_SET, POS_CUR, POS_END (required for 'move')
+    /// How to move: `POS_SET`, `POS_CUR`, `POS_END` (required for 'move')
     pub how: Option<String>,
     /// Options for adding the download
     pub options: Option<Value>,
-    /// Whether to download sequentially (for BitTorrent)
+    /// Whether to download sequentially (for `BitTorrent`)
     pub sequential: Option<bool>,
 }
 

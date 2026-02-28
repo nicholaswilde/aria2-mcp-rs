@@ -50,11 +50,11 @@ pub async fn run_server(
             match serde_json::from_value::<mcp_sdk_rs::transport::Message>(mcp_notification) {
                 Ok(msg) => {
                     if let Err(e) = sender.send(Ok(msg)) {
-                        log::error!("Failed to send notification to client: {}", e);
+                        log::error!("Failed to send notification to client: {e}");
                     }
                 }
                 Err(e) => {
-                    log::error!("Failed to serialize notification for transport: {}", e);
+                    log::error!("Failed to serialize notification for transport: {e}");
                 }
             }
         }
@@ -63,7 +63,7 @@ pub async fn run_server(
     server
         .start()
         .await
-        .map_err(|e| anyhow::anyhow!("Server error: {:?}", e))?;
+        .map_err(|e| anyhow::anyhow!("Server error: {e:?}"))?;
     Ok(())
 }
 
@@ -108,7 +108,7 @@ mod tests {
         }
 
         let received = transport_rx.recv().await.unwrap().unwrap();
-        assert!(format!("{:?}", received).contains("notifications/aria2/event"));
+        assert!(format!("{received:?}").contains("notifications/aria2/event"));
     }
 
     #[tokio::test]

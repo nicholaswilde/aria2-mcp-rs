@@ -15,7 +15,7 @@ async fn test_notification_flow_with_container() -> Result<()> {
     let client = container.client();
 
     let (tx, mut rx) = mpsc::channel(100);
-    client.start_notifications(tx).await?;
+    client.start_notifications(tx)?;
 
     // Give it a moment to connect
     tokio::time::sleep(Duration::from_secs(2)).await;
@@ -55,8 +55,8 @@ async fn test_notification_flow_multi_instance() -> Result<()> {
     client2.name = "box2".to_string();
 
     let (tx, mut rx) = mpsc::channel(100);
-    client1.start_notifications(tx.clone()).await?;
-    client2.start_notifications(tx).await?;
+    client1.start_notifications(tx.clone())?;
+    client2.start_notifications(tx)?;
 
     // Give them a moment to connect
     tokio::time::sleep(Duration::from_secs(2)).await;

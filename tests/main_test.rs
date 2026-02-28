@@ -17,14 +17,14 @@ fn test_config_new() {
 #[test]
 fn test_error_display() {
     let err = Error::Config("test error".to_string());
-    assert_eq!(format!("{}", err), "Configuration error: test error");
+    assert_eq!(format!("{err}"), "Configuration error: test error");
 }
 
 #[test]
 fn test_error_from_io() {
     let io_err = std::io::Error::other("io error");
     let err = Error::from(io_err);
-    assert!(format!("{}", err).contains("io error"));
+    assert!(format!("{err}").contains("io error"));
 }
 
 #[tokio::test]

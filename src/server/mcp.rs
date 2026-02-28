@@ -40,6 +40,7 @@ pub struct JsonRpcResponse {
 }
 
 impl JsonRpcResponse {
+    #[must_use]
     pub fn success(id: RequestId, result: Value) -> Self {
         Self {
             jsonrpc: "2.0".to_string(),
@@ -49,6 +50,7 @@ impl JsonRpcResponse {
         }
     }
 
+    #[must_use]
     pub fn error(id: RequestId, error: JsonRpcError) -> Self {
         Self {
             jsonrpc: "2.0".to_string(),
@@ -68,6 +70,7 @@ pub struct JsonRpcError {
 }
 
 impl JsonRpcError {
+    #[must_use]
     pub fn new(code: i32, message: &str) -> Self {
         Self {
             code,
@@ -85,6 +88,7 @@ pub struct McpState {
 }
 
 impl McpState {
+    #[must_use]
     pub fn new(lazy_mode: bool) -> Self {
         Self {
             running: true,
@@ -137,7 +141,7 @@ pub async fn run_stdio(
                                 let err_res = JsonRpcResponse {
                                     jsonrpc: "2.0".to_string(),
                                     result: None,
-                                    error: Some(JsonRpcError::new(-32700, &format!("Parse error: {}", e))),
+                                    error: Some(JsonRpcError::new(-32700, &format!("Parse error: {e}"))),
                                     id: None,
                                 };
                                 let res_str = serde_json::to_string(&err_res)?;
@@ -165,7 +169,7 @@ pub async fn run_stdio(
                         }
                     }
                     Ok(None) => break, // EOF
-                    Err(e) => return Err(anyhow::anyhow!("Stdin error: {}", e)),
+                    Err(e) => return Err(anyhow::anyhow!("Stdin error: {e}")),
                 }
             }
             Some(notif) = notification_rx.recv() => {
@@ -175,7 +179,7 @@ pub async fn run_stdio(
                     "data": format!("Aria2 Event: {:?}", notif)
                 }));
             }
-            _ = sleep(Duration::from_millis(100)) => {
+            () = sleep(Duration::from_millis(100)) => {
                 flush_notifications_async(Arc::clone(&state), &mut stdout).await?;
             }
         }
@@ -206,9 +210,8 @@ pub async fn handle_request(
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: &[Arc<Aria2Client>],
 ) -> Result<Option<JsonRpcResponse>> {
-    let id = match req.id {
-        Some(id) => id,
-        None => return Ok(None), // Notification
+    let Some(id) = req.id else {
+        return Ok(None); // Notification
     };
 
     let result = match req.method.as_str() {
@@ -249,7 +252,7 @@ pub async fn handle_request(
             if let Some(tool) = reg.get_tool(name) {
                 match tool.run_multi(clients, args).await {
                     Ok(res) => Ok(json!(res)),
-                    Err(e) => Err(JsonRpcError::new(-32603, &format!("Tool error: {}", e))),
+                    Err(e) => Err(JsonRpcError::new(-32603, &format!("Tool error: {e}"))),
                 }
             } else {
                 Err(JsonRpcError::new(-32601, "Tool not found"))
@@ -272,7 +275,7 @@ pub async fn handle_request(
                 if let Some(client) = clients.first() {
                     match resource.read(client).await {
                         Ok(res) => Ok(json!(res)),
-                        Err(e) => Err(JsonRpcError::new(-32603, &format!("Resource error: {}", e))),
+                        Err(e) => Err(JsonRpcError::new(-32603, &format!("Resource error: {e}"))),
                     }
                 } else {
                     Err(JsonRpcError::new(
@@ -297,7 +300,7 @@ pub async fn handle_request(
             if let Some(prompt) = reg.get_prompt(name) {
                 match prompt.get_messages(args) {
                     Ok(res) => Ok(json!({ "messages": res })),
-                    Err(e) => Err(JsonRpcError::new(-32603, &format!("Prompt error: {}", e))),
+                    Err(e) => Err(JsonRpcError::new(-32603, &format!("Prompt error: {e}"))),
                 }
             } else {
                 Err(JsonRpcError::new(-32601, "Prompt not found"))

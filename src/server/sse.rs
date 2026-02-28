@@ -81,11 +81,11 @@ where
         }));
     }
 
-    let addr_str = format!("{}:{}", http_host, http_port);
+    let addr_str = format!("{http_host}:{http_port}");
     let listener = TcpListener::bind(&addr_str).await?;
     let addr = listener.local_addr()?;
 
-    println!("SSE Server starting on {}", addr);
+    println!("SSE Server starting on {addr}");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown)
@@ -104,7 +104,7 @@ async fn auth_middleware(
         .get(axum::http::header::AUTHORIZATION)
         .and_then(|h| h.to_str().ok());
 
-    let expected_auth = format!("Bearer {}", required_token);
+    let expected_auth = format!("Bearer {required_token}");
 
     if let Some(auth) = auth_header {
         if auth == expected_auth {
@@ -432,7 +432,7 @@ mod tests {
         .await;
         let body = serde_json::to_value(result.0).unwrap();
         let text = body["content"][0]["text"].as_str().unwrap();
-        assert!(text.contains("Enabled 1 tools"), "Text was: {}", text);
+        assert!(text.contains("Enabled 1 tools"), "Text was: {text}");
 
         // Disable it
         let req = serde_json::json!({
@@ -450,7 +450,7 @@ mod tests {
         .await;
         let body = serde_json::to_value(result.0).unwrap();
         let text = body["content"][0]["text"].as_str().unwrap();
-        assert!(text.contains("Disabled 1 tools"), "Text was: {}", text);
+        assert!(text.contains("Disabled 1 tools"), "Text was: {text}");
     }
 
     #[tokio::test]

@@ -38,23 +38,20 @@ impl Aria2Container {
         tokio::spawn(async move {
             let mut reader = tokio::io::BufReader::new(stdout).lines();
             while let Ok(Some(line)) = reader.next_line().await {
-                println!("DOCKER STDOUT: {}", line);
+                println!("DOCKER STDOUT: {line}");
             }
         });
         tokio::spawn(async move {
             let mut reader = tokio::io::BufReader::new(stderr).lines();
             while let Ok(Some(line)) = reader.next_line().await {
-                println!("DOCKER STDERR: {}", line);
+                println!("DOCKER STDERR: {line}");
             }
         });
 
         let port_6800 = container.get_host_port_ipv4(6800).await?;
         let host = "localhost".to_string();
 
-        println!(
-            "✅ aria2 container started at http://{}:{}",
-            host, port_6800
-        );
+        println!("✅ aria2 container started at http://{host}:{port_6800}");
 
         Ok(Self {
             _container: container,

@@ -19,10 +19,7 @@ async fn test_connect_docker_http() -> Result<()> {
 
     // Verify connectivity via HTTP
     let version = client.get_version().await?;
-    println!(
-        "Successfully connected to Docker via HTTP. aria2 version: {}",
-        version
-    );
+    println!("Successfully connected to Docker via HTTP. aria2 version: {version}");
     assert!(!version.is_empty());
 
     Ok(())
@@ -43,7 +40,7 @@ async fn test_connect_https_client_logic() -> Result<()> {
     // additional setup, but we can verify the client's URL construction and request behavior.
 
     let rpc_url = format!("https://{}/jsonrpc", server.address());
-    println!("Testing HTTPS connection logic to {}", rpc_url);
+    println!("Testing HTTPS connection logic to {rpc_url}");
 
     let config = Config {
         rpc_url: rpc_url.clone(),
@@ -71,10 +68,7 @@ async fn test_connect_https_client_logic() -> Result<()> {
 
     let ws_url = client.ws_url()?;
     assert_eq!(ws_url, format!("wss://{}/jsonrpc", server.address()));
-    println!(
-        "Verified WebSocket URL conversion: {} -> {}",
-        rpc_url, ws_url
-    );
+    println!("Verified WebSocket URL conversion: {rpc_url} -> {ws_url}");
 
     // We don't call client.get_version() here because it would fail TLS handshake
     // against a non-TLS mock server if we actually use https://.

@@ -6,11 +6,13 @@ pub struct PathSandbox {
 }
 
 impl PathSandbox {
+    #[must_use]
     pub fn new(base_dir: PathBuf) -> Self {
         let base_dir = base_dir.canonicalize().unwrap_or(base_dir);
         Self { base_dir }
     }
 
+    #[must_use]
     pub fn base_dir(&self) -> &Path {
         &self.base_dir
     }
@@ -27,7 +29,7 @@ impl PathSandbox {
         let joined = self.base_dir.join(rel_path);
         let canonical = joined
             .canonicalize()
-            .map_err(|e| anyhow!("Failed to resolve path: {}", e))?;
+            .map_err(|e| anyhow!("Failed to resolve path: {e}"))?;
 
         // Check if it starts with base_dir
         if !canonical.starts_with(&self.base_dir) {
@@ -112,7 +114,7 @@ mod tests {
 
         // Let's rely on the fact that if it resolves, it must be outside.
         if let Ok(path) = result {
-            panic!("Should have failed, but resolved to: {:?}", path);
+            panic!("Should have failed, but resolved to: {path:?}");
         }
 
         Ok(())

@@ -30,11 +30,15 @@ async fn test_bulk_manage_downloads_pause() -> Result<()> {
     let result = tool.run(&client, args).await?;
 
     assert_eq!(
-        result.get("success_count").and_then(|v| v.as_u64()),
+        result
+            .get("success_count")
+            .and_then(serde_json::Value::as_u64),
         Some(2)
     );
     assert_eq!(
-        result.get("failure_count").and_then(|v| v.as_u64()),
+        result
+            .get("failure_count")
+            .and_then(serde_json::Value::as_u64),
         Some(0)
     );
 
@@ -74,11 +78,15 @@ async fn test_bulk_manage_downloads_resume() -> Result<()> {
     let result = tool.run(&client, args).await?;
 
     assert_eq!(
-        result.get("success_count").and_then(|v| v.as_u64()),
+        result
+            .get("success_count")
+            .and_then(serde_json::Value::as_u64),
         Some(2)
     );
     assert_eq!(
-        result.get("failure_count").and_then(|v| v.as_u64()),
+        result
+            .get("failure_count")
+            .and_then(serde_json::Value::as_u64),
         Some(0)
     );
 
@@ -116,7 +124,9 @@ async fn test_bulk_manage_downloads_remove() -> Result<()> {
     let result = tool.run(&client, args).await?;
 
     assert_eq!(
-        result.get("success_count").and_then(|v| v.as_u64()),
+        result
+            .get("success_count")
+            .and_then(serde_json::Value::as_u64),
         Some(2)
     );
 

@@ -58,6 +58,7 @@ impl Default for PromptRegistry {
 }
 
 impl PromptRegistry {
+    #[must_use]
     pub fn new() -> Self {
         let mut registry = Self {
             prompts: Vec::new(),
@@ -73,6 +74,7 @@ impl PromptRegistry {
         self.prompts.push(prompt);
     }
 
+    #[must_use]
     pub fn list_prompts(&self) -> Vec<Prompt> {
         self.prompts
             .iter()
@@ -84,6 +86,7 @@ impl PromptRegistry {
             .collect()
     }
 
+    #[must_use]
     pub fn get_prompt(&self, name: &str) -> Option<Arc<dyn McpPrompt>> {
         self.prompts.iter().find(|p| p.name() == name).cloned()
     }

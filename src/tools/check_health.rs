@@ -41,7 +41,7 @@ impl McpeTool for CheckHealthTool {
         // Check disk space
         let disk_info = get_disk_info(download_dir).ok();
 
-        let report = self.analyze_health(stats, active, stopped, disk_info, download_dir);
+        let report = self.analyze_health(&stats, &active, &stopped, &disk_info, download_dir);
         Ok(report)
     }
 
@@ -66,10 +66,10 @@ impl McpeTool for CheckHealthTool {
 impl CheckHealthTool {
     fn analyze_health(
         &self,
-        stats: Value,
-        active: Value,
-        stopped: Value,
-        disk_info: Option<DiskInfo>,
+        stats: &Value,
+        active: &Value,
+        stopped: &Value,
+        disk_info: &Option<DiskInfo>,
         download_dir: &str,
     ) -> Value {
         let mut issues = Vec::new();
@@ -86,13 +86,16 @@ impl CheckHealthTool {
                     .get("connections")
                     .and_then(|v| v.as_str())
                     .and_then(|v| v.parse::<u64>().ok())
-                    .or_else(|| item.get("connections").and_then(|v| v.as_u64()))
+                    .or_else(|| item.get("connections").and_then(serde_json::Value::as_u64))
                     .unwrap_or(0);
                 let download_speed = item
                     .get("downloadSpeed")
                     .and_then(|v| v.as_str())
                     .and_then(|v| v.parse::<u64>().ok())
-                    .or_else(|| item.get("downloadSpeed").and_then(|v| v.as_u64()))
+                    .or_else(|| {
+                        item.get("downloadSpeed")
+                            .and_then(serde_json::Value::as_u64)
+                    })
                     .unwrap_or(0);
 
                 if connections == 0 && download_speed == 0 {
@@ -101,7 +104,7 @@ impl CheckHealthTool {
                         "gid": gid,
                         "message": format!("Download {} has 0 peers and 0 speed.", gid)
                     }));
-                    recommendations.push(format!("Consider adding more trackers to download {} or check your network connection.", gid));
+                    recommendations.push(format!("Consider adding more trackers to download {gid} or check your network connection."));
                 }
             }
         }
@@ -109,8 +112,8 @@ impl CheckHealthTool {
         // Check for errors in stopped downloads
         if let Some(stopped_arr) = stopped.as_array() {
             for item in stopped_arr {
-                let status = item.get("status").and_then(|v| v.as_str()).unwrap_or("");
-                if status == "error" {
+                let item_status = item.get("status").and_then(|v| v.as_str()).unwrap_or("");
+                if item_status == "error" {
                     let gid = item
                         .get("gid")
                         .and_then(|v| v.as_str())
@@ -130,8 +133,7 @@ impl CheckHealthTool {
                         "message": format!("Download {} failed with error code {}: {}", gid, error_code, error_msg)
                     }));
                     recommendations.push(format!(
-                        "Check the error details for download {} and retry if appropriate.",
-                        gid
+                        "Check the error details for download {gid} and retry if appropriate."
                     ));
                 }
             }
@@ -152,12 +154,12 @@ impl CheckHealthTool {
 
         // Summary
         let summary = json!({
-            "num_active": stats.get("numActive").and_then(|v| v.as_str()).map(|s| s.to_string()).or_else(|| stats.get("numActive").and_then(|v| v.as_u64().map(|u| u.to_string()))),
-            "num_waiting": stats.get("numWaiting").and_then(|v| v.as_str()).map(|s| s.to_string()).or_else(|| stats.get("numWaiting").and_then(|v| v.as_u64().map(|u| u.to_string()))),
-            "num_stopped": stats.get("numStopped").and_then(|v| v.as_str()).map(|s| s.to_string()).or_else(|| stats.get("numStopped").and_then(|v| v.as_u64().map(|u| u.to_string()))),
-            "download_speed": stats.get("downloadSpeed").and_then(|v| v.as_str()).map(|s| s.to_string()).or_else(|| stats.get("downloadSpeed").and_then(|v| v.as_u64().map(|u| u.to_string()))),
-            "upload_speed": stats.get("uploadSpeed").and_then(|v| v.as_str()).map(|s| s.to_string()).or_else(|| stats.get("uploadSpeed").and_then(|v| v.as_u64().map(|u| u.to_string()))),
-            "disk_available_gb": disk_info.as_ref().map(|i| i.available as f64 / 1e9).unwrap_or(0.0)
+            "num_active": stats.get("numActive").and_then(|v| v.as_str()).map(std::string::ToString::to_string).or_else(|| stats.get("numActive").and_then(|v| v.as_u64().map(|u| u.to_string()))),
+            "num_waiting": stats.get("numWaiting").and_then(|v| v.as_str()).map(std::string::ToString::to_string).or_else(|| stats.get("numWaiting").and_then(|v| v.as_u64().map(|u| u.to_string()))),
+            "num_stopped": stats.get("numStopped").and_then(|v| v.as_str()).map(std::string::ToString::to_string).or_else(|| stats.get("numStopped").and_then(|v| v.as_u64().map(|u| u.to_string()))),
+            "download_speed": stats.get("downloadSpeed").and_then(|v| v.as_str()).map(std::string::ToString::to_string).or_else(|| stats.get("downloadSpeed").and_then(|v| v.as_u64().map(|u| u.to_string()))),
+            "upload_speed": stats.get("uploadSpeed").and_then(|v| v.as_str()).map(std::string::ToString::to_string).or_else(|| stats.get("uploadSpeed").and_then(|v| v.as_u64().map(|u| u.to_string()))),
+            "disk_available_gb": disk_info.as_ref().map_or(0.0, |i| i.available as f64 / 1e9)
         });
 
         json!({
@@ -181,7 +183,7 @@ fn get_disk_info<P: AsRef<Path>>(path: P) -> Result<DiskInfo> {
     unsafe {
         let mut stats: libc::statvfs = mem::zeroed();
         let path_str = std::ffi::CString::new(path.as_ref().to_string_lossy().as_bytes())?;
-        if libc::statvfs(path_str.as_ptr(), &mut stats) == 0 {
+        if libc::statvfs(path_str.as_ptr(), &raw mut stats) == 0 {
             #[allow(clippy::useless_conversion)]
             Ok(DiskInfo {
                 available: u64::from(stats.f_bsize) * u64::from(stats.f_bavail),
@@ -233,7 +235,7 @@ mod tests {
             _total: 100 * 1024 * 1024 * 1024,
         });
 
-        let report = tool.analyze_health(stats, active, stopped, disk_info, "/tmp");
+        let report = tool.analyze_health(&stats, &active, &stopped, &disk_info, "/tmp");
         assert_eq!(report["status"], "healthy");
         assert!(report["issues"].as_array().unwrap().is_empty());
     }
@@ -245,7 +247,7 @@ mod tests {
         let active = json!([{ "gid": "1", "connections": "0", "downloadSpeed": "0" }]);
         let stopped = json!([]);
 
-        let report = tool.analyze_health(stats, active, stopped, None, "/tmp");
+        let report = tool.analyze_health(&stats, &active, &stopped, &None, "/tmp");
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "stalled_download");
     }
@@ -258,7 +260,7 @@ mod tests {
         let stopped =
             json!([{ "gid": "2", "status": "error", "errorCode": "1", "errorMessage": "Failed" }]);
 
-        let report = tool.analyze_health(stats, active, stopped, None, "/tmp");
+        let report = tool.analyze_health(&stats, &active, &stopped, &None, "/tmp");
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "download_error");
     }
@@ -274,7 +276,7 @@ mod tests {
             _total: 100 * 1024 * 1024 * 1024,
         });
 
-        let report = tool.analyze_health(stats, active, stopped, disk_info, "/tmp");
+        let report = tool.analyze_health(&stats, &active, &stopped, &disk_info, "/tmp");
         assert_eq!(report["status"], "unhealthy");
         assert_eq!(report["issues"][0]["type"], "low_disk_space");
     }

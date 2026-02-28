@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "aria2": {
+        "command": "cargo",
+        "args": [
+          "run",
+          "--",
+          "--rpc-url",
+          "http://192.168.2.21:6800/jsonrpc",
+          "--rpc-secret",
+          "S+xjpiD+5rk="
+        ],
+        "trust": true
+    }
+  }
+}

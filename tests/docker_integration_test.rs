@@ -66,7 +66,7 @@ async fn test_config_update() -> Result<()> {
         .as_str()
         .unwrap()
         .to_string();
-    println!("original limit: {}", original_limit);
+    println!("original limit: {original_limit}");
 
     // Change limit
     let new_limit = "1M";
@@ -147,10 +147,7 @@ async fn test_status_reporting() -> Result<()> {
         .parse::<u64>()
         .unwrap();
 
-    println!(
-        "progress: {}/{} (speed: {} bytes/s)",
-        completed, total, speed
-    );
+    println!("progress: {completed}/{total} (speed: {speed} bytes/s)");
 
     Ok(())
 }
@@ -167,13 +164,13 @@ async fn test_add_download() -> Result<()> {
     let gid = client.add_uri(uris, None).await?;
 
     assert!(!gid.is_empty());
-    println!("added download with GID: {}", gid);
+    println!("added download with GID: {gid}");
 
     // Verify status
     let status = client.tell_status(&gid).await?;
     assert_eq!(status["gid"], gid);
     let status_str = status["status"].as_str().unwrap();
-    println!("download status: {}", status_str);
+    println!("download status: {status_str}");
     assert!(status_str == "active" || status_str == "waiting" || status_str == "complete");
 
     Ok(())
@@ -222,7 +219,7 @@ async fn test_container_starts_and_is_reachable() -> Result<()> {
     let container = Aria2Container::new().await?;
     let client = container.client();
     let version = client.get_version().await?;
-    println!("aria2 version: {}", version);
+    println!("aria2 version: {version}");
     assert!(!version.is_empty());
     Ok(())
 }

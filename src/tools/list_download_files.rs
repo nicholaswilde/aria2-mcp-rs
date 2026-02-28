@@ -93,7 +93,7 @@ impl ListDownloadFilesTool {
         }
 
         let read_dir = std::fs::read_dir(current_path)
-            .map_err(|e| anyhow::anyhow!("Failed to read directory {:?}: {}", current_path, e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to read directory {current_path:?}: {e}"))?;
 
         for entry in read_dir {
             let entry = entry?;

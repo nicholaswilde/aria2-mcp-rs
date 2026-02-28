@@ -14,7 +14,7 @@ fn test_task_list() {
             println!("'task' command not found, skipping test");
             return;
         }
-        Err(e) => panic!("failed to execute process: {}", e),
+        Err(e) => panic!("failed to execute process: {e}"),
     };
 
     assert!(output.status.success());
