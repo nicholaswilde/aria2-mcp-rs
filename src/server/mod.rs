@@ -107,13 +107,15 @@ impl McpServer {
                 .await
             }
             TransportType::Sse => {
-                if !check_port_available(self.config.http_port).await {
+                if !check_port_available(&self.config.http_host, self.config.http_port).await {
                     return Err(anyhow::anyhow!(
-                        "HTTP port {} is already in use",
+                        "HTTP port {}:{} is already in use",
+                        self.config.http_host,
                         self.config.http_port
                     ));
                 }
                 sse::run_server(
+                    self.config.http_host.clone(),
                     self.config.http_port,
                     self.config.http_auth_token.clone(),
                     Arc::clone(&self.registry),
@@ -240,9 +242,9 @@ async fn start_recovery_task(
     }
 }
 
-async fn check_port_available(port: u16) -> bool {
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
-    tokio::net::TcpListener::bind(addr).await.is_ok()
+async fn check_port_available(host: &str, port: u16) -> bool {
+    let addr_str = format!("{}:{}", host, port);
+    tokio::net::TcpListener::bind(&addr_str).await.is_ok()
 }
 
 fn get_active_profile(
@@ -389,6 +391,7 @@ mod tests {
 
         let config = Config {
             transport: TransportType::Sse,
+            http_host: "0.0.0.0".to_string(),
             http_port: port,
             ..Default::default()
         };
@@ -412,15 +415,17 @@ mod tests {
     async fn test_check_port_available() {
         // Find a free port
         let listener = std::net::TcpListener::bind("0.0.0.0:0").unwrap();
-        let port = listener.local_addr().unwrap().port();
+        let addr = listener.local_addr().unwrap();
+        let port = addr.port();
+        let host = addr.ip().to_string();
 
         // Port is occupied by 'listener', so check_port_available should return false
-        assert!(!super::check_port_available(port).await);
+        assert!(!super::check_port_available(&host, port).await);
 
         drop(listener);
 
         // Port is now free
-        assert!(super::check_port_available(port).await);
+        assert!(super::check_port_available(&host, port).await);
     }
 
     #[test]

@@ -7,6 +7,8 @@ pub struct Config {
     pub rpc_url: String,
     pub rpc_secret: Option<String>,
     pub transport: TransportType,
+    #[serde(default = "default_http_host")]
+    pub http_host: String,
     #[serde(alias = "port")]
     pub http_port: u16,
     pub http_auth_token: Option<String>,
@@ -132,14 +134,19 @@ pub enum TransportType {
     Sse,
 }
 
+fn default_http_host() -> String {
+    "0.0.0.0".to_string()
+}
+
 impl Default for Config {
     fn default() -> Self {
-        let rpc_url = "http://localhost:6800/jsonrpc".to_string();
+        let rpc_url = "http://127.0.0.1:6800/jsonrpc".to_string();
         let rpc_secret = None;
         Self {
             rpc_url: rpc_url.clone(),
             rpc_secret: rpc_secret.clone(),
             transport: TransportType::Stdio,
+            http_host: "0.0.0.0".to_string(),
             http_port: 3000,
             http_auth_token: None,
             log_level: "info".to_string(),
@@ -164,8 +171,9 @@ impl Config {
     pub fn load() -> Result<Self, ConfigError> {
         let s = ConfigLoader::builder()
             // Start with default values
-            .set_default("rpc_url", "http://localhost:6800/jsonrpc")?
+            .set_default("rpc_url", "http://127.0.0.1:6800/jsonrpc")?
             .set_default("transport", "stdio")?
+            .set_default("http_host", "0.0.0.0")?
             .set_default("http_port", 3000)?
             .set_default("log_level", "info")?
             .set_default("lazy_mode", false)?
@@ -190,11 +198,6 @@ impl Config {
                 rpc_url: self.rpc_url.clone(),
                 rpc_secret: self.rpc_secret.clone(),
             });
-        } else if self.instances.len() == 1 && self.instances[0].name == "default" {
-            // Ensure the default instance matches the top-level fields,
-            // which might have been overridden by CLI arguments.
-            self.instances[0].rpc_url = self.rpc_url.clone();
-            self.instances[0].rpc_secret = self.rpc_secret.clone();
         }
     }
 
@@ -219,7 +222,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = Config::default();
-        assert_eq!(config.rpc_url, "http://localhost:6800/jsonrpc");
+        assert_eq!(config.rpc_url, "http://127.0.0.1:6800/jsonrpc");
         assert_eq!(config.transport, TransportType::Stdio);
         assert_eq!(config.http_port, 3000);
     }
@@ -240,15 +243,33 @@ mod tests {
     #[test]
     fn test_normalize_updates_default_instance() {
         let mut config = Config::default();
-        assert_eq!(config.instances[0].rpc_url, "http://localhost:6800/jsonrpc");
+        assert_eq!(config.instances[0].rpc_url, "http://127.0.0.1:6800/jsonrpc");
 
         config.rpc_url = "http://192.168.1.10:6800/jsonrpc".to_string();
         config.normalize();
 
-        assert_eq!(
-            config.instances[0].rpc_url,
-            "http://192.168.1.10:6800/jsonrpc"
-        );
+        // Normalize no longer updates existing instances to avoid overwriting user config
+        assert_eq!(config.instances[0].rpc_url, "http://127.0.0.1:6800/jsonrpc");
+    }
+
+    #[test]
+    fn test_normalize_does_not_overwrite_instance_with_default() {
+        // Simulate a config file that has instances but not top-level rpc_url
+        // The rpc_url will be the default 127.0.0.1
+        let mut config = Config {
+            rpc_url: "http://127.0.0.1:6800/jsonrpc".to_string(),
+            instances: vec![Aria2Instance {
+                name: "default".to_string(),
+                rpc_url: "http://my-aria2:6800/jsonrpc".to_string(),
+                rpc_secret: None,
+            }],
+            ..Default::default()
+        };
+
+        config.normalize();
+
+        // It SHOULD NOT overwrite "my-aria2" with "127.0.0.1"
+        assert_eq!(config.instances[0].rpc_url, "http://my-aria2:6800/jsonrpc");
     }
 
     #[test]

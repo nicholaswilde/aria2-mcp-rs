@@ -5,23 +5,23 @@ use aria2_mcp_rs::config::Config;
 async fn test_aria2_client_ws_connection() {
     // This test will attempt to call a non-existent method or use functionality not yet implemented
     let config = Config {
-        rpc_url: "http://localhost:6800/jsonrpc".to_string(),
+        rpc_url: "http://127.0.0.1:6800/jsonrpc".to_string(),
         ..Default::default()
     };
     let client = Aria2Client::new(config);
 
-    assert_eq!(client.ws_url().unwrap(), "ws://localhost:6800/jsonrpc");
+    assert_eq!(client.ws_url().unwrap(), "ws://127.0.0.1:6800/jsonrpc");
 }
 
 #[tokio::test]
 async fn test_aria2_client_ws_url_https() {
     let config = Config {
-        rpc_url: "https://localhost:6800/jsonrpc".to_string(),
+        rpc_url: "https://127.0.0.1:6800/jsonrpc".to_string(),
         ..Default::default()
     };
     let client = Aria2Client::new(config);
 
-    assert_eq!(client.ws_url().unwrap(), "wss://localhost:6800/jsonrpc");
+    assert_eq!(client.ws_url().unwrap(), "wss://127.0.0.1:6800/jsonrpc");
 }
 
 #[tokio::test]

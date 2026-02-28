@@ -3,11 +3,15 @@
 # --- Required Fields (Defaults shown) ---
 
 # The URL of the aria2 JSON-RPC endpoint.
-rpc_url = "http://localhost:6800/jsonrpc"
+rpc_url = "http://127.0.0.1:6800/jsonrpc"
 
 # The transport to use for the MCP server.
 # Options: "stdio" (local integration), "sse" or "http" (network-accessible server).
 transport = "stdio"
+
+# The host to bind to when using the "sse" or "http" transport.
+# Default: "0.0.0.0" (all interfaces)
+http_host = "0.0.0.0"
 
 # The port to listen on when using the "sse" or "http" transport.
 # Alias: "port"
@@ -44,7 +48,7 @@ log_level = "info"
 
 # [[instances]]
 # name = "primary"
-# rpc_url = "http://localhost:6800/jsonrpc"
+# rpc_url = "http://127.0.0.1:6800/jsonrpc"
 # rpc_secret = "secret1"
 
 # [[instances]]

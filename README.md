@@ -5,7 +5,7 @@
 [![ci](https://img.shields.io/github/actions/workflow/status/nicholaswilde/aria2-mcp-rs/ci.yml?label=ci&style=for-the-badge&branch=main&logo=github-actions)](https://github.com/nicholaswilde/aria2-mcp-rs/actions/workflows/ci.yml)
 
 > [!WARNING]
-> This project is currently in active development (v0.1.21) and is **not production-ready**. Features may change, and breaking changes may occur without notice. **Use this MCP server at your own risk.**
+> This project is currently in active development (v0.1.22) and is **not production-ready**. Features may change, and breaking changes may occur without notice. **Use this MCP server at your own risk.**
 
 This project is a high-performance Model Context Protocol (MCP) server for [aria2](https://aria2.github.io/), built with Rust. It provides a comprehensive interface for LLMs to monitor and manage downloads through **interactive tools**, **read-only resources**, **contextual prompts**, and **real-time notifications**.
 
@@ -92,12 +92,20 @@ The server can manage multiple aria2 instances simultaneously.
 All tools accept an optional `instance` argument (integer) to target a specific instance by its index in the configuration (defaulting to `0`).
 
 ### Configuration
-You can define multiple instances in `config.toml` or via environment variables using the `ARIA2_MCP__INSTANCES__<N>__<FIELD>` format:
+You can define multiple instances in `config.toml`, via environment variables, or directly via command-line arguments.
 
+#### Command Line
+Use the repeatable `-i/--instance` flag:
+```bash
+aria2-mcp-rs --instance name=local,url=http://localhost:6800/jsonrpc --instance name=remote,url=http://192.168.1.10:6800/jsonrpc,secret=token
+```
+
+#### Environment Variables
+Use the indexed format supported by the configuration loader:
 ```bash
 # Instance 0 (Primary)
 export ARIA2_MCP__INSTANCES__0__NAME="primary"
-export ARIA2_MCP__INSTANCES__0__RPC_URL="http://localhost:6800/jsonrpc"
+export ARIA2_MCP__INSTANCES__0__RPC_URL="http://127.0.0.1:6800/jsonrpc"
 
 # Instance 1 (Secondary)
 export ARIA2_MCP__INSTANCES__1__NAME="remote-box"
@@ -248,18 +256,20 @@ The server can be configured via command-line arguments, environment variables, 
 ### Command Line Interface
 
 ```bash
-./target/release/aria2-mcp-rs --rpc-url "http://localhost:6800/jsonrpc" --rpc-secret "your-secret"
+./target/release/aria2-mcp-rs --rpc-url "http://127.0.0.1:6800/jsonrpc" --rpc-secret "your-secret"
 ```
 
 #### Configuration Options
 
 | Argument | Environment Variable | Description | Default |
 | :--- | :--- | :--- | :--- |
-| `-u`, `--rpc-url` | `ARIA2_MCP_RPC_URL` | aria2 RPC URL | `http://localhost:6800/jsonrpc` |
+| `-u`, `--rpc-url` | `ARIA2_MCP_RPC_URL` | aria2 RPC URL | `http://127.0.0.1:6800/jsonrpc` |
 | `-s`, `--rpc-secret` | `ARIA2_MCP_RPC_SECRET` | aria2 RPC Secret | - |
 | `-t`, `--transport` | `ARIA2_MCP_TRANSPORT` | MCP Transport (stdio, sse, http) | `stdio` |
+| `--http-host` | `ARIA2_MCP_HTTP_HOST` | HTTP Host for SSE | `0.0.0.0` |
 | `--http-port` | `ARIA2_MCP_HTTP_PORT` | HTTP Port for SSE | `3000` |
 | `--http-auth-token` | `ARIA2_MCP_HTTP_AUTH_TOKEN` | Bearer token for SSE security | (none) |
+| `-i`, `--instance` | - | Add multiple instances (format: `name=N,url=U,secret=S`) | - |
 | `-L`, `--log-level` | `ARIA2_MCP_LOG_LEVEL` | Application log level | `info` |
 | `-l`, `--lazy` | `ARIA2_MCP_LAZY` | Enable Lazy Mode | `false` |
 | `--no-verify-ssl` | `ARIA2_MCP_NO_VERIFY_SSL` | Disable SSL verification (default) | `true` |

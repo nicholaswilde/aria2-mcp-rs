@@ -6,25 +6,25 @@ fn test_multi_instance_config_env_vars() {
     env::set_var("ARIA2_MCP__INSTANCES__0__NAME", "instance1");
     env::set_var(
         "ARIA2_MCP__INSTANCES__0__RPC_URL",
-        "http://localhost:6800/jsonrpc",
+        "http://127.0.0.1:6800/jsonrpc",
     );
     env::set_var("ARIA2_MCP__INSTANCES__0__RPC_SECRET", "secret1");
 
     env::set_var("ARIA2_MCP__INSTANCES__1__NAME", "instance2");
     env::set_var(
         "ARIA2_MCP__INSTANCES__1__RPC_URL",
-        "http://localhost:6801/jsonrpc",
+        "http://127.0.0.1:6801/jsonrpc",
     );
 
     let config = Config::load().expect("Failed to load config");
 
     assert_eq!(config.instances.len(), 2);
     assert_eq!(config.instances[0].name, "instance1");
-    assert_eq!(config.instances[0].rpc_url, "http://localhost:6800/jsonrpc");
+    assert_eq!(config.instances[0].rpc_url, "http://127.0.0.1:6800/jsonrpc");
     assert_eq!(config.instances[0].rpc_secret, Some("secret1".to_string()));
 
     assert_eq!(config.instances[1].name, "instance2");
-    assert_eq!(config.instances[1].rpc_url, "http://localhost:6801/jsonrpc");
+    assert_eq!(config.instances[1].rpc_url, "http://127.0.0.1:6801/jsonrpc");
     assert_eq!(config.instances[1].rpc_secret, None);
 
     // Cleanup
@@ -38,7 +38,7 @@ fn test_multi_instance_config_env_vars() {
 #[test]
 fn test_multi_instance_config_toml() {
     let toml_content = r#"
-        rpc_url = "http://localhost:6800/jsonrpc"
+        rpc_url = "http://127.0.0.1:6800/jsonrpc"
         transport = "stdio"
         http_port = 3000
         log_level = "info"
@@ -47,12 +47,12 @@ fn test_multi_instance_config_toml() {
 
         [[instances]]
         name = "primary"
-        rpc_url = "http://localhost:6800/jsonrpc"
+        rpc_url = "http://127.0.0.1:6800/jsonrpc"
         rpc_secret = "secret1"
 
         [[instances]]
         name = "secondary"
-        rpc_url = "http://localhost:6801/jsonrpc"
+        rpc_url = "http://127.0.0.1:6801/jsonrpc"
     "#;
 
     let mut config: Config = toml::from_str(toml_content).expect("Failed to parse TOML");
@@ -86,4 +86,20 @@ fn test_config_backward_compatibility() {
         config.instances[0].rpc_secret,
         Some("legacy_secret".to_string())
     );
+}
+
+#[test]
+fn test_config_transport_http_alias() {
+    let toml_content = r#"
+        rpc_url = "http://localhost:6800/jsonrpc"
+        transport = "http"
+        http_host = "0.0.0.0"
+        http_port = 3000
+        log_level = "info"
+        lazy_mode = false
+        no_verify_ssl = true
+    "#;
+
+    let config: Config = toml::from_str(toml_content).expect("Failed to parse TOML");
+    assert_eq!(config.transport, aria2_mcp_rs::TransportType::Sse);
 }

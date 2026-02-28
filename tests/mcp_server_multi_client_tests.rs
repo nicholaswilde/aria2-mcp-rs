@@ -6,7 +6,7 @@ fn test_mcp_server_multi_client_initialization() {
     config.instances = vec![
         aria2_mcp_rs::config::Aria2Instance {
             name: "instance1".to_string(),
-            rpc_url: "http://localhost:6800/jsonrpc".to_string(),
+            rpc_url: "http://127.0.0.1:6800/jsonrpc".to_string(),
             rpc_secret: None,
         },
         aria2_mcp_rs::config::Aria2Instance {

@@ -6,7 +6,6 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
-use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::RwLock;
@@ -17,7 +16,9 @@ use crate::prompts::PromptRegistry;
 use crate::resources::ResourceRegistry;
 use crate::tools::ToolRegistry;
 
+#[allow(clippy::too_many_arguments)]
 pub async fn run_server(
+    http_host: String,
     http_port: u16,
     http_auth_token: Option<String>,
     registry: Arc<RwLock<ToolRegistry>>,
@@ -28,6 +29,7 @@ pub async fn run_server(
 ) -> Result<()> {
     let (_tx, rx) = tokio::sync::oneshot::channel::<()>();
     run_server_with_shutdown(
+        http_host,
         http_port,
         http_auth_token,
         registry,
@@ -44,6 +46,7 @@ pub async fn run_server(
 
 #[allow(clippy::too_many_arguments)]
 pub async fn run_server_with_shutdown<F>(
+    http_host: String,
     http_port: u16,
     http_auth_token: Option<String>,
     registry: Arc<RwLock<ToolRegistry>>,
@@ -78,8 +81,9 @@ where
         }));
     }
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], http_port));
-    let listener = TcpListener::bind(addr).await?;
+    let addr_str = format!("{}:{}", http_host, http_port);
+    let listener = TcpListener::bind(&addr_str).await?;
+    let addr = listener.local_addr()?;
 
     println!("SSE Server starting on {}", addr);
 
@@ -460,6 +464,7 @@ mod tests {
 
         let server_handle = tokio::spawn(async move {
             run_server_with_shutdown(
+                "0.0.0.0".to_string(),
                 0, // random port
                 None,
                 registry,

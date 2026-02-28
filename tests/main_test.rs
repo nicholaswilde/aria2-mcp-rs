@@ -3,7 +3,7 @@ use aria2_mcp_rs::{Config, Error};
 #[test]
 fn test_config_default() {
     let config = Config::default();
-    assert_eq!(config.rpc_url, "http://localhost:6800/jsonrpc");
+    assert_eq!(config.rpc_url, "http://127.0.0.1:6800/jsonrpc");
     assert_eq!(config.rpc_secret, None);
 }
 

@@ -1235,7 +1235,7 @@ mod tests {
     #[test]
     fn test_ws_url_error() {
         let config = Config {
-            rpc_url: "ftp://localhost:6800/jsonrpc".to_string(),
+            rpc_url: "ftp://127.0.0.1:6800/jsonrpc".to_string(),
             ..Config::default()
         };
         let client = Aria2Client::new(config);
