@@ -10,7 +10,10 @@ async fn test_aria2_client_ws_connection() {
     };
     let client = Aria2Client::new(config);
 
-    assert_eq!(client.ws_url().unwrap(), "ws://127.0.0.1:6800/jsonrpc");
+    assert_eq!(
+        client.ws_url().await.unwrap(),
+        "ws://127.0.0.1:6800/jsonrpc"
+    );
 }
 
 #[tokio::test]
@@ -21,7 +24,10 @@ async fn test_aria2_client_ws_url_https() {
     };
     let client = Aria2Client::new(config);
 
-    assert_eq!(client.ws_url().unwrap(), "wss://127.0.0.1:6800/jsonrpc");
+    assert_eq!(
+        client.ws_url().await.unwrap(),
+        "wss://127.0.0.1:6800/jsonrpc"
+    );
 }
 
 #[tokio::test]

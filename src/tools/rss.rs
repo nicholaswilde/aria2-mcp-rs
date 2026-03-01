@@ -17,9 +17,7 @@ pub async fn start_rss_monitoring(client: Arc<Aria2Client>) -> Result<()> {
 
         let feeds = {
             let config = client.config();
-            let config_guard = config
-                .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+            let config_guard = config.read().await;
             config_guard.rss_config.feeds.clone()
         };
 
@@ -28,7 +26,9 @@ pub async fn start_rss_monitoring(client: Arc<Aria2Client>) -> Result<()> {
                 log::error!("Error processing RSS feed '{}': {}", feed.name, e);
             } else {
                 // Update history in config
-                if let Ok(mut config_guard) = client.config().write() {
+                {
+                    let config = client.config();
+                    let mut config_guard = config.write().await;
                     if let Some(f) = config_guard.rss_config.feeds.get_mut(idx) {
                         f.download_history = feed.download_history;
                     }
@@ -174,9 +174,7 @@ impl McpeTool for AddRssFeedTool {
         };
 
         let config = client.config();
-        let mut config_guard = config
-            .write()
-            .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+        let mut config_guard = config.write().await;
         config_guard.rss_config.feeds.push(feed);
 
         Ok(json!({
@@ -207,9 +205,7 @@ impl McpeTool for ListRssFeedsTool {
 
     async fn run(&self, client: &Aria2Client, _args: Value) -> Result<Value> {
         let config = client.config();
-        let config_guard = config
-            .read()
-            .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+        let config_guard = config.read().await;
 
         Ok(json!({
             "feeds": config_guard.rss_config.feeds
@@ -339,7 +335,7 @@ mod tests {
         assert_eq!(result["status"], "success");
 
         let config = client.config();
-        let config_guard = config.read().unwrap();
+        let config_guard = config.read().await;
         assert_eq!(config_guard.rss_config.feeds.len(), 1);
         assert_eq!(config_guard.rss_config.feeds[0].name, "test");
     }

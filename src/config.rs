@@ -15,6 +15,8 @@ pub struct Config {
     pub log_level: String,
     pub lazy_mode: bool,
     pub no_verify_ssl: bool,
+    #[serde(default = "default_rpc_timeout")]
+    pub rpc_timeout_secs: u64,
     #[serde(default)]
     pub bandwidth_profiles: HashMap<String, BandwidthProfile>,
     #[serde(default)]
@@ -139,6 +141,10 @@ fn default_http_host() -> String {
     "0.0.0.0".to_string()
 }
 
+fn default_rpc_timeout() -> u64 {
+    10
+}
+
 impl Default for Config {
     fn default() -> Self {
         let rpc_url = "http://127.0.0.1:6800/jsonrpc".to_string();
@@ -153,6 +159,7 @@ impl Default for Config {
             log_level: "info".to_string(),
             lazy_mode: false,
             no_verify_ssl: true,
+            rpc_timeout_secs: 10,
             bandwidth_profiles: HashMap::new(),
             bandwidth_schedules: Vec::new(),
             retry_config: crate::aria2::recovery::RetryConfig::default(),

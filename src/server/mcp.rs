@@ -122,6 +122,7 @@ pub async fn run_stdio(
 ) -> Result<()> {
     let mut reader = BufReader::new(tokio::io::stdin()).lines();
     let mut stdout = tokio::io::stdout();
+    let (response_tx, mut response_rx) = tokio::sync::mpsc::channel::<JsonRpcResponse>(100);
 
     loop {
         {
@@ -152,25 +153,43 @@ pub async fn run_stdio(
                             }
                         };
 
-                        let res = handle_request(
-                            req.clone(),
-                            Arc::clone(&state),
-                            Arc::clone(&registry),
-                            Arc::clone(&resource_registry),
-                            Arc::clone(&prompt_registry),
-                            &clients
-                        ).await?;
+                        let state_clone = Arc::clone(&state);
+                        let registry_clone = Arc::clone(&registry);
+                        let resource_registry_clone = Arc::clone(&resource_registry);
+                        let prompt_registry_clone = Arc::clone(&prompt_registry);
+                        let clients_clone = clients.clone();
+                        let response_tx_clone = response_tx.clone();
 
-                        if let Some(resp) = res {
-                            let res_str = serde_json::to_string(&resp)?;
-                            stdout.write_all(res_str.as_bytes()).await?;
-                            stdout.write_all(b"\n").await?;
-                            stdout.flush().await?;
-                        }
+                        tokio::spawn(async move {
+                            match handle_request(
+                                req,
+                                state_clone,
+                                registry_clone,
+                                resource_registry_clone,
+                                prompt_registry_clone,
+                                clients_clone
+                            ).await {
+                                Ok(Some(resp)) => {
+                                    if let Err(e) = response_tx_clone.send(resp).await {
+                                        log::error!("Failed to send response to channel: {e}");
+                                    }
+                                }
+                                Ok(None) => {}
+                                Err(e) => {
+                                    log::error!("Error handling request: {e}");
+                                }
+                            }
+                        });
                     }
                     Ok(None) => break, // EOF
                     Err(e) => return Err(anyhow::anyhow!("Stdin error: {e}")),
                 }
+            }
+            Some(resp) = response_rx.recv() => {
+                let res_str = serde_json::to_string(&resp)?;
+                stdout.write_all(res_str.as_bytes()).await?;
+                stdout.write_all(b"\n").await?;
+                stdout.flush().await?;
             }
             Some(notif) = notification_rx.recv() => {
                 let mut state_guard = state.write().await;
@@ -208,7 +227,7 @@ pub async fn handle_request(
     registry: Arc<RwLock<ToolRegistry>>,
     resource_registry: Arc<RwLock<ResourceRegistry>>,
     prompt_registry: Arc<RwLock<PromptRegistry>>,
-    clients: &[Arc<Aria2Client>],
+    clients: Vec<Arc<Aria2Client>>,
 ) -> Result<Option<JsonRpcResponse>> {
     let Some(id) = req.id else {
         return Ok(None); // Notification
@@ -250,8 +269,13 @@ pub async fn handle_request(
             let args = params["arguments"].clone();
             let reg = registry.read().await;
             if let Some(tool) = reg.get_tool(name) {
-                match tool.run_multi(clients, args).await {
-                    Ok(res) => Ok(json!(res)),
+                match tool.run_multi(&clients, args).await {
+                    Ok(res) => Ok(json!({
+                        "content": [{
+                            "type": "text",
+                            "text": res.to_string()
+                        }]
+                    })),
                     Err(e) => Err(JsonRpcError::new(-32603, &format!("Tool error: {e}"))),
                 }
             } else {
@@ -268,13 +292,22 @@ pub async fn handle_request(
             let uri = params["uri"].as_str().unwrap_or_default();
             let reg = resource_registry.read().await;
             if let Some(resource) = reg.get_resource(uri) {
-                // Check if ResourceRegistry has read_resource or we call it on the resource itself.
-                // ResourceRegistry has get_resource which returns McpResource.
-                // Need to find which client to use for McpResource::read.
-                // Use first client for now as default.
                 if let Some(client) = clients.first() {
                     match resource.read(client).await {
-                        Ok(res) => Ok(json!(res)),
+                        Ok(res) => {
+                            let mut content_item = json!({
+                                "uri": uri,
+                            });
+                            if let Some(mime) = resource.mime_type() {
+                                content_item["mimeType"] = json!(mime);
+                            }
+                            if let Some(s) = res.as_str() {
+                                content_item["text"] = json!(s);
+                            } else {
+                                content_item["text"] = json!(res.to_string());
+                            }
+                            Ok(json!({ "contents": [content_item] }))
+                        }
                         Err(e) => Err(JsonRpcError::new(-32603, &format!("Resource error: {e}"))),
                     }
                 } else {

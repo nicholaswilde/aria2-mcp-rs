@@ -106,9 +106,7 @@ impl McpeTool for OrganizeCompletedTool {
         match action {
             "list_rules" => {
                 let config = client.config();
-                let config_guard = config
-                    .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+                let config_guard = config.read().await;
                 let rules = config_guard.organize_rules.clone();
                 Ok(json!({ "rules": rules }))
             }
@@ -124,9 +122,7 @@ impl McpeTool for OrganizeCompletedTool {
 
                 let config = client.config();
                 {
-                    let mut config_guard = config
-                        .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                    let mut config_guard = config.write().await;
 
                     if config_guard
                         .organize_rules
@@ -155,9 +151,7 @@ impl McpeTool for OrganizeCompletedTool {
 
                 let config = client.config();
                 {
-                    let mut config_guard = config
-                        .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                    let mut config_guard = config.write().await;
 
                     let initial_len = config_guard.organize_rules.len();
                     config_guard.organize_rules.retain(|r| r.name != rule_name);
@@ -178,9 +172,7 @@ impl McpeTool for OrganizeCompletedTool {
                     r
                 } else {
                     let config = client.config();
-                    let config_guard = config
-                        .read()
-                        .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+                    let config_guard = config.read().await;
                     config_guard.organize_rules.clone()
                 };
 

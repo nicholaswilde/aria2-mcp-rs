@@ -17,7 +17,7 @@ async fn test_background_purge_logic() -> Result<()> {
     // 1. Configure purge: enabled, 1s interval, 0s min age
     {
         let config = client.config();
-        let mut config_guard = config.write().unwrap();
+        let mut config_guard = config.write().await;
         config_guard.purge_config.enabled = true;
         config_guard.purge_config.interval_secs = 1;
         config_guard.purge_config.min_age_secs = 0;

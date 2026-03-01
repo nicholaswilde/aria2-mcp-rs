@@ -1,7 +1,6 @@
 pub mod handler;
 pub mod mcp;
 pub mod sse;
-pub mod stdio;
 
 use anyhow::Result;
 use chrono::{Datelike, Local, Timelike};
@@ -24,7 +23,6 @@ pub struct McpServer {
     prompt_registry: Arc<RwLock<PromptRegistry>>,
     clients: Vec<Arc<Aria2Client>>,
     recovery_manager: Arc<RecoveryManager>,
-    state: Arc<RwLock<mcp::McpState>>,
 }
 
 impl McpServer {
@@ -36,7 +34,6 @@ impl McpServer {
         clients: Vec<Aria2Client>,
     ) -> Self {
         let recovery_manager = Arc::new(RecoveryManager::new(config.retry_config.clone()));
-        let lazy_mode = config.lazy_mode;
         Self {
             config,
             registry: Arc::new(RwLock::new(registry)),
@@ -44,7 +41,6 @@ impl McpServer {
             prompt_registry: Arc::new(RwLock::new(prompt_registry)),
             clients: clients.into_iter().map(Arc::new).collect(),
             recovery_manager,
-            state: Arc::new(RwLock::new(mcp::McpState::new(lazy_mode))),
         }
     }
 
@@ -102,8 +98,9 @@ impl McpServer {
 
         match self.config.transport {
             TransportType::Stdio => {
+                let state = Arc::new(RwLock::new(mcp::McpState::new(self.config.lazy_mode)));
                 mcp::run_stdio(
-                    Arc::clone(&self.state),
+                    state,
                     Arc::clone(&self.registry),
                     Arc::clone(&self.resource_registry),
                     Arc::clone(&self.prompt_registry),
@@ -144,9 +141,7 @@ pub async fn start_purge_task(client: Arc<Aria2Client>) -> Result<()> {
 
         let config = client.config();
         let purge_config = {
-            let config_guard = config
-                .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+            let config_guard = config.read().await;
             config_guard.purge_config.clone()
         };
 
@@ -301,9 +296,7 @@ async fn start_scheduler(client: Arc<Aria2Client>) -> Result<()> {
 
         let (profiles, schedules) = {
             let config = client.config();
-            let config_guard = config
-                .read()
-                .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+            let config_guard = config.read().await;
             (
                 config_guard.bandwidth_profiles.clone(),
                 config_guard.bandwidth_schedules.clone(),

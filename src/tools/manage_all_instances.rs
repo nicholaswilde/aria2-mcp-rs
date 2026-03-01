@@ -34,7 +34,7 @@ impl McpeTool for ManageAllInstancesTool {
     }
 
     async fn run(&self, _client: &Aria2Client, _args: Value) -> Result<Value> {
-        Err(anyhow::anyhow!("This tool requires multiple clients and cannot be run with a single client reference. Use McpHandler's multi-client routing."))
+        Err(anyhow::anyhow!("This tool requires multiple clients and cannot be run with a single client reference. Use the native MCP handler's multi-client routing."))
     }
 
     async fn run_multi(&self, clients: &[Arc<Aria2Client>], args: Value) -> Result<Value> {

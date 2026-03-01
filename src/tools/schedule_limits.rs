@@ -74,9 +74,7 @@ impl McpeTool for ScheduleLimitsTool {
         match action {
             "list_profiles" => {
                 let config = client.config();
-                let config_guard = config
-                    .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+                let config_guard = config.read().await;
                 let profiles = config_guard.bandwidth_profiles.clone();
                 Ok(json!({ "profiles": profiles }))
             }
@@ -101,9 +99,7 @@ impl McpeTool for ScheduleLimitsTool {
 
                 let config = client.config();
                 {
-                    let mut config_guard = config
-                        .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                    let mut config_guard = config.write().await;
                     config_guard
                         .bandwidth_profiles
                         .insert(name.to_string(), profile);
@@ -120,9 +116,7 @@ impl McpeTool for ScheduleLimitsTool {
 
                 let config = client.config();
                 {
-                    let mut config_guard = config
-                        .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                    let mut config_guard = config.write().await;
                     config_guard.bandwidth_profiles.remove(name);
                 }
                 let _ = client.save_state().await;
@@ -131,9 +125,7 @@ impl McpeTool for ScheduleLimitsTool {
             }
             "list_schedules" => {
                 let config = client.config();
-                let config_guard = config
-                    .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+                let config_guard = config.read().await;
                 let schedules = config_guard.bandwidth_schedules.clone();
                 Ok(json!({ "schedules": schedules }))
             }
@@ -165,9 +157,7 @@ impl McpeTool for ScheduleLimitsTool {
 
                 let config = client.config();
                 {
-                    let mut config_guard = config
-                        .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                    let mut config_guard = config.write().await;
 
                     // Validate profile exists
                     if !config_guard.bandwidth_profiles.contains_key(profile_name) {
@@ -188,9 +178,7 @@ impl McpeTool for ScheduleLimitsTool {
 
                 let config = client.config();
                 {
-                    let mut config_guard = config
-                        .write()
-                        .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                    let mut config_guard = config.write().await;
 
                     if index >= config_guard.bandwidth_schedules.len() {
                         return Err(anyhow::anyhow!("Schedule index out of bounds"));
@@ -210,9 +198,7 @@ impl McpeTool for ScheduleLimitsTool {
 
                 let profile = {
                     let config = client.config();
-                    let config_guard = config
-                        .read()
-                        .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+                    let config_guard = config.read().await;
                     config_guard
                         .bandwidth_profiles
                         .get(name)

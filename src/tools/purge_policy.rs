@@ -59,15 +59,11 @@ impl McpeTool for PurgePolicyTool {
 
         match action {
             "get_policy" => {
-                let config_guard = config
-                    .read()
-                    .map_err(|e| anyhow::anyhow!("Failed to read config: {e}"))?;
+                let config_guard = config.read().await;
                 Ok(json!({ "policy": config_guard.purge_config }))
             }
             "update_policy" => {
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                let mut config_guard = config.write().await;
 
                 if let Some(enabled) = args.get("enabled").and_then(serde_json::Value::as_bool) {
                     config_guard.purge_config.enabled = enabled;
@@ -90,9 +86,7 @@ impl McpeTool for PurgePolicyTool {
                     .and_then(|v| v.as_str())
                     .context("Missing 'gid' for exclude_gid")?;
 
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                let mut config_guard = config.write().await;
 
                 config_guard
                     .purge_config
@@ -109,9 +103,7 @@ impl McpeTool for PurgePolicyTool {
                     .and_then(|v| v.as_str())
                     .context("Missing 'gid' for remove_exclusion")?;
 
-                let mut config_guard = config
-                    .write()
-                    .map_err(|e| anyhow::anyhow!("Failed to write config: {e}"))?;
+                let mut config_guard = config.write().await;
 
                 let removed = config_guard.purge_config.excluded_gids.remove(gid);
 

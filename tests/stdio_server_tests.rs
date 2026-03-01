@@ -32,7 +32,7 @@ async fn test_stdio_flow_initialize_and_tools() {
         Arc::clone(&registry),
         Arc::clone(&resource_registry),
         Arc::clone(&prompt_registry),
-        &clients,
+        clients.clone(),
     )
     .await
     .unwrap()
@@ -42,7 +42,10 @@ async fn test_stdio_flow_initialize_and_tools() {
         res_init.id,
         Some(aria2_mcp_rs::server::mcp::RequestId::Number(1))
     );
-    assert!(res_init.result.is_some());
+    let result_init = res_init.result.unwrap();
+    assert!(result_init["serverInfo"].is_object());
+    assert_eq!(result_init["serverInfo"]["name"], "aria2-mcp-rs");
+    assert!(result_init["serverInfo"]["version"].is_string());
 
     // 2. List Tools
     let req_tools = JsonRpcRequest {
@@ -58,7 +61,7 @@ async fn test_stdio_flow_initialize_and_tools() {
         Arc::clone(&registry),
         Arc::clone(&resource_registry),
         Arc::clone(&prompt_registry),
-        &clients,
+        clients.clone(),
     )
     .await
     .unwrap()

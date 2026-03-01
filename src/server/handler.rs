@@ -214,10 +214,18 @@ impl ServerHandler for McpHandler {
                 })?;
                 drop(registry);
 
-                let result = resource
-                    .read_multi(&self.clients)
-                    .await
-                    .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
+                let result = tokio::time::timeout(
+                    std::time::Duration::from_secs(30),
+                    resource.read_multi(&self.clients),
+                )
+                .await
+                .map_err(|_| {
+                    Error::protocol(
+                        ErrorCode::InternalError,
+                        "Resource read timed out".to_string(),
+                    )
+                })?
+                .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
 
                 // MCP spec for resources/read returns "contents": [{ "uri": "...", "mimeType": "...", "text": "..." }]
                 let mut content_item = serde_json::json!({
@@ -310,10 +318,15 @@ impl ServerHandler for McpHandler {
                 })?;
                 drop(registry);
 
-                let result = tool
-                    .run_multi(&self.clients, arguments)
-                    .await
-                    .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
+                let result = tokio::time::timeout(
+                    std::time::Duration::from_secs(30),
+                    tool.run_multi(&self.clients, arguments),
+                )
+                .await
+                .map_err(|_| {
+                    Error::protocol(ErrorCode::InternalError, "Tool call timed out".to_string())
+                })?
+                .map_err(|e| Error::protocol(ErrorCode::InternalError, e.to_string()))?;
 
                 Ok(serde_json::json!({
                     "content": [{

@@ -66,7 +66,7 @@ async fn test_connect_https_client_logic() -> Result<()> {
     // the reqwest client will attempt TLS.
     // To make this test pass without a real TLS server, we verify the URL handling.
 
-    let ws_url = client.ws_url()?;
+    let ws_url = client.ws_url().await?;
     assert_eq!(ws_url, format!("wss://{}/jsonrpc", server.address()));
     println!("Verified WebSocket URL conversion: {rpc_url} -> {ws_url}");
 
