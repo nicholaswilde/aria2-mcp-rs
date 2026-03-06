@@ -277,7 +277,7 @@ The server can be configured via command-line arguments, environment variables, 
 
 ## :balance_scale: License
 
-[MIT License](LICENSE)
+[Apache License 2.0](LICENSE)
 
 ## :writing_hand: Author
 
